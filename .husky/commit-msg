@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Ejecuta commitlint en modo silencioso
+npx --no-install commitlint --edit $1 --quiet || {
+  echo "❌ Commit inválido | Formato esperado: <tipo>(<ticket>): <descripción>"
+  echo ""
+  echo "✅ Ejemplo: feat(JIRA-101): refactor session web form"
+  echo ""
+  echo " 🛈 Tipos permitidos: feat, fix, chore, docs, refactor, test, style, perf"
+  echo ""  
+  exit 1
+}
