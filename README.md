@@ -1,1 +1,3 @@
 # Nomadia
+
+CLONAR EL REPO AL USAR
