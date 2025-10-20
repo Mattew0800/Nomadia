@@ -1,5 +1,23 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-# No hacer nada por ahora, solo commit
-exit 0
+# Configurá tus ramas principales aquí
+PROTECTED_BRANCHES="main develop"
+
+# Obtener la rama actual
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Revisar si la rama actual es protegida
+for branch in $PROTECTED_BRANCHES; do
+  if [ "$current_branch" = "$branch" ]; then
+    echo ""
+    echo " ------------------------------------------------------------------------------"
+    echo ""
+    echo -e "\033[31m❌ No se permiten commits directos a la rama '$current_branch'.\033[0m"
+    echo " 🛈 Crea primero una rama feature/fix y haz commit allí."
+    echo ""
+    echo " ------------------------------------------------------------------------------"
+    echo ""
+    exit 1
+  fi
+done

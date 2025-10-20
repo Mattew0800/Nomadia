@@ -11,3 +11,6 @@ npx --no-install commitlint --edit $1 --quiet || {
   echo ""  
   exit 1
 }
+
+
+

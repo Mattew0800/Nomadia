@@ -1,0 +1,46 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+
+# $3 = 1 si se creó nueva rama con 'git checkout -b'
+if [ "$3" = "1" ]; then
+  branch_name=$(git rev-parse --abbrev-ref HEAD)
+
+  # Ignorar la rama principal
+  if [ "$branch_name" = "develop" ]; then
+    exit 0
+  fi
+
+  pattern="^(feat|fix|chore|docs|refactor|test|style|perf)/[A-Z]+-[0-9]+-[a-z0-9-]+$"
+
+  if ! echo "$branch_name" | grep -Eq "$pattern"; then
+    echo " "
+    echo " ------------------------------------------------------------------------------"
+    echo " "
+    echo "❌ Nombre de rama inválido: $branch_name"
+    echo ""
+    echo "✅ Formato esperado: <tipo>/<TICKET>-<descripción>"
+    echo ""
+    echo " 🛈 Ejemplo: feat/JIRA-101-refactor-session-form"
+    echo ""
+    echo "⚠️  Volviendo a la rama DEVELOP y borrando '$branch_name'... ⚠️"
+    echo ""
+    echo " ------------------------------------------------------------------------------"
+
+
+    # Volver a la rama principal
+    git checkout "develop"
+
+    # Borrar la rama inválida
+    git branch -D "$branch_name"
+    echo ""
+    echo " ------------------------------------------------------------------------------"
+    echo -e "\033[31m"
+    echo "⚠️  La rama inválida fue eliminada. Crea una rama nueva con el formato correcto."
+    echo "             ☠️  ☢️   Recuerda que has sido movido a la rama DEVELOP. ☢️  ☠️"
+    echo -e "\033[0m"
+    echo " ------------------------------------------------------------------------------"
+    echo ""
+    exit 1
+  fi
+fi
