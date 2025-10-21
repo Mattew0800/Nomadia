@@ -21,3 +21,4 @@ for branch in $PROTECTED_BRANCHES; do
     exit 1
   fi
 done
+
