@@ -43,7 +43,7 @@ jobs:
 
           PATTERN="^(feature|fix|chore|docs|refactor|test|style|perf)/(frontend|backend)/[A-Z]+-[0-9]+-[a-z0-9-]+$"
           if [[ ! "$BRANCH_NAME" =~ $PATTERN ]]; then
-            ERROR_MSG="❌ Branch inválido: $BRANCH_NAME\n💡 Formato esperado: <tipo>/<stack>/<TICKET>-<descripción>\n💡 Ejemplo: feature/frontend/NOM-4-login-form\n💡 Regex usada: $PATTERN"
+            ERROR_MSG="❌ Branch inválido: $BRANCH_NAME\n💡 Formato esperado: &lt;tipo&gt;/&lt;stack&gt;/&lt;TICKET&gt;-&lt;descripción&gt;\n💡 Ejemplo: feature/frontend/NOM-4-login-form
             echo "branch_status=fail" >> $GITHUB_OUTPUT
             echo "branch_error<<EOF" >> $GITHUB_OUTPUT
             echo -e "$ERROR_MSG" >> $GITHUB_OUTPUT
@@ -62,7 +62,8 @@ jobs:
           for COMMIT in $COMMITS; do
             echo "$COMMIT" | npx --no-install commitlint --edit /dev/stdin || {
               ERRORS+="❌ Commit inválido: $COMMIT\n"
-              ERRORS+="💡 Formato esperado: <tipo>(<ticket>): <descripción>\n"
+              ERRORS+="💡 Formato esperado: &lt;tipo&gt;(&lt;ticket&gt;): &lt;descripción&gt;\n"
+              ERRORS+="💡 Ejemplo: feat(FEAT-1): agregar botón de login\n"
             }
           done
           if [[ -n "$ERRORS" ]]; then
