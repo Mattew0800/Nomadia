@@ -97,17 +97,18 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const branchStatus = "${{ steps.branch-check.outputs.branch_status || '' }}"
-            const branchError = `${{ steps.branch-check.outputs.branch_error || '' }}`
-            const commitStatus = "${{ steps.commit-check.outputs.commit_status || '' }}`
-            const commitError = `${{ steps.commit-check.outputs.commit_error || '' }}`
-            const secretStatus = "${{ steps.secret-check.outputs.secret_status || '' }}`
-            const secretError = `${{ steps.secret-check.outputs.secret_error || '' }}`
+            // Usar toJSON() para escapar multilinea y caracteres especiales
+            const branchStatus = ${{ toJSON(steps.branch-check.outputs.branch_status) }};
+            const branchError = ${{ toJSON(steps.branch-check.outputs.branch_error) }};
+            const commitStatus = ${{ toJSON(steps.commit-check.outputs.commit_status) }};
+            const commitError = ${{ toJSON(steps.commit-check.outputs.commit_error) }};
+            const secretStatus = ${{ toJSON(steps.secret-check.outputs.secret_status) }};
+            const secretError = ${{ toJSON(steps.secret-check.outputs.secret_error) }};
 
-            let commentBody = ""
-            if(branchStatus === "fail") commentBody += branchError.trim() + "\n\n"
-            if(commitStatus === "fail") commentBody += commitError.trim() + "\n\n"
-            if(secretStatus === "fail") commentBody += secretError.trim() + "\n\n"
+            let commentBody = "";
+            if(branchStatus === "fail") commentBody += branchError.trim() + "\n\n";
+            if(commitStatus === "fail") commentBody += commitError.trim() + "\n\n";
+            if(secretStatus === "fail") commentBody += secretError.trim() + "\n\n";
 
             if(commentBody.length > 0) {
               github.rest.issues.createComment({
@@ -115,5 +116,5 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: commentBody
-              })
+              });
             }
