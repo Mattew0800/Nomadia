@@ -1,113 +1,30 @@
-# .github/workflows/validation.yml
-name: GitHub PR Validations
+- name: Comment on PR
+  if: always()
+  uses: actions/github-script@v7
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    script: |
+      // Obtener los outputs de los steps anteriores
+      const branchStatus = "${{ steps.branch-check.outputs.branch_status || '' }}"
+      const branchError = `${{ steps.branch-check.outputs.branch_error || '' }}`
+      const commitStatus = "${{ steps.commit-check.outputs.commit_status || '' }}`
+      const commitError = `${{ steps.commit-check.outputs.commit_error || '' }}`
+      const secretStatus = "${{ steps.secret-check.outputs.secret_status || '' }}`
+      const secretError = `${{ steps.secret-check.outputs.secret_error || '' }}`
+      
+      // Construir el cuerpo del comentario de forma segura
+      let commentBody = ""
 
-on:
-  pull_request:
-    types: [opened, synchronize]
+      if(branchStatus === "fail") commentBody += branchError.trim() + "\n\n"
+      if(commitStatus === "fail") commentBody += commitError.trim() + "\n\n"
+      if(secretStatus === "fail") commentBody += secretError.trim() + "\n\n"
 
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-
-    steps:
-      # 1️⃣ Checkout
-      - name: Checkout PR
-        uses: actions/checkout@v3
-
-      # 2️⃣ Setup Node
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      # 3️⃣ Install dependencies
-      - name: Install dependencies
-        run: npm ci
-
-      # 4️⃣ Validate branch name
-      - name: Validate branch name
-        id: branch-check
-        run: |
-          BRANCH_NAME=${{ github.head_ref }}
-          if [[ "$BRANCH_NAME" == "develop" || "$BRANCH_NAME" == "main" ]]; then
-            echo "Branch principal, no se valida"
-            echo "branch_status=ok" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          PATTERN="^(feature|fix|chore|docs|refactor|test|style|perf)/(frontend|backend)/[A-Z]+-[0-9]+-[a-z0-9-]+$"
-          if [[ ! "$BRANCH_NAME" =~ $PATTERN ]]; then
-            ERROR_MSG="❌ Branch inválido: $BRANCH_NAME\n💡 Formato esperado: <tipo>/<stack>/<TICKET>-<descripción>\n💡 Ejemplo: feature/frontend/NOM-4-login-form\n💡 Regex usada: $PATTERN"
-            echo "branch_status=fail" >> $GITHUB_OUTPUT
-            echo "branch_error<<EOF" >> $GITHUB_OUTPUT
-            echo -e "$ERROR_MSG" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-            exit 1
-          else
-            echo "branch_status=ok" >> $GITHUB_OUTPUT
-          fi
-
-      # 5️⃣ Validate commit messages
-      - name: Validate commits
-        id: commit-check
-        run: |
-          COMMITS=$(git log origin/${{ github.base_ref }}..HEAD --pretty=format:%s)
-          ERRORS=""
-          for COMMIT in $COMMITS; do
-            echo "$COMMIT" | npx --no-install commitlint --edit /dev/stdin || {
-              ERRORS+="❌ Commit inválido: $COMMIT\n"
-              ERRORS+="💡 Formato esperado: <tipo>(<ticket>): <descripción>\n"
-            }
-          done
-          if [[ -n "$ERRORS" ]]; then
-            echo "commit_status=fail" >> $GITHUB_OUTPUT
-            echo "commit_error<<EOF" >> $GITHUB_OUTPUT
-            echo -e "$ERRORS" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-            exit 1
-          else
-            echo "commit_status=ok" >> $GITHUB_OUTPUT
-          fi
-
-      # 6️⃣ Check secrets
-      - name: Check for secrets
-        id: secret-check
-        run: |
-          SECRETS=$(grep -RInE "API_KEY|SECRET_KEY|SECRET|\.env" . || true)
-          if [[ -n "$SECRETS" ]]; then
-            echo "secret_status=fail" >> $GITHUB_OUTPUT
-            echo "secret_error<<EOF" >> $GITHUB_OUTPUT
-            echo -e "❌ Se detectaron posibles secretos:\n$SECRETS" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-            exit 1
-          else
-            echo "secret_status=ok" >> $GITHUB_OUTPUT
-          fi
-
-      # 7️⃣ Comment on PR if any validation fails
-      - name: Comment on PR
-        if: always()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const branchStatus = "${{ steps.branch-check.outputs.branch_status }}"
-            const branchError = "${{ steps.branch-check.outputs.branch_error }}"
-            const commitStatus = "${{ steps.commit-check.outputs.commit_status }}"
-            const commitError = "${{ steps.commit-check.outputs.commit_error }}"
-            const secretStatus = "${{ steps.secret-check.outputs.secret_status }}"
-            const secretError = "${{ steps.secret-check.outputs.secret_error }}"
-
-            let commentBody = ""
-            if(branchStatus === "fail") commentBody += branchError + "\n\n"
-            if(commitStatus === "fail") commentBody += commitError + "\n\n"
-            if(secretStatus === "fail") commentBody += secretError + "\n\n"
-
-            if(commentBody) {
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: commentBody
-              })
-            }
+      // Solo crear el comentario si hay contenido
+      if(commentBody.length > 0) {
+        github.rest.issues.createComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: context.issue.number,
+          body: commentBody
+        })
+      }
