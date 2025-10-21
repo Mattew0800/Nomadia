@@ -43,7 +43,7 @@ jobs:
 
           PATTERN="^(feature|fix|chore|docs|refactor|test|style|perf)/(frontend|backend)/[A-Z]+-[0-9]+-[a-z0-9-]+$"
           if [[ ! "$BRANCH_NAME" =~ $PATTERN ]]; then
-            ERROR_MSG="❌ Branch inválido: $BRANCH_NAME\n💡 Formato esperado: &lt;tipo&gt;/&lt;stack&gt;/&lt;TICKET&gt;-&lt;descripción&gt;\n💡 Ejemplo: feature/frontend/NOM-4-login-form
+            ERROR_MSG="❌ Branch inválido: $BRANCH_NAME\n💡 Formato esperado: &lt;tipo&gt;/&lt;stack&gt;/&lt;TICKET&gt;-&lt;descripción&gt;\n💡 Ejemplo: feature/frontend/NOM-4-login-form"
             echo "branch_status=fail" >> $GITHUB_OUTPUT
             echo "branch_error<<EOF" >> $GITHUB_OUTPUT
             echo -e "$ERROR_MSG" >> $GITHUB_OUTPUT
