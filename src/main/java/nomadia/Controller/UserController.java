@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/nomadia/user")
-@CrossOrigin (origins="http://localhost:4200")
+@CrossOrigin (origins={"http://localhost:4200","http://localhost:8080"})
 public class UserController {
 
     private final UserService userService;

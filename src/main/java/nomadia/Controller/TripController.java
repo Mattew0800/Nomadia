@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("nomadia/trip")
-@CrossOrigin (origins="http://localhost:4200")
+@CrossOrigin (origins={"http://localhost:4200","http://localhost:8080"})
 public class TripController {
 
     private final TripService tripService;
