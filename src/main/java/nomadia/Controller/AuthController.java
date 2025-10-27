@@ -16,6 +16,7 @@ import static nomadia.Enum.Role.USER;
 
 @RestController
 @RequestMapping("/nomadia/auth")
+@CrossOrigin (origins="http://localhost:4200")
 public class AuthController {
 
     private final AuthService authService;
