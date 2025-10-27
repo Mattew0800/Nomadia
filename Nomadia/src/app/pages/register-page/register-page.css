@@ -521,3 +521,47 @@ body {
     font-size: 20px;
   }
 }
+
+
+
+.input-invalid{
+  border-color: red !important;
+}
+
+
+.input-valid {
+    border-color: #a3e635 !important;
+}
+
+
+
+.check-color {
+  -webkit-appearance: none; 
+  -moz-appearance: none;
+  appearance: none;
+  
+  width: 20px;
+  height: 20px;
+  border: 2px solid red; /* Solo el borde rojo */
+  border-radius: 4px;
+  background-color: white; /* Fondo blanco */
+  cursor: pointer;
+}
+
+.check-color:checked {
+  background-color: red; /* Fondo rojo cuando está marcado */
+  border-color: darkred;
+}
+
+.formError{  
+  color: rgb(211, 25, 25);
+  margin-top: 0.3rem;
+  font-size: 0.8rem;  
+  
+}
+
+.underline{  
+  text-decoration: underline red 2px;
+}
+
+
