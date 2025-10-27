@@ -1,4 +1,4 @@
-package nomadia.DTO;
+package nomadia.DTO.User;
 
 import lombok.Data;
 import nomadia.Enum.Role;

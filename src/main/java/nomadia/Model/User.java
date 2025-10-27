@@ -3,7 +3,6 @@ package nomadia.Model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nomadia.Enum.Role;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,14 +41,32 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Size(min=3,max= 10,message = "El apodo debe tener entre 3 y 10 caracteres")
+    @Column(nullable = true)
+    private String nick;
+
+    @Column(nullable = true)
+    private Date birth;
+
+    @Column(nullable = true)
+    private int age;
+
+    @Column(name = "photo_url",nullable = true)
+    private String photoUrl;
+
     @ManyToMany
     @JoinTable(
             name = "user_trip",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "trip_id")
     )
+
     @Column(nullable = true)
     private Set<Trip> trips = new HashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<Calification> califications = new HashSet<>();
+
 
     public User toEntity() {
         User user = new User();

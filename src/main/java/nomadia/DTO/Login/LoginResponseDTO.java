@@ -1,4 +1,4 @@
-package nomadia.DTO;
+package nomadia.DTO.Login;
 
 import lombok.Data;
 

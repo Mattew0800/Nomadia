@@ -1,4 +1,4 @@
-package nomadia.DTO;
+package nomadia.DTO.User;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ import nomadia.Enum.Role;
 import nomadia.Model.User;
 
 @Data
-public class UserUpdateDTO {
+public class UserCreateDTO {
 
     @NotBlank(message = "El nombre es requerido")
     @Size(min = 2, max = 50)
@@ -25,8 +25,8 @@ public class UserUpdateDTO {
             message = "La contraseña debe contener al menos un número, una mayúscula y una minúscula"
     )
     private String password;
-    private Role role;
 
+    private Role role;
     public User toEntity() {
         User user = new User();
         user.setName(this.name);

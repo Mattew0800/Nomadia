@@ -1,9 +1,9 @@
 package nomadia.Controller;
 
 import jakarta.validation.Valid;
-import nomadia.DTO.LoginRequestDTO;
-import nomadia.DTO.LoginResponseDTO;
-import nomadia.DTO.RegisterRequestDTO;
+import nomadia.DTO.Login.LoginRequestDTO;
+import nomadia.DTO.Login.LoginResponseDTO;
+import nomadia.DTO.Login.RegisterRequestDTO;
 import nomadia.Model.User;
 import nomadia.Service.AuthService;
 import nomadia.Service.UserService;

@@ -36,7 +36,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(Long id, User updatedData) {
+    public Optional<User> updateUser(Long id, User updatedData) { // ver si se puede poner en el DTO
         return userRepository.findById(id).map(existingUser -> {
             if (updatedData.getName() != null) existingUser.setName(updatedData.getName());
             if (updatedData.getEmail() != null) existingUser.setEmail(updatedData.getEmail());

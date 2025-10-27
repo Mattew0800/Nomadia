@@ -1,15 +1,15 @@
 package nomadia.Controller;
 
 import jakarta.validation.Valid;
-import nomadia.DTO.UserCreateDTO;
-import nomadia.DTO.UserResponseDTO;
-import nomadia.DTO.UserUpdateDTO;
-import nomadia.Model.User;
+import nomadia.Config.UserDetailsImpl;
+import nomadia.DTO.User.UserCreateDTO;
+import nomadia.DTO.User.UserResponseDTO;
+import nomadia.DTO.User.UserUpdateDTO;
 import nomadia.Service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,20 +24,20 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
     @GetMapping("/me")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserResponseDTO> getSelf() {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok(UserResponseDTO.fromEntity(currentUser));
+    public ResponseEntity<UserResponseDTO> getSelf(@AuthenticationPrincipal UserDetailsImpl principal) {
+        return userService.findById(principal.getId())
+                .map(UserResponseDTO::fromEntity)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PutMapping("/me/update")
+    @PutMapping("/me/update") // a revisar, en especial lo del dto
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserResponseDTO> updateSelf(@Valid @RequestBody UserUpdateDTO dto) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        return userService.updateUser(currentUser.getId(), dto.toEntity())
+    public ResponseEntity<UserResponseDTO> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
+                                                      @Valid @RequestBody UserUpdateDTO dto) {
+        return userService.updateUser(principal.getId(), dto.toEntity())
                 .map(UserResponseDTO::fromEntity)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -46,10 +46,9 @@ public class UserController {
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
-        User saved = userService.createUser(dto.toEntity());
-        return new ResponseEntity<>(UserResponseDTO.fromEntity(saved), HttpStatus.CREATED);
+        var saved = userService.createUser(dto.toEntity());
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDTO.fromEntity(saved));
     }
-
     @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponseDTO> getAllUsers() {

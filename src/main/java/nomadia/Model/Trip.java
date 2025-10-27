@@ -1,24 +1,20 @@
 package nomadia.Model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import nomadia.Enum.State;
+import nomadia.Enum.TripType;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
 @Table(name = "trip")
 public class Trip {
 
@@ -26,20 +22,56 @@ public class Trip {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "El destino es necesario")
-    @Size(min = 2, max = 100, message = "El destino debe ser entre 2 y 100 caracteres")
-    @Column(name = "destination",nullable = false)
-    private String destination;
+    @NotBlank(message = "El nombre es necesario")
+    @Size(min = 2, max = 100, message = "El nombre debe ser entre 2 y 100 caracteres")
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @FutureOrPresent(message = "El viaje debe empezar entre hoy o en el futuro")
-    @Column(name = "start_date",nullable = false)
+    @NotNull(message = "La fecha de inicio es obligatoria")
+    @FutureOrPresent(message = "El viaje debe empezar hoy o en el futuro")
+    @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    @AssertTrue(message = "La fecha de finalizacion debe ser minimo mañana")
-    @Column(name = "end_date",nullable = false)
+    @NotNull(message = "La fecha de finalización es obligatoria")
+    @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+
+    @Size(min = 2, max = 100, message = "La descripción debe tener entre 2 y 100 caracteres")
+    @Column(name = "description")
+    private String description;
+
+    @NotNull(message = "El estado es obligatorio")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state", nullable = false)
+    private State state;
+
+    @NotNull(message = "El tipo es obligatorio")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private TripType type;
 
     @ManyToMany(mappedBy = "trips")
     private Set<User> users = new HashSet<>();
 
+
+    @PositiveOrZero(message = "El presupuesto no puede ser negativo")
+    @Column(name = "budget", precision = 12, scale = 2)
+    private BigDecimal budget;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
+
+    @Transient
+    public long getDurationDays() {
+        if (startDate == null || endDate == null) return 0;
+        return ChronoUnit.DAYS.between(startDate, endDate);
+    }
+
+    @AssertTrue(message = "La fecha de finalización debe ser al menos mañana y posterior a la fecha de inicio")
+    public boolean isEndAfterStartAndAtLeastTomorrow() {
+        if (startDate == null || endDate == null) return true;
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        return endDate.isAfter(startDate) && (endDate.isAfter(tomorrow) || endDate.isEqual(tomorrow));
+    }
 }
