@@ -1,6 +1,6 @@
 package nomadia.Service;
 
-import jakarta.transaction.Transactional;
+
 import nomadia.DTO.Trip.TripCreateDTO;
 import nomadia.DTO.Trip.TripListDTO;
 import nomadia.DTO.Trip.TripResponseDTO;
@@ -10,10 +10,12 @@ import nomadia.Model.Trip;
 import nomadia.Model.User;
 import nomadia.Repository.TripRepository;
 import nomadia.Repository.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class TripService {
 
     private final TripRepository tripRepository;
