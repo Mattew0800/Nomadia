@@ -43,37 +43,40 @@ public class TripController {
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> searchTrip(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<TripResponseDTO> searchTrip(@AuthenticationPrincipal UserDetailsImpl me,
                                                       @RequestParam String name) {
-        return tripService.findByNameForUser(name, userDetails.getId())
+        return tripService.findByNameForUser(name, me.getId())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PostMapping("/{tripId}/users/{userId}") // a modificar
-    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)")
+    @PostMapping("/add-users")
+    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)") // creador
     public ResponseEntity<TripResponseDTO> addUser(@PathVariable Long tripId,
-                                                   @PathVariable Long userId) {
-        return tripService.addUserToTrip(tripId, userId)
+                                                   @PathVariable Long userId, // que mande un dto de user para agregar al viaje, tirar error si no esta en la bdd o si ya esta en el viaje
+                                                   @AuthenticationPrincipal UserDetailsImpl me) {
+        return tripService.addUserToTrip(tripId, userId, me.getId())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{tripId}/users/{userId}") // a modificar
-    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)")
+    @DeleteMapping("/remove-users/")
+    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)") // creador
     public ResponseEntity<Void> removeUser(@PathVariable Long tripId,
-                                           @PathVariable Long userId) {
-        tripService.removeUserFromTrip(tripId, userId);
+                                           @PathVariable Long userId,// que mande un dto deu ser para agregar al viaje, tirar error si no esta en la bdd o si no esta en el viaje
+                                           @AuthenticationPrincipal UserDetailsImpl me) {
+        tripService.removeUserFromTrip(tripId, userId, me.getId());
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{tripId}") // a modificar
+    @PutMapping("/{tripId}")
     @PreAuthorize("@tripSecurity.isMember(#tripId, authentication)")
     public ResponseEntity<?> updateTrip(@PathVariable Long tripId,
-                                        @Valid @RequestBody TripUpdateDTO dto) {
-        return tripService.updateTrip(tripId, dto)
+                                        @Valid @RequestBody TripUpdateDTO dto,
+                                        @AuthenticationPrincipal UserDetailsImpl me) {
+        return tripService.updateTrip(tripId, dto, me.getId())
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
 }

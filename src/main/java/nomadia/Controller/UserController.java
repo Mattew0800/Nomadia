@@ -5,6 +5,8 @@ import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.User.UserCreateDTO;
 import nomadia.DTO.User.UserResponseDTO;
 import nomadia.DTO.User.UserUpdateDTO;
+import nomadia.Enum.Role;
+import nomadia.Model.User;
 import nomadia.Service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,15 +35,18 @@ public class UserController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PutMapping("/me/update") // a revisar, en especial lo del dto
+    @PutMapping("/me/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserResponseDTO> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
+    public ResponseEntity<?> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
                                                       @Valid @RequestBody UserUpdateDTO dto) {
-        return userService.updateUser(principal.getId(), dto.toEntity())
-                .map(UserResponseDTO::fromEntity)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        if (dto.getRole()!=null&&(userService.findById(principal.getId())).get().getRole()== Role.USER){
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("No tenés permisos para cambiar el rol de usuario.");        }
+        User updated = userService.updateUser(principal.getId(), dto, /*allowRoleChange=*/false);
+        return ResponseEntity.ok(UserResponseDTO.fromEntity(updated));
     }
+
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")

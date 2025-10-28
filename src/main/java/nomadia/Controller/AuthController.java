@@ -63,7 +63,6 @@ public class AuthController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         return authService.authenticate(request.getEmail(), request.getPassword())
@@ -76,8 +75,14 @@ public class AuthController {
                     response.setEmail(user.getEmail());
                     return ResponseEntity.ok(response);
                 })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+                .orElseGet(() ->
+                        ResponseEntity
+                                .status(HttpStatus.UNAUTHORIZED)
+                                .header("Error-Message", "Correo o contraseña incorrectos")
+                                .body(null)
+                );
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {

@@ -11,14 +11,12 @@ import nomadia.Model.User;
 @Data
 public class UserUpdateDTO {
 
-    @NotBlank(message = "El nombre es requerido")
-    @Size(min = 2, max = 50)
+    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
     private String name;
 
-    @NotBlank(message = "El email es requerido")
     @Email(message = "Email inválido")
     private String email;
-    @NotBlank(message = "La contraseña es requerida")
+
     @Size(min = 8, max = 25, message= "La contraseña debe tener entre 8 y 25 caracteres")
     @Pattern(
             regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).+$",
@@ -26,14 +24,6 @@ public class UserUpdateDTO {
     )
     private String password;
 
-    private Role role;
-
-    public User toEntity() {
-        User user = new User();
-        user.setName(this.name);
-        user.setEmail(this.email);
-        user.setPassword(this.password);
-        user.setRole(this.role);
-        return user;
-    }
+    // No permitas que el propio usuario cambie el rol en /me/update
+    private Role role; // lo vamos a ignorar en updateSelf
 }

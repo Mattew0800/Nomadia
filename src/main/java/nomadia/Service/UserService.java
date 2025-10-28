@@ -1,5 +1,7 @@
 package nomadia.Service;
 
+import jakarta.transaction.Transactional;
+import nomadia.DTO.User.UserUpdateDTO;
 import nomadia.Model.User;
 import nomadia.Repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,17 +38,30 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(Long id, User updatedData) { // ver si se puede poner en el DTO
-        return userRepository.findById(id).map(existingUser -> {
-            if (updatedData.getName() != null) existingUser.setName(updatedData.getName());
-            if (updatedData.getEmail() != null) existingUser.setEmail(updatedData.getEmail());
-            if (updatedData.getRole() != null) existingUser.setRole(updatedData.getRole());
+    @Transactional
+    public User updateUser(Long id, UserUpdateDTO dto, boolean allowRoleChange) {
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-            if (updatedData.getPassword() != null && !updatedData.getPassword().isBlank()) {
-                existingUser.setPassword(passwordEncoder.encode(updatedData.getPassword()));
+        if (dto.getName() != null) { existing.setName(dto.getName().trim()); }
+        if (dto.getEmail() != null) {
+            String newEmail = dto.getEmail().trim().toLowerCase();
+            if (userRepository.existsByEmailIgnoreCaseAndIdNot(newEmail, id)) {
+                throw new IllegalArgumentException("El email ya está en uso por otro usuario.");
             }
-            return userRepository.save(existingUser);
-        });
+            existing.setEmail(newEmail);
+        }
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            existing.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        if (dto.getRole() != null) {
+            if (!allowRoleChange) {
+            } else {
+                existing.setRole(dto.getRole());
+            }
+        }
+
+        return userRepository.save(existing);
     }
 
     public boolean deleteUser(Long id) {
