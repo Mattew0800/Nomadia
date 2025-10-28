@@ -63,13 +63,13 @@ public class TripController {
     @DeleteMapping("/remove-users/")
     @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)") // creador
     public ResponseEntity<Void> removeUser(@PathVariable Long tripId,
-                                           @PathVariable Long userId,// que mande un dto deu ser para agregar al viaje, tirar error si no esta en la bdd o si no esta en el viaje
+                                           @PathVariable Long userId,// que mande un dto de user para agregar al viaje, tirar error si no esta en la bdd o si no esta en el viaje
                                            @AuthenticationPrincipal UserDetailsImpl me) {
         tripService.removeUserFromTrip(tripId, userId, me.getId());
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{tripId}")
+    @PutMapping("/update") // actualizar campos del viaje
     @PreAuthorize("@tripSecurity.isMember(#tripId, authentication)")
     public ResponseEntity<?> updateTrip(@PathVariable Long tripId,
                                         @Valid @RequestBody TripUpdateDTO dto,
