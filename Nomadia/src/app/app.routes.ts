@@ -19,5 +19,4 @@ export const routes: Routes = [
     {path: 'test', component: Test},
     {path: '', redirectTo: 'MainPage', pathMatch: 'full'},
     {path: '**', redirectTo: 'error' },
-    
 ];
