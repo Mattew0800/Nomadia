@@ -32,16 +32,21 @@
                 <p>Tu próxima aventura te espera</p>
             </div>
 
-            <form>
+            <form [formGroup]="logForm" (submit)="login()">
                 <div class="input-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="tu@email.com" required>
+                    <input type="email" id="email" placeholder="tu@email.com" required formControlName="email" [ngClass]="{'input-invalid': invalidCredentials}">
+                    
                 </div>
 
                 <div class="input-group">
                     <label for="password">Contraseña</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+                    <input type="password" id="password" placeholder="••••••••" required formControlName="password" [ngClass]="{'input-invalid': invalidCredentials}">
                 </div>
+
+                @if(loginError){
+                    <p class="formError">{{loginError}}</p>
+                }
 
                 <div class="form-options">
                     <label class="remember-me">
@@ -50,7 +55,7 @@
                     </label>
                     <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
                 </div>
-
+                
                 <button type="submit" class="btn-login">Iniciar Sesión</button>
             </form>
 

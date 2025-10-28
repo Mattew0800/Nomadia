@@ -475,6 +475,17 @@ body {
   text-shadow: 0 0 8px rgba(190, 242, 100, 0.5);
 }
 
+.formError{  
+  color: rgb(105, 0, 0);
+  transform: translateY(-1rem);
+  font-size: 0.8rem; 
+  
+}
+
+.input-invalid{
+  border-color: red !important;
+}
+
 @media (max-width: 1200px) {
   .login-section {
     width: 50%;
