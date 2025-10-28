@@ -13,11 +13,10 @@ export const routes: Routes = [
     {path: 'landing', component: LandingPage},
     {path: 'login', component: LoginPage, canActivate: [PublicGuard]},
     {path: 'register', component: RegisterPage, canActivate: [PublicGuard]},
-    {path: 'mainPage', component: MainPage, canActivate:[AuthGuard]},
+    {path: 'mainPage', component: MainPage},
     {path: 'error', component: ErrorPage},
     {path: 'profile', component: UserProfile, canActivate: [AuthGuard]},
     {path: 'test', component: Test},
     {path: '', redirectTo: 'landing', pathMatch: 'full'},
     {path: '**', redirectTo: 'error' },
-    
 ];
