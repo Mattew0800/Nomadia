@@ -533,6 +533,11 @@ body {
     border-color: #a3e635 !important;
 }
 
+#registerMsg{
+  color: #a3e635;
+  margin-bottom: 1rem;
+}
+
 
 
 .check-color {

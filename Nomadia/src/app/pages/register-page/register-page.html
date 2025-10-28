@@ -31,7 +31,7 @@
                 <p>Unite a miles de viajeros</p>
             </div>
 
-            <form [formGroup]="registerForm" (submit)="onSubmit()">
+            <form [formGroup]="registerForm" (submit)="register()">
                 <div class="input-group">
                     <label for="name">Nombre completo</label>
                     <input type="text" id="name" placeholder="Juan Pérez" required formControlName="name"
@@ -94,6 +94,8 @@
                     <label for="terms">Acepto los <a href="#">términos y condiciones</a> y la <a href="#">política de privacidad</a></label>                    
 
                 </div>
+
+                <p id="registerMsg">{{registerMsg}}</p>
 
                 <button type="submit" class="btn-login">Registrarme</button>
             </form>
