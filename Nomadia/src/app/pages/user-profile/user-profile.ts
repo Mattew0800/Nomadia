@@ -12,6 +12,7 @@ export class UserProfile {
 
     constructor(public authService: AuthService,private router: Router){}
 
+ 
 
     logout() {
       localStorage.removeItem('token');

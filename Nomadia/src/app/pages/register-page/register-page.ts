@@ -1,7 +1,8 @@
 import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth-service';
 
 @Component({
   selector: 'app-register-page',
@@ -13,8 +14,9 @@ export class RegisterPage {
 
   registerForm: FormGroup;
   submitted = false;
+  registerMsg?:string;
 
-  constructor() {
+  constructor(public authService: AuthService, private router: Router) {
     this.registerForm = new FormGroup({
 
         name: new FormControl('', [Validators.required,
@@ -47,16 +49,36 @@ export class RegisterPage {
       return this.registerForm.get('terms');
     }
 
-  onSubmit(): void {
+
+  register() {
     this.submitted = true;
+
     if (this.registerForm.valid) {
-      console.log('Formulario válido:', this.registerForm.value);
+
+      const { name, email, password } = this.registerForm.value;
+
+      this.authService.registerUser(name, email, password).subscribe({
+      next: () => {
+        console.log("REGISTRADO JOYA");
+        this.registerMsg="Registrado con éxito."
+        
+         setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 2000);
+        
+      },
+      error: (e) => {
+        console.log(e);        
+      }
+      });
+
     } else {
       console.log('Formulario inválido');
       return;
     }
 
-    //logica para enviar
+
+
   }
 
 }
