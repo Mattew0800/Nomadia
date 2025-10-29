@@ -42,12 +42,14 @@ public class UserController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
                                         @Valid @RequestBody UserUpdateDTO dto) {
+        System.out.println(dto.toString());
         User me = userService.findById(principal.getId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        if (dto.getRole() != null && me.getRole() == Role.USER) {
+        if (dto.getRole() != null && dto.getRole() != me.getRole() && me.getRole() == Role.USER) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("No tenés permisos para cambiar el rol de usuario.");
-        } // modularizar al servicio
+        }
+        // modularizar al servicio
         boolean wantsPasswordChange =
                 notBlank(dto.getOldPassword()) ||
                         notBlank(dto.getNewPassword()) ||

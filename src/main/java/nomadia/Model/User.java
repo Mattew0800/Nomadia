@@ -35,7 +35,6 @@ public class User {
     @Column(nullable = false,length = 10)
     private Role role;
 
-
     private String about;
 
     @NotBlank(message = "El email es requerido")

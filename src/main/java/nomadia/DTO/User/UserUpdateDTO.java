@@ -50,7 +50,7 @@ public class UserUpdateDTO {
     private Integer age;
 
     private Role role;
-    public void applyToEntity(User user, PasswordEncoder passwordEncoder, boolean allowRoleChange) {
+    public void applyToEntity(User user, PasswordEncoder passwordEncoder, boolean allowRoleChange){
         if (this.name != null) user.setName(this.name.trim());
         if (this.email != null) user.setEmail(this.email.trim().toLowerCase());
         if (this.phone != null) user.setPhone(this.phone.trim());
@@ -60,12 +60,9 @@ public class UserUpdateDTO {
         if (this.birth != null) user.setBirth(this.birth);
         if (this.age != null) user.setAge(this.age);
 
-        // 🔐 Contraseña
         if (this.newNewPassword != null && !this.newNewPassword.isBlank()) {
             user.setPassword(passwordEncoder.encode(this.newNewPassword));
         }
-
-        // 🎭 Rol (solo si está permitido)
         if (this.role != null && allowRoleChange) {
             user.setRole(this.role);
         }
