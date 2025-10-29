@@ -25,7 +25,7 @@ public class AuthController {
         this.authService = authService;
         this.userService = userService;
     }
-    @PostMapping("/register")
+    @PostMapping("/register")// chequeado
     public ResponseEntity<LoginResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         User user = new User();
         user.setName(request.getName());
@@ -44,7 +44,7 @@ public class AuthController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    @PostMapping("/register-admin")
+    @PostMapping("/register-admin") // esto para prueba dsps se va
     public ResponseEntity<LoginResponseDTO> registerAdmin(@Valid @RequestBody RegisterRequestDTO request) {
         User user = new User();
         user.setName(request.getName());
@@ -63,7 +63,7 @@ public class AuthController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    @PostMapping("/login")
+    @PostMapping("/login")// chequeado
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         return authService.authenticate(request.getEmail(), request.getPassword())
                 .map(user -> {
@@ -84,7 +84,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/logout")
+    @PostMapping("/logout") // por mera cortesia
     public ResponseEntity<Void> logout() {
         return ResponseEntity.ok().build();
     }

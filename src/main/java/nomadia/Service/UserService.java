@@ -43,26 +43,14 @@ public class UserService {
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (dto.getName() != null) { existing.setName(dto.getName().trim()); }
-        if (dto.getEmail() != null) {
-            String newEmail = dto.getEmail().trim().toLowerCase();
-            if (userRepository.existsByEmailIgnoreCaseAndIdNot(newEmail, id)) {
-                throw new IllegalArgumentException("El email ya está en uso por otro usuario.");
-            }
-            existing.setEmail(newEmail);
+        if (dto.getEmail() != null &&
+                userRepository.existsByEmailIgnoreCaseAndIdNot(dto.getEmail().trim().toLowerCase(), id)) {
+            throw new IllegalArgumentException("El email ya está en uso por otro usuario.");
         }
-        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            existing.setPassword(passwordEncoder.encode(dto.getPassword()));
-        }
-        if (dto.getRole() != null) {
-            if (!allowRoleChange) {
-            } else {
-                existing.setRole(dto.getRole());
-            }
-        }
-
+        dto.applyToEntity(existing, passwordEncoder, allowRoleChange);
         return userRepository.save(existing);
     }
+
 
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {

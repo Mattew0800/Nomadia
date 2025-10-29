@@ -22,7 +22,7 @@ public class TripController {
         this.tripService = tripService;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/create") //chequeado
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,
                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -31,7 +31,7 @@ public class TripController {
                 .body(created);
     }
 
-    @GetMapping("/my-trips")
+    @GetMapping("/my-trips")// chequeado
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<TripListDTO>> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<TripListDTO> trips = tripService.findMyTrips(userDetails.getId());
@@ -47,7 +47,7 @@ public class TripController {
 //                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 //    }
 
-    @PostMapping("/{tripId}/add-users")
+    @PostMapping("/{tripId}/add-users") // a chequear , en especial como vincular el id del viaje en la url
     @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)")
     public ResponseEntity<?> addUser(@PathVariable Long tripId,
                                      @Valid @RequestBody TripAddUserByEmailDTO body,
@@ -55,7 +55,7 @@ public class TripController {
         return ResponseEntity.ok(tripService.addUserToTrip(tripId, body.getEmail(), me.getId()));
     }
 
-    @DeleteMapping("/{tripId}/users")
+    @DeleteMapping("/{tripId}/users") // a chequear, en especial como vincular el id del viaje en la url
     @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)") // defensa 1
     public ResponseEntity<Void> removeUserByEmail(@PathVariable Long tripId,
                                                   @Valid @RequestBody TripAddUserByEmailDTO body,
@@ -64,7 +64,7 @@ public class TripController {
         return ResponseEntity.noContent().build(); // 204
     }
 
-    @PutMapping("/update") // actualizar campos del viaje
+    @PutMapping("/update") // a chequear
     @PreAuthorize("@tripSecurity.isMember(#tripId, authentication)")
     public ResponseEntity<?> updateTrip(@PathVariable Long tripId,
                                         @Valid @RequestBody TripUpdateDTO dto,

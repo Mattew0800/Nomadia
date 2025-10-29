@@ -29,7 +29,7 @@ public class UserController {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
-    @GetMapping("/me")
+    @GetMapping("/me") // chequeado
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserResponseDTO> getSelf(@AuthenticationPrincipal UserDetailsImpl principal) {
         return userService.findById(principal.getId())
@@ -38,7 +38,7 @@ public class UserController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PutMapping("/me/update")
+    @PutMapping("/me/update") // a chequear verificaciones
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
                                         @Valid @RequestBody UserUpdateDTO dto) {
@@ -85,13 +85,14 @@ public class UserController {
         return s != null && !s.trim().isEmpty();
     }
 
-    @PostMapping("/create")
+    @PostMapping("/create") // esto dsps se va, solo para prueba
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
         var saved = userService.createUser(dto.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDTO.fromEntity(saved));
     }
-    @GetMapping("/get-all")
+
+    @GetMapping("/get-all") //chequeado
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponseDTO> getAllUsers() {
         return userService.findAll().stream()
