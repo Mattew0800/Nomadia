@@ -15,9 +15,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user")
 public class User {
@@ -34,6 +34,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false,length = 10)
     private Role role;
+
+
+    private String about;
 
     @NotBlank(message = "El email es requerido")
     @Email(message = "El email debe ser válido")
@@ -53,6 +56,9 @@ public class User {
 
     @Column(name = "photo_url",nullable = true)
     private String photoUrl;
+
+    @Column(nullable = true)
+    private String phone;
 
     @ManyToMany
     @JoinTable(
@@ -74,6 +80,12 @@ public class User {
         user.setEmail(email);
         user.setPassword(password);
         user.setRole(role);
+        user.setPhone(phone);
+        user.setAge(age);
+        user.setAbout(about);
+        user.setPhotoUrl(photoUrl);
+        user.setNick(nick);
+        user.setBirth(birth);
         return user;
     }
 

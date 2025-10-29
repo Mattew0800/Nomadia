@@ -24,6 +24,7 @@ public class UserCreateDTO {
     private String password;
 
     private Role role;
+
     public User toEntity() {
         User user = new User();
         user.setName(this.name);

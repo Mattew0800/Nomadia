@@ -2,10 +2,7 @@ package nomadia.Controller;
 
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
-import nomadia.DTO.Trip.TripCreateDTO;
-import nomadia.DTO.Trip.TripListDTO;
-import nomadia.DTO.Trip.TripResponseDTO;
-import nomadia.DTO.Trip.TripUpdateDTO;
+import nomadia.DTO.Trip.*;
 import nomadia.Service.TripService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +26,7 @@ public class TripController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,
                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        TripResponseDTO created = tripService.createTrip(dto, userDetails.getId()); // verificar que no haya un viaje de el con el mismo nombre
+        TripResponseDTO created = tripService.createTrip(dto, userDetails.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(created);
     }
@@ -41,32 +38,30 @@ public class TripController {
         return ResponseEntity.ok(trips);
     }
 
-    @GetMapping("/search")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> searchTrip(@AuthenticationPrincipal UserDetailsImpl me,
-                                                      @RequestParam String name) {
-        return tripService.findByNameForUser(name, me.getId())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+//    @GetMapping("/search")
+//    @PreAuthorize("hasRole('USER')")
+//    public ResponseEntity<TripResponseDTO> searchTrip(@AuthenticationPrincipal UserDetailsImpl me,
+//                                                      @RequestBody String name) {
+//        return tripService.findByNameForUser(name, me.getId())
+//                .map(ResponseEntity::ok)
+//                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+//    }
+
+    @PostMapping("/{tripId}/add-users")
+    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)")
+    public ResponseEntity<?> addUser(@PathVariable Long tripId,
+                                     @Valid @RequestBody TripAddUserByEmailDTO body,
+                                     @AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.ok(tripService.addUserToTrip(tripId, body.getEmail(), me.getId()));
     }
 
-    @PostMapping("/add-users")
-    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)") // creador
-    public ResponseEntity<TripResponseDTO> addUser(@PathVariable Long tripId,
-                                                   @PathVariable Long userId, // que mande un dto de user para agregar al viaje, tirar error si no esta en la bdd o si ya esta en el viaje
-                                                   @AuthenticationPrincipal UserDetailsImpl me) {
-        return tripService.addUserToTrip(tripId, userId, me.getId())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/remove-users/")
-    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)") // creador
-    public ResponseEntity<Void> removeUser(@PathVariable Long tripId,
-                                           @PathVariable Long userId,// que mande un dto de user para agregar al viaje, tirar error si no esta en la bdd o si no esta en el viaje
-                                           @AuthenticationPrincipal UserDetailsImpl me) {
-        tripService.removeUserFromTrip(tripId, userId, me.getId());
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{tripId}/users")
+    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)") // defensa 1
+    public ResponseEntity<Void> removeUserByEmail(@PathVariable Long tripId,
+                                                  @Valid @RequestBody TripAddUserByEmailDTO body,
+                                                  @AuthenticationPrincipal UserDetailsImpl me) {
+        tripService.removeUserFromTrip(tripId, body.getEmail(), me.getId()); // defensa 2 dentro del service
+        return ResponseEntity.noContent().build(); // 204
     }
 
     @PutMapping("/update") // actualizar campos del viaje

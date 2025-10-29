@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +23,11 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
     @GetMapping("/me")
     @PreAuthorize("hasRole('USER')")
@@ -38,15 +41,49 @@ public class UserController {
     @PutMapping("/me/update")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
-                                                      @Valid @RequestBody UserUpdateDTO dto) {
-        if (dto.getRole()!=null&&(userService.findById(principal.getId())).get().getRole()== Role.USER){
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body("No tenés permisos para cambiar el rol de usuario.");        }
-        User updated = userService.updateUser(principal.getId(), dto, /*allowRoleChange=*/false);
+                                        @Valid @RequestBody UserUpdateDTO dto) {
+        User me = userService.findById(principal.getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (dto.getRole() != null && me.getRole() == Role.USER) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("No tenés permisos para cambiar el rol de usuario.");
+        } // modularizar al servicio
+        boolean wantsPasswordChange =
+                notBlank(dto.getOldPassword()) ||
+                        notBlank(dto.getNewPassword()) ||
+                        notBlank(dto.getNewNewPassword());
+
+        if (wantsPasswordChange) {
+            if (!notBlank(dto.getOldPassword()) ||
+                    !notBlank(dto.getNewPassword()) ||
+                    !notBlank(dto.getNewNewPassword())) {
+                return ResponseEntity.badRequest()
+                        .body("Para cambiar la contraseña debés enviar oldPassword, newPassword y newNewPassword.");
+            }
+            if (!passwordEncoder.matches(dto.getOldPassword(), me.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("La contraseña actual es incorrecta.");
+            }
+
+            if (!dto.getNewPassword().equals(dto.getNewNewPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Las contraseñas nuevas no coinciden.");
+            }
+
+            if (passwordEncoder.matches(dto.getNewPassword(), me.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("La nueva contraseña no puede ser igual a la actual.");
+            }
+            dto.setPassword(dto.getNewPassword());
+        }
+
+        User updated = userService.updateUser(me.getId(), dto, /*allowRoleChange=*/false);
         return ResponseEntity.ok(UserResponseDTO.fromEntity(updated));
     }
 
+    private boolean notBlank(String s) {
+        return s != null && !s.trim().isEmpty();
+    }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")

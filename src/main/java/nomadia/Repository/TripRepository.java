@@ -1,7 +1,9 @@
 package nomadia.Repository;
 
+import jakarta.transaction.Transactional;
 import nomadia.Model.Trip;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,6 +21,15 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
 
     @Query("select t.createdBy.id from Trip t where t.id = :tripId")
     Optional<Long> findOwnerId(@Param("tripId") Long tripId);
+
+    @Modifying
+    @Transactional
+    @Query(
+            value = "INSERT IGNORE INTO user_trip (user_id, trip_id) VALUES (:userId, :tripId)",
+            nativeQuery = true
+    )
+    void insertCreator(@Param("userId") Long userId, @Param("tripId") Long tripId);
+
 
     boolean existsByIdAndCreatedBy_Id(Long tripId, Long userId);
 
