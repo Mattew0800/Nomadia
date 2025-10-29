@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nomadia</title>
-</head>
 
-<body>
 
-    <div class="app-container">
-        <!-- Sidebar -->
+<div class="app-container">
+<!-- Sidebar -->
         <aside class="sidebar">
             <!-- Background gradient effect -->
             <div class="sidebar-gradient-1"></div>
@@ -123,7 +115,7 @@
             </nav>
         </aside>
 
-        <!-- Main Content -->
+ <!-- Main Content -->
         <main class="main-content">
             <!-- Top Header -->
             <header class="top-header">
@@ -144,7 +136,7 @@
                 <div class="user-profile">
                     <div class="user-image"><img src="default-user-img.jpg" alt="" srcset=""></div>
                     <div class="user-info">
-                        <div class="user-name">Anni</div>
+                        <div class="user-name">Nombre</div>
                         <div class="user-status">Traveler Pro</div>
                     </div>
 
@@ -169,68 +161,108 @@
 
             </header>
 
+    <div class="profile-card">
+      <div class="profile-header">
+        <section class="profile-main">
+          <div class="profile-user-profile">
+            <div class="user-image large">
+              <img [src]="photoPreview() || 'default-user-img.jpg'" alt="Foto de Usuario">
+            </div>
+            <div class="user-info large">
+              <h2 class="user-name">Nombre </h2>
+              <p class="user-status">Traveler Pro</p>
+            </div>
+          </div>
+        </section>
+      </div>
 
+      <!-- FORM -->
+      <form *ngif="form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="form-grid">
+          <div>
+            <label>Nombre completo</label>
+            <input type="text" formControlName="name"
+                   [ngClass]="{'input-invalid': form.get('name')?.invalid && form.get('name')?.touched}">
+          </div>
 
-            <div class="profile-card">
-                <div class="profile-header">
-                    <section class="profile-main">
-                        <div class="profile-user-profile">
-                            <div class="user-image large">
-                                <img src="default-user-img.jpg" alt="Foto de Usuario">
-                            </div>
-                            <div class="user-info large">
-                                <h2 class="user-name">Anna Johnson</h2>
-                                <p class="user-status">Traveler Pro</p>
-                            </div>
-                        </div>
-                    </section>
+          <div>
+            <label>Apodo</label>
+            <input type="text" formControlName="nick">
+          </div>
 
+          <div>
+            <label>Email</label>
+            <input type="email" formControlName="email">
+          </div>
 
-                </div>
+          <div>
+            <label>Teléfono</label>
+            <input type="tel" formControlName="phone">
+          </div>
 
-                <form id="userForm">
-                    <div class="form-grid">
-                        <div>
-                            <label>Nombre completo</label>
-                            <input type="text" value="Anna Smith" disabled>
-                        </div>
-                        <div>
-                            <label>Apodo</label>
-                            <input type="text" value="Anni" disabled>
-                        </div>
+          <div>
+            <label>Fecha de nacimiento</label>
+            <input type="date" formControlName="birth">
+          </div>
 
-                        <div>
-                            <label>Email</label>
-                            <input type="email" value="anna.smith@nomadia.com" disabled>
-                        </div>
-                        <div>
-                            <label>Teléfono</label>
-                            <input type="tel" value="+54 223 456 7890" disabled>
-                        </div>
+          <div>
+            <label>Edad</label>
+            <input type="number" formControlName="age" readonly>
+          </div>
 
-                        <div>
-                            <label>Fecha de nacimiento</label>
-                            <input type="date" value="1995-06-15" disabled>
-                        </div>
-                        <div>
-                            <label>Edad</label>
-                            <input type="number" value="29" disabled>
-                        </div>
+          <div id="form__grid-aboutme">
+            <label>Sobre mí</label>
+            <textarea formControlName="about" rows="4"></textarea>
+          </div>
 
-                        <div id="form__grid-aboutme">
-                            <label>Sobre mi</label>
-                            <textarea
-                                disabled>Amante de los viajes, la aventura y conocer nuevas culturas. Siempre lista para la próxima escapada con amigos.</textarea>
-                        </div>
+          <!-- Foto -->
+          <div>
+            <label>Foto de perfil</label>
+            <input type="file" accept="image/*" (change)="onSelectPhoto($event)">
+            <div style="margin-top:.5rem; display:flex; gap:.75rem; align-items:center;">
+              <img *ngIf="photoPreview()" [src]="photoPreview()" alt="preview"
+                   style="width:64px;height:64px;border-radius:12px;object-fit:cover;">
+              <button type="button" class="filters-btn" (click)="removePhoto()" *ngIf="photoPreview()">Quitar foto</button>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div style="grid-column:1/3;">
+            <label style="display:block;margin-bottom:.5rem;">Cambiar contraseña (opcional)</label>
+            <div formGroupName="passwordGroup">
+                <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+                    <div>
+                    <label>Contraseña actual</label>
+                    <input type="password" formControlName="currentPassword">
                     </div>
 
-                    <button class="edit-btn" id="toggleEdit" routerLink="/editProfile">Editar perfil</button>
-                </form>
-            </div>
+                    <div>
+                    <label>Nueva contraseña</label>
+                    <input type="password" formControlName="newPassword"
+                            [ngClass]="{'input-invalid': form.get('passwordGroup.newPassword')?.invalid && form.get('passwordGroup.newPassword')?.touched}">
+                    </div>
 
+                    <div style="grid-column:1/3;">
+                    <label>Confirmar nueva contraseña</label>
+                    <input type="password" formControlName="confirmPassword"
+                            [ngClass]="{'input-invalid': form.get('passwordGroup')?.errors?.['mismatch'] && form.get('passwordGroup.confirmPassword')?.touched}">
+                    <p *ngIf="form.get('passwordGroup')?.errors?.['mismatch']" class="formError" style="margin-top:.25rem;">
+                        Las contraseñas no coinciden.
+                    </p>
+                    </div>
+                </div>
+                </div>
+          </div>
+        </div>
 
-        </main>
+        <div style="display:flex; gap:1rem; margin-top:2rem;">
+          <button class="edit-btn" type="submit" [disabled]="saving()">Guardar cambios</button>
+          <button class="filters-btn" type="button" (click)="cancel()">Cancelar</button>
+        </div>
+
+        <p *ngIf="apiOk()" style="margin-top:1rem; color:#d1f366;">{{ apiOk() }}</p>
+        <p *ngIf="apiError()" style="margin-top:1rem; color:#eb3f3a;">{{ apiError() }}</p>
+      </form>
     </div>
-</body>
-
-</html>
+  </main>
+</div>

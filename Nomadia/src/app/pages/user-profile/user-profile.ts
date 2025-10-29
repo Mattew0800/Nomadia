@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 
 @Component({
   selector: 'app-user-profile',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
 })

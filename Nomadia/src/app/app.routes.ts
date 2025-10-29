@@ -8,6 +8,7 @@ import { Test } from './pages/test/test';
 import { AuthGuard } from './guards/auth.guard';
 import { PublicGuard } from './guards/public.guard';
 import { MainPage } from './pages/main-page/main-page';
+import { UserProfileEdit } from './pages/user-profile-edit/user-profile-edit';
 
 export const routes: Routes = [
     {path: 'landing', component: LandingPage},
@@ -15,7 +16,8 @@ export const routes: Routes = [
     {path: 'register', component: RegisterPage, canActivate: [PublicGuard]},
     {path: 'mainPage', component:MainPage,},
     {path: 'error', component: ErrorPage},
-    {path: 'profile', component: UserProfile, canActivate: [AuthGuard]},
+    {path: 'profile', component: UserProfile,},
+    {path: 'editProfile', component: UserProfileEdit},
     {path: 'test', component: Test},
     {path: '', redirectTo: 'MainPage', pathMatch: 'full'},
     {path: '**', redirectTo: 'error' },
