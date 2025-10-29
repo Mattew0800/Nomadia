@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { User } from '../models/User';
 import { LoginResponse } from '../models/LoginResponse';
 import { RegisterResponse } from '../models/RegisterResponse';
+import { putResponse } from '../models/putResponse';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,20 @@ export class AuthService {
     return this.http.post<RegisterResponse>(`${this.API_URL}/auth/register`,body)
   }
 
-  
+  updateUser(userData: {
+  name: string;
+  nick: string;
+  email: string;
+  phone: string;
+  birth: Date;
+  age: number;
+  photo?: string;
+  about?: string;
+  currentPass?: string;
+  newPass?: string;
+  confirmPass?: string;
+}){
+  return this.http.put<putResponse>(`${this.API_URL}/me/update`,userData)
+  }
   
 }

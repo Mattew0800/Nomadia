@@ -76,9 +76,6 @@ export class RegisterPage {
       console.log('Formulario inválido');
       return;
     }
-
-
-
   }
 
 }

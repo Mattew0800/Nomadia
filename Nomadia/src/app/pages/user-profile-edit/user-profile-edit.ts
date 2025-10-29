@@ -1,172 +1,155 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Component } from '@angular/core';
+import { CommonModule, NgClass } from '@angular/common';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NgClass } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../services/auth-service';
-
-
-/** Ajustá este servicio a tu firma real; acá muestro ejemplo básico */
-type UserProfile = {
-  id: number;
-  name: string;
-  nick?: string;
-  email: string;
-  phone?: string;
-  birth?: string;   // ISO yyyy-MM-dd
-  age?: number;
-  about?: string;
-  photoUrl?: string;
-};
-
-function samePassword(ctrl: AbstractControl): ValidationErrors | null {
-  const newPass = ctrl.get('newPassword')?.value;
-  const confirm = ctrl.get('confirmPassword')?.value;
-  if (!newPass && !confirm) return null;
-  return newPass === confirm ? null : { mismatch: true };
-}
 
 @Component({
   selector: 'app-user-profile-edit',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, NgClass, HttpClientModule],
   templateUrl: './user-profile-edit.html',
-  styleUrls: ['./user-profile-edit.css']
+  styleUrl: './user-profile-edit.css'
 })
-export class UserProfileEdit implements OnInit {
+export class UserProfileEdit {
 
-  private http = inject(HttpClient);
-  private router = inject(Router);
+  form: FormGroup;
+  submitted = false;
+  photoFile?: File;
+  photoPreview?: string;
+  msgOk?: string;
+  msgError?: string;
+  loading = true;
 
-  loading = signal<boolean>(true);
-  saving  = signal<boolean>(false);
-  apiError = signal<string | null>(null);
-  apiOk    = signal<string | null>(null);
+  constructor(private http: HttpClient, private router: Router, public authService: AuthService) {
 
-  form!: FormGroup<{
-    name: FormControl<string>;
-    nick: FormControl<string | null>;
-    email: FormControl<string>;
-    phone: FormControl<string | null>;
-    birth: FormControl<string | null>;
-    age: FormControl<number | null>;
-    about: FormControl<string | null>;
-    passwordGroup: FormGroup<{
-      currentPassword: FormControl<string | null>;
-      newPassword: FormControl<string | null>;
-      confirmPassword: FormControl<string | null>;
-    }>
-  }>;
+    this.form = new FormGroup({
+      name: new FormControl('', [
+        Validators.required,
+        Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'.-]{2,}$/)
+      ]),
+      nick: new FormControl(''),
+      email: new FormControl({ value: '', disabled: false }, [
+        Validators.required,
+        Validators.email
+      ]),
+      phone: new FormControl(''),
+      birth: new FormControl(''),
+      age: new FormControl(''),
+      about: new FormControl(''),
 
-  photoPreview = signal<string | null>(null);
-  photoFile: File | null = null;
-
-  constructor(public authService: AuthService, router: Router){}
+      currentPass: new FormControl(''),
+      newPass: new FormControl('', [Validators.minLength(6)]),
+      confirmPass: new FormControl('')
+    });
+  }
 
   ngOnInit(): void {
-    // Traer perfil actual (ajustá a tu endpoint real; usando proxy /api)
-    this.http.get<UserProfile>('/api/users/me').subscribe({
-      next: (user) => { this.buildForm(user); this.loading.set(false); },
-      error: () => { this.apiError.set('No se pudo cargar tu perfil.'); this.loading.set(false); }
+    // Cargar datos del perfil actual
+    this.http.get<any>('/api/users/me').subscribe({
+      next: (user) => {
+        this.form.patchValue(user);
+        this.photoPreview = user.photoUrl;
+        this.loading = false;
+      },
+      error: () => {
+        this.msgError = 'No se pudo cargar tu perfil.';
+        this.loading = false;
+      }
+    });
+
+    // Calcular edad al cambiar birth
+    this.form.get('birth')?.valueChanges.subscribe(birth => {
+      this.form.patchValue({ age: this.calcAge(birth) }, { emitEvent: false });
     });
   }
 
-  private buildForm(user: UserProfile) {
-    this.form = new FormGroup({
-      name: new FormControl(user.name ?? '', {
-        nonNullable: true,
-        validators: [Validators.required, Validators.pattern(/^[\p{L}\s'.-]{2,}$/u)]
-      }),
-      nick: new FormControl(user.nick ?? null),
-      email: new FormControl({ value: user.email ?? '', disabled: true }, { nonNullable: true, validators: [Validators.required, Validators.email] }),
-      phone: new FormControl(user.phone ?? null),
-      birth: new FormControl(user.birth ?? null),
-      age: new FormControl(user.age ?? null),
-      about: new FormControl(user.about ?? null),
-      passwordGroup: new FormGroup({
-        currentPassword: new FormControl<string | null>(null),
-        newPassword: new FormControl<string | null>(null, [Validators.minLength(6)]),
-        confirmPassword: new FormControl<string | null>(null)
-      }, { validators: samePassword })
-    });
-
-    // Recalcular edad cuando cambia fecha
-    this.form.get('birth')!.valueChanges.subscribe(v => {
-      this.form.get('age')!.setValue(this.calcAge(v ?? undefined), { emitEvent: false });
-    });
-
-    if (user.photoUrl) this.photoPreview.set(user.photoUrl);
+  get f() {
+    return this.form.controls;
   }
 
-  private calcAge(birth?: string | null): number | null {
+  calcAge(birth: string): number | null {
     if (!birth) return null;
     const d = new Date(birth);
-    if (Number.isNaN(d.getTime())) return null;
+    if (isNaN(d.getTime())) return null;
     const t = new Date();
     let age = t.getFullYear() - d.getFullYear();
     const m = t.getMonth() - d.getMonth();
     if (m < 0 || (m === 0 && t.getDate() < d.getDate())) age--;
-    return Math.max(age, 0);
+    return age >= 0 ? age : null;
   }
 
-  onSelectPhoto(ev: Event) {
-    const input = ev.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    this.photoFile = file;
-    const reader = new FileReader();
-    reader.onload = () => this.photoPreview.set(reader.result as string);
-    reader.readAsDataURL(file);
+  onSelectPhoto(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.photoFile = file;
+      const reader = new FileReader();
+      reader.onload = () => this.photoPreview = reader.result as string;
+      reader.readAsDataURL(file);
+    }
   }
 
   removePhoto() {
-    this.photoFile = null;
-    this.photoPreview.set(null);
+    this.photoFile = undefined;
+    this.photoPreview = undefined;
+  }
+
+  passwordsMatch(): boolean {
+    const newPass = this.form.get('newPassword')?.value;
+    const confirm = this.form.get('confirmPassword')?.value;
+    return !newPass || !confirm || newPass === confirm;
   }
 
   save() {
-    this.apiError.set(null);
-    this.apiOk.set(null);
-    if (!this.form.valid) { this.form.markAllAsTouched(); return; }
-    this.saving.set(true);
+    this.submitted = true;
+    this.msgError = undefined;
+    this.msgOk = undefined;
+
+    if (!this.form.valid || !this.passwordsMatch()) {
+      console.log('Formulario inválido');
+      return;
+    }
 
     const raw = this.form.getRawValue();
     const fd = new FormData();
+
     fd.append('name', raw.name);
-    if (raw.nick)  fd.append('nick', raw.nick);
+    if (raw.nick) fd.append('nick', raw.nick);
     if (raw.phone) fd.append('phone', raw.phone);
     if (raw.birth) fd.append('birth', raw.birth);
-    if (raw.age !== null && raw.age !== undefined) fd.append('age', String(raw.age));
+    if (raw.age) fd.append('age', raw.age.toString());
     if (raw.about) fd.append('about', raw.about);
+
     if (this.photoFile) fd.append('photo', this.photoFile);
 
-    const pass = raw.passwordGroup;
-    const wantsPassChange = pass.currentPassword && pass.newPassword;
-    if (wantsPassChange) {
-      fd.append('currentPassword', pass.currentPassword!);
-      fd.append('newPassword', pass.newPassword!);
+    if (raw.currentPassword && raw.newPass) {
+      fd.append('currentPassword', raw.currentPass);
+      fd.append('newPassword', raw.newPass);
     }
 
-    // Ajustá a tu endpoint (ej: /api/users/me  PUT/PATCH; si subís foto, muchos back usan multipart)
-    this.http.put('/api/users/me', fd).subscribe({
-      next: () => { this.saving.set(false); this.apiOk.set('Perfil actualizado.'); setTimeout(() => this.router.navigate(['/profile']), 900); },
+    this.authService.updateUser(this.form.value).subscribe({
+      next: () => {
+        this.msgOk = 'Perfil actualizado con éxito.';
+        setTimeout(() => this.router.navigate(['/profile']), 1200);
+      },
       error: (e) => {
-        this.saving.set(false);
-        if (e?.status === 400) this.apiError.set('Datos inválidos.');
-        else if (e?.status === 401) this.apiError.set('Sesión expirada. Iniciá sesión de nuevo.');
-        else this.apiError.set('No se pudo actualizar el perfil.');
+        console.error(e);
+        this.msgError = e.status === 400 ? 'Datos inválidos.' :
+                        e.status === 401 ? 'Sesión expirada.' :
+                        'Error al actualizar el perfil.';
       }
     });
   }
 
   cancel() {
-    this.router.navigate(['/user-profile']);
+    this.router.navigate(['/profile']);
   }
 
-    logout() {
-      localStorage.removeItem('token');
-      this.authService.users = [];
-      this.router.navigate(['/login']);
-    }
+  logout() {
+    localStorage.removeItem('token');
+    this.authService.users = [];
+    this.router.navigate(['/login']);
+  }
+
 }
