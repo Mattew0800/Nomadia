@@ -80,15 +80,18 @@ export class UserProfileEdit {
     return age >= 0 ? age : null;
   }
 
-  onSelectPhoto(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.photoFile = file;
-      const reader = new FileReader();
-      reader.onload = () => this.photoPreview = reader.result as string;
-      reader.readAsDataURL(file);
-    }
+onSelectPhoto(event: any) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.photoPreview = reader.result as string;
+      this.form.patchValue({ photo: this.photoPreview });
+    };
+    reader.readAsDataURL(file); 
   }
+}
+
 
   removePhoto() {
     this.photoFile = undefined;
@@ -123,15 +126,29 @@ export class UserProfileEdit {
 
     if (this.photoFile) fd.append('photo', this.photoFile);
 
-    if (raw.currentPassword && raw.newPass) {
-      fd.append('currentPassword', raw.currentPass);
+    if (raw.currentPass && raw.newPass) {
+      fd.append('currentPass', raw.currentPass);
       fd.append('newPassword', raw.newPass);
     }
 
-    this.authService.updateUser(this.form.value).subscribe({
+    const payload = {
+      name: this.form.value.name,
+      nick: this.form.value.nick,
+      email: this.form.value.email,
+      phone: this.form.value.phone,
+      birth: this.form.value.birth,
+      age: this.form.value.age,
+      about: this.form.value.about,
+      currentPass: this.form.value.currentPass,
+      newPass: this.form.value.newPass,
+      confirmPass: this.form.value.confirmPass,
+      photo: this.form.value.photo
+    };
+
+    this.authService.updateUser(payload).subscribe({
       next: () => {
         this.msgOk = 'Perfil actualizado con éxito.';
-        setTimeout(() => this.router.navigate(['/profile']), 1200);
+        //setTimeout(() => this.router.navigate(['/profile']), 1200);
       },
       error: (e) => {
         console.error(e);

@@ -36,20 +36,21 @@ export class AuthService {
     return this.http.post<RegisterResponse>(`${this.API_URL}/auth/register`,body)
   }
 
-  updateUser(userData: {
-  name: string;
-  nick: string;
-  email: string;
-  phone: string;
-  birth: Date;
-  age: number;
-  photo?: string;
-  about?: string;
-  currentPass?: string;
-  newPass?: string;
-  confirmPass?: string;
-}){
-  return this.http.put<putResponse>(`${this.API_URL}/me/update`,userData)
-  }
+updateUser(data: putResponse) {  
+  const token = localStorage.getItem('token');
+
+  return this.http.put(
+    `${this.API_URL}/user/me/update`,
+    data,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
+      }
+    }
+  );
+}
+
+
   
 }

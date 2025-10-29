@@ -3,7 +3,6 @@ export interface putResponse {
   nick: string;
   email: string;
   phone: string;
-  password: string;
   birth: Date;
   age: number;
   photo: string;
