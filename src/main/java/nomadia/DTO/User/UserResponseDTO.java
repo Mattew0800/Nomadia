@@ -19,6 +19,7 @@ public class UserResponseDTO {
     private String about;
     private Date birth;
     private Integer age;
+    public String token;
 
     public static UserResponseDTO fromEntity(User user) {
         UserResponseDTO dto = new UserResponseDTO();
@@ -34,5 +35,9 @@ public class UserResponseDTO {
         dto.setAge(user.getAge());
         dto.setRole(user.getRole());
         return dto;
+    }
+    public UserResponseDTO withToken(String token) {
+        this.token = token;
+        return this;
     }
 }

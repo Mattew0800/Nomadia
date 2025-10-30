@@ -51,7 +51,7 @@ public class User {
     private Date birth;
 
     @Column(nullable = true)
-    private int age;
+    private Integer age;
 
     @Column(name = "photo_url",nullable = true)
     private String photoUrl;

@@ -14,7 +14,6 @@ import nomadia.Validator.HalfStep;
 @Setter @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Table(name = "calification")
 public class Calification {
 
