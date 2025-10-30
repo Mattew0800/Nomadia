@@ -1,5 +1,7 @@
 package nomadia.Service;
 
+import jakarta.transaction.Transactional;
+import nomadia.DTO.User.UserUpdateDTO;
 import nomadia.Model.User;
 import nomadia.Repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,18 +38,19 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(Long id, User updatedData) { // ver si se puede poner en el DTO
-        return userRepository.findById(id).map(existingUser -> {
-            if (updatedData.getName() != null) existingUser.setName(updatedData.getName());
-            if (updatedData.getEmail() != null) existingUser.setEmail(updatedData.getEmail());
-            if (updatedData.getRole() != null) existingUser.setRole(updatedData.getRole());
+    @Transactional
+    public User updateUser(Long id, UserUpdateDTO dto, boolean allowRoleChange) {
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-            if (updatedData.getPassword() != null && !updatedData.getPassword().isBlank()) {
-                existingUser.setPassword(passwordEncoder.encode(updatedData.getPassword()));
-            }
-            return userRepository.save(existingUser);
-        });
+        if (dto.getEmail() != null &&
+                userRepository.existsByEmailIgnoreCaseAndIdNot(dto.getEmail().trim().toLowerCase(), id)) {
+            throw new IllegalArgumentException("El email ya está en uso por otro usuario.");
+        }
+        dto.applyToEntity(existing, passwordEncoder, allowRoleChange);
+        return userRepository.save(existing);
     }
+
 
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {

@@ -2,8 +2,12 @@ package nomadia.Config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import nomadia.Model.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 import java.util.List;
 
 @Getter
@@ -15,6 +19,19 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
     private List<? extends GrantedAuthority> authorities;
 
+    public static UserDetailsImpl build(User user) {
+        return new UserDetailsImpl(
+                user.getId(),
+                user.getEmail(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
     @Override
     public String getUsername() {
         return email;

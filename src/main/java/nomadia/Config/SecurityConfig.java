@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +20,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final String jwtSecret;
@@ -50,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/nomadia/auth/logout").hasRole("USER")
                         .requestMatchers("/nomadia/auth/register").permitAll()
                         .requestMatchers("/nomadia/auth/login").permitAll()
-
+                        
                         // Endpoints usuario
                         .requestMatchers("/nomadia/user/me").hasRole("USER")
                         .requestMatchers("/nomadia/user/me/update").hasRole("USER")
@@ -60,6 +62,12 @@ public class SecurityConfig {
                         .requestMatchers("/nomadia/user/get-all").hasRole("ADMIN")
                         .requestMatchers("/nomadia/user/get-user/{id}").hasRole("ADMIN")
                         .requestMatchers("/nomadia/user/delete-user/{id}").hasRole("ADMIN")
+                        .requestMatchers("/nomadia/trip/create").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/my-trips").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/search").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/*/add-users").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/*/users").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/update").hasRole("USER")
 
                         .anyRequest().authenticated()
                 )

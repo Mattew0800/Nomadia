@@ -9,7 +9,9 @@ import nomadia.Enum.TripType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -37,12 +39,11 @@ public class Trip {
     private LocalDate endDate;
 
     @Size(min = 2, max = 100, message = "La descripción debe tener entre 2 y 100 caracteres")
-    @Column(name = "description")
+    @Column(name = "description",nullable = true)
     private String description;
 
-    @NotNull(message = "El estado es obligatorio")
     @Enumerated(EnumType.STRING)
-    @Column(name = "state", nullable = false)
+    @Column(name = "state", nullable = true)
     private State state;
 
     @NotNull(message = "El tipo es obligatorio")
@@ -53,9 +54,8 @@ public class Trip {
     @ManyToMany(mappedBy = "trips")
     private Set<User> users = new HashSet<>();
 
-
     @PositiveOrZero(message = "El presupuesto no puede ser negativo")
-    @Column(name = "budget", precision = 12, scale = 2)
+    @Column(name = "budget", precision = 12, scale = 2,nullable = true)
     private BigDecimal budget;
 
     @ManyToOne(optional = false)
@@ -74,4 +74,7 @@ public class Trip {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         return endDate.isAfter(startDate) && (endDate.isAfter(tomorrow) || endDate.isEqual(tomorrow));
     }
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Activity> activities = new ArrayList<>();
 }

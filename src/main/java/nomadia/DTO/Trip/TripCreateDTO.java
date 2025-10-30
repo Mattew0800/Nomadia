@@ -30,7 +30,6 @@ public class TripCreateDTO {
     @Size(min = 2, max = 100, message = "La descripción debe tener entre 2 y 100 caracteres")
     private String description;
 
-    @NotNull(message = "El estado es obligatorio")
     private State state;
 
     @NotNull(message = "El tipo es obligatorio")

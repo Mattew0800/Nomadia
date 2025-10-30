@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nomadia.Validator.HalfStep;
 
-@Setter
-@Getter
+@Entity
+@Setter @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
