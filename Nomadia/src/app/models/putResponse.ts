@@ -1,13 +1,16 @@
 export interface putResponse {
-  name: string;
-  nick: string;
-  email: string;
-  phone: string;
-  birth: Date;
-  age: number;
-  photo: string;
-  about: string;
-  currentPass: string;
-  newPass: string;
-  confirmPass: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string | null;
+  nick?: string;
+  about?: string;
+  birth?: Date | null;
+  age?: number;
+
+  oldPassword?: string | null;
+  newPassword?: string | null;
+  newNewPassword?: string | null;
+
+  role?: string; // opcional, si tu backend lo usa
 }

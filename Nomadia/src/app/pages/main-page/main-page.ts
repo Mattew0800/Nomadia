@@ -8,7 +8,7 @@ type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.css'],
 })

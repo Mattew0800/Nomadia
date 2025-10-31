@@ -142,9 +142,17 @@
 
                 <!-- User Profile Section -->
                 <div class="user-profile">
-                    <div class="user-image"><img src="default-user-img.jpg" alt="" srcset=""></div>
+                        @if(user?.photoUrl){
+                            <div class="user-image"><img src="{{user?.photoUrl}}" alt="" srcset=""></div>
+                        }@else{
+                            <div class="user-image"><img src="default-user-img.jpg" alt="" srcset=""></div>
+                        }
                     <div class="user-info">
-                        <div class="user-name">Anni</div>
+                        @if(user?.name){ 
+                            <div class="user-name">{{user?.name}}</div>
+                        }@else{
+                            <div class="user-name">Yo</div>
+                        }
                         <div class="user-status">Traveler Pro</div>
                     </div>
 
@@ -176,11 +184,22 @@
                     <section class="profile-main">
                         <div class="profile-user-profile">
                             <div class="user-image large">
-                                <img src="default-user-img.jpg" alt="Foto de Usuario">
+                                @if(user){
+                                    <img src="{{user.photoUrl}}" alt="Foto de Usuario">
+                                }@else{
+                                    <img src="default-user-img.jpg" alt="Foto de Usuario">
+                                }
+                                
                             </div>
                             <div class="user-info large">
-                                <h2 class="user-name">Anna Johnson</h2>
-                                <p class="user-status">Traveler Pro</p>
+                                @if(user){
+                                    <h2 class="user-name">{{user.name}}</h2>
+                                    <p class="user-status">Traveler Pro</p>
+                                }@else{
+                                    <h2 class="user-name">Yo</h2>
+                                    <p class="user-status">Traveler Pro</p>
+                                }
+
                             </div>
                         </div>
                     </section>
@@ -190,38 +209,96 @@
 
                 <form id="userForm">
                     <div class="form-grid">
-                        <div>
-                            <label>Nombre completo</label>
-                            <input type="text" value="Anna Smith" disabled>
-                        </div>
-                        <div>
-                            <label>Apodo</label>
-                            <input type="text" value="Anni" disabled>
-                        </div>
+                        @if(user){
+                            <div>
+                                <label>Nombre completo</label>
+                                <input type="text" value={{user.name}} disabled>
+                            </div>
+                        }@else{
+                            <div>
+                                <label>Nombre completo</label>
+                                <input type="text" value="Sin asignar" disabled>  
+                            </div>
+                        }
 
-                        <div>
-                            <label>Email</label>
-                            <input type="email" value="anna.smith@nomadia.com" disabled>
-                        </div>
-                        <div>
-                            <label>Teléfono</label>
-                            <input type="tel" value="+54 223 456 7890" disabled>
-                        </div>
+                        @if(user){
+                            <div>
+                                <label>Apodo</label>
+                                <input type="text" value="{{user.nick}}" disabled>
+                            </div>
+                        }@else{
+                            <div>
+                                <label>Apodo</label>
+                                <input type="text" value="Sin asignar" disabled>  
+                            </div>
+                        }
 
+                        @if(user){
+                            <div>
+                                <label>Email</label>
+                                <input type="email" value="{{user.email}}" disabled>
+                            </div>
+                        }@else{
+                            <div>
+                                <label>Email</label>
+                                <input type="email" value="Sin asignar" disabled>
+                            </div>
+                        }
+
+                        @if(user){
+                            <div>
+                                <label>Teléfono</label>
+                                <input type="tel" value="+54 223 456 7890" disabled>
+                            </div>
+                        }@else{
+                            <div>
+                                <label>Teléfono</label>
+                                <input type="tel" value="Sin asignar" disabled>
+                            </div>
+                        }
+
+                        @if(user){
                         <div>
                             <label>Fecha de nacimiento</label>
-                            <input type="date" value="1995-06-15" disabled>
+                            <input type="text" value="{{ user.birth | date:'dd/MM/yyyy' }}" disabled>
                         </div>
-                        <div>
-                            <label>Edad</label>
-                            <input type="number" value="29" disabled>
-                        </div>
+                        }@else{
+                            <div>
+                                <label>Fecha de nacimiento</label>
+                                <input type="text" value="Sin asignar" disabled>
+                            </div>
+                        }
 
-                        <div id="form__grid-aboutme">
-                            <label>Sobre mi</label>
-                            <textarea
-                                disabled>Amante de los viajes, la aventura y conocer nuevas culturas. Siempre lista para la próxima escapada con amigos.</textarea>
-                        </div>
+
+                        @if(user){
+                            <div>
+                                <label>Edad</label>
+                                <input type="number" value="{{user.age}}" disabled>
+                            </div>
+                        }@else{
+                            <div>
+                                <label>Edad</label>
+                                <input type="number" value="Sin asignar" disabled>
+                            </div>
+                        }
+
+
+                        @if(user){
+                            <div id="form__grid-aboutme">
+                                <label>Sobre mi</label>
+                                <textarea
+                                    disabled>{{user.about}}</textarea>
+                            </div>
+                        }@else{
+                            <div id="form__grid-aboutme">
+                                <label>Sobre mi</label>
+                                <textarea
+                                    disabled></textarea>
+                            </div>
+                        }
+
+
+
                     </div>
 
                     <button class="edit-btn" id="toggleEdit" routerLink="/editProfile">Editar perfil</button>

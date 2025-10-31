@@ -4,11 +4,16 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../services/auth-service';
+import { UpdateUserResponse } from '../../models/UpdateUserResponse';
+import { UserService } from '../../services/user-service';
+import { putResponse } from '../../models/putResponse';
+import { ErrorResponse } from '../../models/ErrorResponse';
+import { User } from '../../models/User';
 
 @Component({
   selector: 'app-user-profile-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgClass, HttpClientModule],
+  imports: [CommonModule, ReactiveFormsModule, NgClass],
   templateUrl: './user-profile-edit.html',
   styleUrl: './user-profile-edit.css'
 })
@@ -21,8 +26,14 @@ export class UserProfileEdit {
   msgOk?: string;
   msgError?: string;
   loading = true;
+  errorMessages: { [key: string]: string } = {};
+  user?: User; 
+  DEFAULT_PHOTO = 'default-user-img.jpg';
 
-  constructor(private http: HttpClient, private router: Router, public authService: AuthService) {
+
+
+
+  constructor(private http: HttpClient, private router: Router, public authService: AuthService, public userService: UserService) {
 
     this.form = new FormGroup({
       name: new FormControl('', [
@@ -35,7 +46,7 @@ export class UserProfileEdit {
         Validators.email
       ]),
       phone: new FormControl(''),
-      birth: new FormControl(''),
+      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/)]),
       age: new FormControl(''),
       about: new FormControl(''),
 
@@ -46,11 +57,29 @@ export class UserProfileEdit {
   }
 
   ngOnInit(): void {
-    // Cargar datos del perfil actual
-    this.http.get<any>('/api/users/me').subscribe({
+    this.userService.getCurrentUser().subscribe({
       next: (user) => {
-        this.form.patchValue(user);
-        this.photoPreview = user.photoUrl;
+        this.user = user; 
+
+        // Convertir birth a YYYY-MM-DD si existe
+        const birthStr = user.birth
+          ? new Date(user.birth).toISOString().substring(0, 10)
+          : '';
+
+        // Patch del formulario con datos del usuario
+        this.form.patchValue({
+          name: user.name || '',
+          nick: user.nick || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          about: user.about || '',
+          birth: birthStr,
+          age: birthStr ? this.calcAge(birthStr) : null
+        });
+
+        // Cargar la foto de perfil actual
+        this.photoPreview = user.photoUrl || '';
+
         this.loading = false;
       },
       error: () => {
@@ -59,11 +88,18 @@ export class UserProfileEdit {
       }
     });
 
-    // Calcular edad al cambiar birth
-    this.form.get('birth')?.valueChanges.subscribe(birth => {
-      this.form.patchValue({ age: this.calcAge(birth) }, { emitEvent: false });
+    // Suscribirse a cambios de la fecha de nacimiento para recalcular la edad
+    this.form.get('birth')?.valueChanges.subscribe((birth: string) => {
+      this.form.patchValue(
+        { age: this.calcAge(birth) },
+        { emitEvent: false } // evita loop de eventos
+      );
     });
   }
+
+
+
+
 
   get f() {
     return this.form.controls;
@@ -93,80 +129,90 @@ onSelectPhoto(event: any) {
 }
 
 
-  removePhoto() {
-    this.photoFile = undefined;
-    this.photoPreview = undefined;
-  }
+removePhoto() {
+  this.photoFile = undefined;
+  this.photoPreview = this.DEFAULT_PHOTO;
+  this.form.patchValue({ photo: this.photoPreview });
+}
+
 
   passwordsMatch(): boolean {
-    const newPass = this.form.get('newPassword')?.value;
-    const confirm = this.form.get('confirmPassword')?.value;
+    const newPass = this.form.get('newPass')?.value;
+    const confirm = this.form.get('confirmPass')?.value;
     return !newPass || !confirm || newPass === confirm;
   }
 
   save() {
-    this.submitted = true;
-    this.msgError = undefined;
-    this.msgOk = undefined;
+  this.submitted = true;
+  this.msgError = undefined;
+  this.msgOk = undefined;
 
-    if (!this.form.valid || !this.passwordsMatch()) {
-      console.log('Formulario inválido');
-      return;
-    }
-
-    const raw = this.form.getRawValue();
-    const fd = new FormData();
-
-    fd.append('name', raw.name);
-    if (raw.nick) fd.append('nick', raw.nick);
-    if (raw.phone) fd.append('phone', raw.phone);
-    if (raw.birth) fd.append('birth', raw.birth);
-    if (raw.age) fd.append('age', raw.age.toString());
-    if (raw.about) fd.append('about', raw.about);
-
-    if (this.photoFile) fd.append('photo', this.photoFile);
-
-    if (raw.currentPass && raw.newPass) {
-      fd.append('currentPass', raw.currentPass);
-      fd.append('newPassword', raw.newPass);
-    }
-
-    const payload = {
-      name: this.form.value.name,
-      nick: this.form.value.nick,
-      email: this.form.value.email,
-      phone: this.form.value.phone,
-      birth: this.form.value.birth,
-      age: this.form.value.age,
-      about: this.form.value.about,
-      currentPass: this.form.value.currentPass,
-      newPass: this.form.value.newPass,
-      confirmPass: this.form.value.confirmPass,
-      photo: this.form.value.photo
-    };
-
-    this.authService.updateUser(payload).subscribe({
-      next: () => {
-        this.msgOk = 'Perfil actualizado con éxito.';
-        //setTimeout(() => this.router.navigate(['/profile']), 1200);
-      },
-      error: (e) => {
-        console.error(e);
-        this.msgError = e.status === 400 ? 'Datos inválidos.' :
-                        e.status === 401 ? 'Sesión expirada.' :
-                        'Error al actualizar el perfil.';
-      }
-    });
+  if (!this.form.valid || !this.passwordsMatch()) {
+    console.log('Formulario inválido');
+    return;
   }
+
+  // Convertimos birth a Date
+  const birthDate = this.form.value.birth ? new Date(this.form.value.birth) : null;
+
+  // Armar payload según UserUpdateDTO
+const payload: putResponse = {
+  name: this.form.value.name,
+  nick: this.form.value.nick,
+  email: this.form.value.email,
+  phone: this.form.value.phone,
+  about: this.form.value.about,
+  photoUrl: this.photoPreview || null,
+  birth: birthDate,
+  age: this.form.value.age,
+  oldPassword: this.form.value.currentPass || null,
+  newPassword: this.form.value.newPass || null,
+  newNewPassword: this.form.value.confirmPass || null
+};
+
+
+  console.log('Payload que se enviará al backend:', payload);
+
+  this.userService.updateUser(payload).subscribe({  
+      next: (res: UpdateUserResponse) => {
+        this.msgOk = 'Perfil actualizado con éxito.';
+
+        this.errorMessages = {};
+
+
+        if (res.newToken) {
+          this.authService.setToken(res.newToken); 
+        }
+      },
+      error: (err) => {
+        const backendError = err.error as ErrorResponse;
+
+        if (err.newToken) {
+          this.authService.setToken(err.newToken); 
+        }
+
+        if (backendError?.errors) {          
+          this.errorMessages = backendError.errors;
+        } else {
+          this.msgError =
+            backendError?.message ||
+            (err.status === 401
+              ? 'Sesión expirada.'
+              : 'Error al actualizar el perfil.');
+        }
+      }
+
+    });
+  } 
 
   cancel() {
     this.router.navigate(['/profile']);
   }
 
-  logout() {
-    localStorage.removeItem('token');
-    this.authService.users = [];
+  logout() {  
+    this.authService.removeToken();
     this.router.navigate(['/login']);
   }
+
 
 }
