@@ -1,6 +1,7 @@
 import { Component, HostListener, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router,RouterLink } from '@angular/router';
+import { Test } from '../test/test';
 
 type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'purple'|'blue' };
 
@@ -8,7 +9,7 @@ type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, Test],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.css'],
 })
@@ -91,47 +92,5 @@ export class MainPage {
   }
 
 
-    // --- DROPDOWN PERFIL ---
-  showMenu = false;
-
-  @ViewChild('userMenu', { static: false }) menuRef!: ElementRef<HTMLElement>;
-  @ViewChild('userMenuBtn', { static: false }) btnRef!: ElementRef<HTMLElement>;
-
-  toggleMenu(event: MouseEvent) {
-    event.stopPropagation();
-    this.showMenu = !this.showMenu;
-  }
-
-  onSelect(action: string) {
-    this.showMenu = false;
-    switch (action) {
-    case 'profile':
-      this.router.navigate(['/profile']);
-      break;
-    case 'test':
-      this.router.navigate(['/test']); // si tenés esta ruta
-      break;
-    case 'cerrar':
-      this.router.navigate(['/login']);
-      break;
-    default:
-      console.warn('Acción desconocida:', action);
-  }
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    const target = event.target as Node;
-    const clickedInsideMenu = this.menuRef?.nativeElement.contains(target);
-    const clickedButton = this.btnRef?.nativeElement.contains(target);
-    if (!clickedInsideMenu && !clickedButton) {
-      this.showMenu = false;
-    }
-  }
-
-  @HostListener('document:keydown.escape')
-  onEsc() {
-    this.showMenu = false;
-  }
 
 }

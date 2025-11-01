@@ -1,32 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Titan+One&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Titan+One&display=swap');
 
 :root {
-  /* Colores */
-  --dark-primary: #141627;
-  --dark-secondary: #1c1f37;
-  --text-muted: #5f647e;
-  --text-light: #d7dbee;
-  --accent-lime: #d1f366;
-  --accent-orange: #ec502c;
-  --accent-red: #eb3f3a; 
-
-  /* Tipografías */
-  --font-sans: "Poppins", "Helvetica Neue", sans-serif;
-  --font-display: "Titan One", sans-serif;
-}
-:host{
-    --bg-outer:#0B0F1A;
-  --bg:#0F1524;
-  --panel:#151B2C;
-  --panel-2:#1A2134;
-  --text:#E8EDF6;
-  --muted:#8B93A7;
-  --brand:#C9FF6A;
-  --brand-dark:#79C956;
-  --accent:#FF6A00;
-  --yellow:#FFC043;
-  --purple:#8B5CF6;
-  --blue:#4DB5FF;
+  /* 🎨 Colores */
   --dark-primary: #141627;
   --dark-secondary: #1c1f37;
   --text-muted: #5f647e;
@@ -35,22 +10,9 @@
   --accent-orange: #ec502c;
   --accent-red: #eb3f3a;
 
-  --shadow:0 10px 24px rgba(0,0,0,.35);
-
-  /*  Tipografías */
-  --font-sans: "Poppins", "Helvetica Neue", sans-serif;
-  --font-display: "Titan One", sans-serif;
-
-  display:block;
-  min-height:100dvh;
-  color:var(--text);
-  background:
-    radial-gradient(1200px 600px at -200px -200px,#131B2E 0%,transparent 60%),
-    radial-gradient(800px 600px at 120% -100px,#10172A 0%,transparent 60%),
-    var(--bg-outer);
-
-  --page-pad-x: 0;
-  --right-col-w: 23rem; 
+  /* 🧩 Tipografías */
+  --font-sans: 'Poppins', 'Helvetica Neue', sans-serif;
+  --font-display: 'Titan One', sans-serif;
 }
 
 * {
@@ -62,7 +24,7 @@
 body {
   background-color: #141627;
   color: #d7dbee;
-  font-family: "Poppins", "Helvetica Neue", sans-serif;
+  font-family: 'Poppins', 'Helvetica Neue', sans-serif;
 }
 
 html,
@@ -97,11 +59,7 @@ body {
   position: absolute;
   width: 200px;
   height: 200px;
-  background: radial-gradient(
-    circle,
-    rgba(203, 70, 40, 0.3) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, rgba(203, 70, 40, 0.3) 0%, transparent 70%);
   border-radius: 50%;
   top: 150px;
   left: -50px;
@@ -112,11 +70,7 @@ body {
   position: absolute;
   width: 200px;
   height: 200px;
-  background: radial-gradient(
-    circle,
-    rgba(144, 171, 57, 0.3) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, rgba(144, 171, 57, 0.3) 0%, transparent 70%);
   border-radius: 50%;
   top: 50px;
   left: -80px;
@@ -193,19 +147,22 @@ body {
 }
 
 .logout-item:hover {
-  background-color: #FF4D4D;
+  background-color: #ff4d4d;
   color: #fff;
 }
 
 .logout-item:hover svg path {
-    fill: #fff; /* cambia el color del path del svg */
+  fill: #fff; /* cambia el color del path del svg */
 }
 
 .nav-item:hover .hole,
 .nav-item:focus .hole {
-    fill: #303730;
+  fill: #303730;
 }
 
+#form__grid-aboutme {
+  grid-column: 1/3;
+}
 
 /* ===== MAIN CONTENT ===== */
 .main-content {
@@ -221,7 +178,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem var(--page-pad-x);
+  padding: 1rem 3rem;
   background-color: #141627;
   border-bottom: 1px solid rgba(95, 100, 126, 0.1);
 }
@@ -243,17 +200,16 @@ body {
   border: none;
   color: #5f647e;
   font-size: 1rem;
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: 'Helvetica Neue', sans-serif;
   outline: none;
-  padding: 0.7rem 0.5rem;  
-  line-height: 1.4;         
+  padding: 0.7rem 0.5rem;
+  line-height: 1.4;
 }
 
 .search-input:focus {
   color: #a0a3b3;
   transition: color 0.3s ease;
 }
-
 
 .filters-btn {
   display: flex;
@@ -266,29 +222,29 @@ body {
   color: #777;
   font-size: 14px;
   cursor: pointer;
-  font-family: "Noto Sans", sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   transition: all 0.3s ease;
   white-space: nowrap;
 }
 
 .filters-btn:hover {
-    color: #a3e635;  
+  color: #a3e635;
 }
 
-.filters-btn svg path{
+.filters-btn svg path {
   transition: all 0.3s ease;
 }
 
 .filters-btn:hover svg path {
   fill: #a3e635;
-  
 }
 
 /* User Profile Header */
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
+
 }
 
 .notification-icon {
@@ -299,6 +255,8 @@ body {
   align-items: center;
   border-radius: 50%; /* hace que la sombra siga la forma circular */
   transition: all 0.3s ease;
+  margin-right: 2.5rem;
+  
 }
 
 .notification-icon svg {
@@ -309,10 +267,9 @@ body {
 
 /* efecto hover combinado */
 .notification-icon:hover {
-  transform: scale(1.05); 
-  filter: drop-shadow(0 0 10px #EC502C); 
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 10px #ec502c);
 }
-
 
 .user-info {
   display: flex;
@@ -324,18 +281,39 @@ body {
   border-radius: 2rem;
 }
 
+
+.user-profile .user-image {
+  width: 3rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-profile .user-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+
+
 .user-name {
   font-size: 24px;
   font-weight: 700;
   color: #d7dbee;
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: 'Helvetica Neue', sans-serif;
 }
 
 .user-status {
   font-size: 16px;
   font-weight: 400;
   color: #5f647e;
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: 'Helvetica Neue', sans-serif;
 }
 
 .dropdown-btn {
@@ -346,11 +324,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  
 }
 
 .dropdown-btn svg {
   width: 24px;
   height: 24px;
+  transform: translateX(-1rem);
 }
 
 /* Profile Section */
@@ -383,7 +363,7 @@ body {
   font-size: 64px;
   font-weight: 700;
   color: #d7dbee;
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: 'Helvetica Neue', sans-serif;
   margin: 0;
   line-height: 1.2;
 }
@@ -392,82 +372,59 @@ body {
   font-size: 32px;
   font-weight: 400;
   color: #5f647e;
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: 'Helvetica Neue', sans-serif;
   margin: 0;
 }
 
-/* ===== GRID PRINCIPAL =====
-   Hero a la izquierda; a la derecha una COLUMNA con calendario arriba y agenda abajo */
-.grid{
-  display:grid;
-  grid-template-columns: 1fr 22rem;   /* izquierda grande / derecha angosta */
-  grid-auto-rows: min-content;        /* las filas se ajustan al contenido */
-  gap:22px;
-  align-items:start;
-  padding: 1rem var(--page-pad-x);
-  margin-right: 1rem;
-  grid-template-columns: 1fr var(--right-col-w);
+
+.dropdown { position: relative; }
+
+.dropdown-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Si tenés un contenedor .right-col, lo apila verticalmente */
-.right-col{
-  grid-column:2;
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-  align-items:stretch;
+.dropdown-btn svg {
+  width: 24px;
+  height: 24px;
 }
 
-.calendar{ grid-column:2; }
-.agenda-card{ grid-column:2; }
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    display: none;
+    min-width: 200px;
+    padding: 8px 20px;
+    border-radius: 12px;
+    background: var(--dark-secondary, #1c1f37);
+    box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.05) inset;
+    z-index: 1000;
+    list-style: none;
+  }
 
-/* El hero ocupa la columna izquierda y “abarca” ambas filas de la derecha */
-.hero{
-  grid-column:1;
-  grid-row: 1 / span 2;  /* se estira verticalmente junto a la columna derecha */
-  background:#151B2C; border-radius:20px; border:1px solid rgba(255,255,255,.06);
-  box-shadow:var(--shadow); overflow:hidden; height:330px;
-}
-.hero img{ width:100%; height:100%; object-fit:cover; display:block;}
+  .dropdown-menu.show { 
+    display: block; 
+  }
+  .dropdown-item {
+    display: block;
+    padding: 10px 14px;
+    color: var(--text-light, #d7dbee);
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 2px;
+  }
 
-/* ===== TARJETAS ===== */
-.card{
-  background:#1A2134; border-radius:20px; border:1px solid rgba(255,255,255,.07);
-  box-shadow:var(--shadow); padding:18px;
-}
-
-/* ===== CALENDARIO ===== */
-.calendar .cal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-.calendar .month{ color:#C7D2F0; letter-spacing:.8px; font-size:12px; }
-.calendar .more{ width:34px; height:34px; border-radius:10px; border:none; background:#0F1628; color:#B7C2DF; cursor:pointer; }
-.weekdays, .days{ display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; }
-.weekdays span{ color:#7F8AAF; font-size:11px; text-align:center; padding:6px 0; }
-.day, .days span{
-  display:grid; place-items:center; height:36px; border-radius:10px; font-size:13px;
-  background:#0F1628; color:#DDE6FF; border:1px solid rgba(255,255,255,.05); position:relative;
-}
-.day{ appearance:none; border:1px solid rgba(255,255,255,.05); cursor:pointer; }
-.days span.muted{ color:#6F7695; opacity:.6; background:#0F1628; }
-.has-dot::after{ content:""; width:6px; height:6px; border-radius:50%; background:#FF8B3D; position:absolute; bottom:6px; }
-.is-today{ outline:2px solid #FF7A2D; color:#FFEFE3; font-weight:600; }
-.selected-day{ background:#1e2a44 !important; color:#fff !important; outline:2px solid var(--accent); font-weight:600; transform:scale(1.05); transition:.2s; }
-
-/* ===== AGENDA (tarjeta aparte debajo del calendario) ===== */
-.agenda-card .date-title{ margin-top:6px; color:#C7D2F0; letter-spacing:.3px; }
-.agenda{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:12px; }
-.event{
-  display:grid; grid-template-columns:56px 1fr; gap:12px;
-  background:#0F1628; border:1px solid rgba(255,255,255,.06);
-  border-radius:14px; padding:10px; position:relative; cursor:pointer;
-}
-.event::before{ content:""; position:absolute; left:-2px; top:10px; bottom:10px; width:4px; border-radius:3px; background:#fff3; }
-.event.yellow::before{ background:var(--yellow); }
-.event.purple::before{ background:var(--purple); }
-.event.blue::before{ background:var(--blue); }
-.event .time{ color:#9AA6C3; font-weight:600; align-self:center; }
-.event .details .label{ color:#A6B3D6; font-size:12px; }
-.event .details .desc{ color:#E8EEFF; }
-.selected-event{ border:1px solid var(--accent) !important; background:linear-gradient(90deg,#1e2a44 0%, #111827 100%); transform:scale(1.02); transition:.2s; }
+  .dropdown-item:hover { 
+    background: rgba(209,243,102,.12); 
+    color: var(--accent-lime, #d1f366); 
+    border-radius: 12px;
+  }
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1024px) {
@@ -676,12 +633,12 @@ body {
   display: flex;
   align-items: center;
   gap: 2rem;
-  width: 100%;               
+  width: 100%;
   box-sizing: border-box;
 }
 
 .profile-user-profile .user-image.large img {
-  width: 8rem; /* más grande que el header */
+  width: 8rem; 
   height: 8rem;
   border-radius: 50%;
 }
@@ -718,7 +675,6 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
-
 .profile-header {
   display: flex;
   justify-content: space-between;
@@ -727,7 +683,6 @@ body {
   padding-bottom: 0.8rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 
 .profile-header h2 {
   margin: 0;
@@ -746,26 +701,20 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(190, 242, 100, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(190, 242, 100, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   margin-bottom: -0.5rem;
   position: relative;
   overflow: hidden;
 }
 
 .edit-btn::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   transition: left 0.6s ease;
 }
 
@@ -775,8 +724,7 @@ body {
 
 .edit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 30px rgba(190, 242, 100, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 30px rgba(190, 242, 100, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .edit-btn:active {
@@ -786,17 +734,15 @@ body {
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem 2rem; 
+  gap: 1.5rem 2rem;
   margin-bottom: -2rem;
 }
-
 
 label {
   font-weight: 500;
   color: #9aa0b5;
   letter-spacing: 0.3px;
 }
-
 
 input,
 textarea {
@@ -806,7 +752,6 @@ textarea {
   border-radius: 8px;
   color: #e2e2e2;
   font-size: 0.95rem;
-  
 }
 
 input[disabled],
@@ -826,6 +771,3 @@ textarea {
 .hidden {
   display: none;
 }
-
-
-

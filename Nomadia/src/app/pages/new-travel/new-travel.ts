@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators, AbstractContro
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { HttpClient } from '@angular/common/http';
+import {Test} from '../test/test';
 
 // --- DTO TEMPORAL (Coincide con nomadia.DTO.Trip.TripCreateDTO) ---
 interface TempTripCreateDTO {
@@ -31,7 +32,7 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-new-travel',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink], 
+  imports: [CommonModule, ReactiveFormsModule, Test],
   templateUrl: './new-travel.html',
   styleUrls: ['./new-travel.css'],
 })
@@ -53,13 +54,13 @@ export class NewTravel {
   loading = false;
 
   tripTypes: string[] = ['CLASICO', 'AVENTURA', 'RELAX', 'TRABAJO'];
-  
+
   // Se ha quitado todo el código de calendario/agenda para centrarse en la funcionalidad del viaje
   // ... si necesitas el código de agenda, insértalo aquí.
 
   constructor(
-    public authService: AuthService, 
-    private router: Router, 
+    public authService: AuthService,
+    private router: Router,
     private http: HttpClient
   ) {
     // Si tenías lógica de calendario aquí, recupérala si es necesaria
@@ -88,7 +89,7 @@ export class NewTravel {
 
     // 1. Obtener valores del formulario
     const formValues = this.form.getRawValue();
-    
+
     // 2. Mapear y preparar el payload para el backend
     // Excluimos 'destino' y creamos el payload con los nombres de campos del DTO de Java
     const tripPayload: TempTripCreateDTO = {
@@ -97,13 +98,13 @@ export class NewTravel {
         endDate: formValues.endDate,
         description: formValues.description,
         type: formValues.type,
-        // budget se omite aquí, por lo que será 'undefined' en el objeto, 
+        // budget se omite aquí, por lo que será 'undefined' en el objeto,
         // y Spring Boot lo interpretará como null o usará el valor por defecto
         // (que se ignora si no se envía).
     };
-    
+
     // 3. Simular la llamada HTTP
-    const apiUrl = 'http://localhost:8080/nomadia/trip/create'; 
+    const apiUrl = 'http://localhost:8080/nomadia/trip/create';
     const token = this.authService.getToken();
 
     if (!token) {
@@ -114,7 +115,7 @@ export class NewTravel {
 
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` 
+        'Authorization': `Bearer ${token}`
     };
 
     this.http.post<any>(apiUrl, tripPayload, { headers })
@@ -123,7 +124,7 @@ export class NewTravel {
                 this.loading = false;
                 console.log('Viaje creado:', response);
                 this.msgOk = 'Viaje creado con éxito.';
-                this.form.reset({ type: 'CLASICO' }); 
+                this.form.reset({ type: 'CLASICO' });
                 this.submitted = false;
             },
             error: (err) => {

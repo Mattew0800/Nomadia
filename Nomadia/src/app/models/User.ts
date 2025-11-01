@@ -6,8 +6,9 @@ export class User{
     nick?: string
     birth?: Date
     age?: number
-    photo?: string
+    photoUrl?: string
     phone?: string 
+    about?: string
 
     constructor(    
     id: string,
@@ -17,8 +18,9 @@ export class User{
     nick: string,
     birth: Date,
     age: number,
-    photo: string,
-    phone: string
+    photoUrl: string,
+    phone: string,
+    about: string
 )
     {
         this.id=id;
@@ -28,8 +30,9 @@ export class User{
         this.nick=nick;
         this.birth=birth;
         this.age=age;
-        this.photo=photo;
+        this.photoUrl=photoUrl;
         this.phone=phone;
+        this.about = about;
     }
 
 
