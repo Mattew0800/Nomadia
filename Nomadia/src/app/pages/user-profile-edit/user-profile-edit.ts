@@ -9,11 +9,12 @@ import { UserService } from '../../services/user-service';
 import { putResponse } from '../../models/putResponse';
 import { ErrorResponse } from '../../models/ErrorResponse';
 import { User } from '../../models/User';
+import { Test } from '../test/test';
 
 @Component({
   selector: 'app-user-profile-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgClass],
+  imports: [CommonModule, ReactiveFormsModule, NgClass, Test],
   templateUrl: './user-profile-edit.html',
   styleUrl: './user-profile-edit.css'
 })

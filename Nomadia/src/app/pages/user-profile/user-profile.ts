@@ -4,10 +4,11 @@ import { AuthService } from '../../services/auth-service';
 import { User } from '../../models/User';
 import { UserService } from '../../services/user-service';
 import { DatePipe } from '@angular/common';
+import { Test } from '../test/test';
 
 @Component({
   selector: 'app-user-profile',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, Test],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
 })
