@@ -9,8 +9,7 @@
 </head>
 
 <body>
-
-    <div class="app-container">
+<div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar">
             <!-- Background gradient effect -->
@@ -69,7 +68,7 @@
                             d="M9.34903 8.04647H14.9304C15.1797 8.04647 15.4101 7.91348 15.5346 7.69763C15.6592 7.48179 15.6592 7.2158 15.5346 6.99996C15.4101 6.78412 15.1797 6.65112 14.9304 6.65112H9.34903C9.09971 6.65112 8.86939 6.78412 8.74481 6.99996C8.62022 7.2158 8.62022 7.48179 8.74481 7.69763C8.86939 7.91348 9.09971 8.04647 9.34903 8.04647Z"
                             fill="#5F647E" />
                     </svg>
-                    <span><a routerLink="newTravel"></a>cargar viaje</span>
+                    <span>Favoritos</span>
                 </div>
 
                 <div class="nav-item">
@@ -110,7 +109,7 @@
             
 
                 <!-- Logout -->
-                <div class="logout-item">
+                <div class="logout-item" (click)="logout()">
                     <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path
                             d="M2 5.00004C2 3.34316 3.34316 2 5.00004 2H12C13.6569 2 15 3.34316 15 5.00004V7.50002C15 8.05233 14.5524 8.49998 14.0001 8.49998C13.4478 8.49998 13 8.05233 13 7.50002V5.00004C13 4.44773 12.5523 3.99991 12 3.99991H5.00004C4.44773 3.99991 3.99991 4.44773 3.99991 5.00004V19C3.99991 19.5523 4.44773 20.0001 5.00004 20.0001H12C12.5523 20.0001 13 19.5523 13 19V16.5C13 15.9477 13.4478 15.5 14.0001 15.5C14.5524 15.5 15 15.9477 15 16.5V19C15 20.657 13.6569 22 12 22H5.00004C3.34316 22 2 20.657 2 19V5.00004Z"
@@ -168,10 +167,59 @@
                     </svg>
                 </div>
 
-            </header>          
+            </header>
+        <div class="profile-card">
+            <div class="profile-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <section class="profile-main">
+                    <div class="profile-user-profile" style="gap:1.5rem; align-items:center;">
+                        <div class="user-info large" style="gap:0.25rem;">
+                            <h2 class="user-name" style="font-size: 2.5rem; font-weight: 700; color: #d7dbee;">Crear Nuevo Viaje</h2>
+                            <p class="user-status" style="font-size: 1.25rem; color: #5f647e;">Ingresá los detalles de tu próxima aventura</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+                <div class="form-grid">
+                    
+                    <div>
+                        <label for="nombreViaje">Nombre de Viaje</label>
+                        <input id="nombreViaje" type="text" formControlName="name" placeholder="Nombre del viaje" />
+                    </div>
 
-        </main>
-    </div>
+                    <div>
+                        <label for="tipoDeViaje">Tipo de viaje</label>
+                        <input id="tipoDeViaje" type="text" formControlName="type" />
+                    </div>
+                    
+                    <div>
+                        <label for="desde">Desde</label>
+                        <input id="desde" type="date" formControlName="startDate" />
+                    </div>
+
+                    <div>
+                        <label for="hasta">Hasta</label>
+                        <input id="hasta" type="date" formControlName="endDate" />
+                    </div>
+                    
+                    <div id="form__grid-aboutme"> 
+                        <label for="about">Descripción de viaje</label>
+                        <textarea id="about" formControlName="description" rows="4" placeholder="Contanos detalles del viaje..."></textarea>
+                    </div>
+
+                    <div style="grid-column: 1/3; margin-top:1rem;">
+                        <button type="submit" class="edit-btn" style="width: auto;">Cargar Viaje</button>
+                    </div>
+
+                </div>
+            </form>
+
+            <div *ngIf="submitted && msgError" class="alert error">{{ msgError }}</div>
+            <div *ngIf="submitted && msgOk" class="alert ok">{{ msgOk }}</div>
+
+        </div> </main>
+</div>
 </body>
 
 </html>

@@ -18,6 +18,10 @@ export class AuthService {
     this.users = [];
   }
 
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
   getUser(id: string){
     return this.http.get<User>(`${this.API_URL}/${id}`);
   }  
