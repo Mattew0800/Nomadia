@@ -2,11 +2,16 @@ package nomadia.Enum;
 
 public enum TripType {
     TURISMO,
-    NEGOCIOS,
+    AVENTURA,
+    GASTRONOMICO,
     EDUCATIVO,
-    REPENTINO,
     FAMILIAR,
-    GRUPAL,
+    RELAX,
     ROMANTICO,
-    CULTURAL
+    CULTURAL,
+    PLAYA,
+    DEPORTIVO,
+    VOLUNTARIADO,
+    FIESTA,
+    PROFESIONAL
 }
