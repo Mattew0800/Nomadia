@@ -53,7 +53,8 @@ public class User {
     @Column(nullable = true)
     private Integer age;
 
-    @Column(name = "photo_url",nullable = true)
+    @Lob
+    @Column(name = "photo_url", columnDefinition = "LONGTEXT", nullable = true)
     private String photoUrl;
 
     @Column(nullable = true)

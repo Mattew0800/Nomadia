@@ -24,7 +24,6 @@ public class UserUpdateDTO {
             message = "El teléfono debe contener solo números, espacios, guiones y opcionalmente un '+' inicial")
     private String phone;
 
-    @Size(max = 255, message = "La URL de la foto no debe superar 255 caracteres")
     private String photoUrl;
 
     @Size(min = 3, max = 10, message = "El apodo debe tener entre 3 y 10 caracteres")
