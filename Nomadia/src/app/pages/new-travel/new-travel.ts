@@ -5,20 +5,10 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { HttpClient } from '@angular/common/http';
 import {Test} from '../test/test';
+import { TripCreate } from '../../models/TripCreate';
 
-// --- DTO TEMPORAL (Coincide con nomadia.DTO.Trip.TripCreateDTO) ---
-interface TempTripCreateDTO {
-    name: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-    type: string;
-    budget?: number; // Sigue en el DTO, pero se enviará como undefined/null desde aquí
-    // Nota: El campo 'destino' de tu formulario NO se mapea al DTO de backend
-}
-// -------------------------------------------------------------------
 
-type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'purple'|'blue' };
+
 
 function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
   const desde = group.get('startDate')?.value as string | null; // Corregido el nombre del control
@@ -55,22 +45,19 @@ export class NewTravel {
 
   tripTypes: string[] = ['CLASICO', 'AVENTURA', 'RELAX', 'TRABAJO'];
 
-  // Se ha quitado todo el código de calendario/agenda para centrarse en la funcionalidad del viaje
-  // ... si necesitas el código de agenda, insértalo aquí.
+
 
   constructor(
     public authService: AuthService,
     private router: Router,
     private http: HttpClient
   ) {
-    // Si tenías lógica de calendario aquí, recupérala si es necesaria
+   
   }
 
-  // Getter para acceder a los controles del formulario fácilmente en el HTML
   get f() { return this.form.controls; }
 
 
-  // --- FUNCIÓN SAVE AJUSTADA SIN 'budget' ---
   save() {
     this.submitted = true;
     this.msgError = undefined;
@@ -87,23 +74,17 @@ export class NewTravel {
       return;
     }
 
-    // 1. Obtener valores del formulario
     const formValues = this.form.getRawValue();
 
-    // 2. Mapear y preparar el payload para el backend
-    // Excluimos 'destino' y creamos el payload con los nombres de campos del DTO de Java
-    const tripPayload: TempTripCreateDTO = {
+    const tripPayload: TripCreate = {
         name: formValues.name,
         startDate: formValues.startDate,
         endDate: formValues.endDate,
         description: formValues.description,
         type: formValues.type,
-        // budget se omite aquí, por lo que será 'undefined' en el objeto,
-        // y Spring Boot lo interpretará como null o usará el valor por defecto
-        // (que se ignora si no se envía).
+
     };
 
-    // 3. Simular la llamada HTTP
     const apiUrl = 'http://localhost:8080/nomadia/trip/create';
     const token = this.authService.getToken();
 
@@ -126,6 +107,7 @@ export class NewTravel {
                 this.msgOk = 'Viaje creado con éxito.';
                 this.form.reset({ type: 'CLASICO' });
                 this.submitted = false;
+                this.router.navigate(['tripList']);
             },
             error: (err) => {
                 this.loading = false;

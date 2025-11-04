@@ -10,17 +10,19 @@ import { PublicGuard } from './guards/public.guard';
 import { MainPage } from './pages/main-page/main-page';
 import { UserProfileEdit } from './pages/user-profile-edit/user-profile-edit';
 import { NewTravel } from './pages/new-travel/new-travel';
+import { TripList } from './pages/trip-list/trip-list';
 
 export const routes: Routes = [
-    {path: 'landing', component: LandingPage},
+    {path: 'landing', component: LandingPage, canActivate: [PublicGuard]},
     {path: 'login', component: LoginPage, canActivate: [PublicGuard]},
     {path: 'register', component: RegisterPage, canActivate: [PublicGuard]},
-    {path: 'mainPage', component:MainPage},
-    {path: 'error', component: ErrorPage},
-    {path: 'profile', component: UserProfile},
-    {path: 'editProfile', component: UserProfileEdit},
-    {path: 'newTravel', component: NewTravel},
+    {path: 'mainPage', component:MainPage, canActivate: [AuthGuard]},
+    {path: 'profile', component: UserProfile, canActivate: [AuthGuard]},
+    {path: 'editProfile', component: UserProfileEdit, canActivate: [AuthGuard]},
+    {path: 'newTrip', component: NewTravel, canActivate: [AuthGuard]},
+    {path: 'tripList', component: TripList, canActivate: [AuthGuard]},
     {path: 'test', component: Test},
-    {path: '', redirectTo: 'MainPage', pathMatch: 'full'},
+    {path: 'error', component: ErrorPage},
+    {path: '', redirectTo: 'mainPage', pathMatch: 'full'},
     {path: '**', redirectTo: 'error' },
 ];

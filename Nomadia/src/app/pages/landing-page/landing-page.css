@@ -172,10 +172,6 @@
 .image-hexagon:nth-child(3) { z-index: 1; }
 
 
-
-
-
-
 @keyframes floatHex {
   0%, 100% { transform: translate(-50%, -50%) translateY(0); }
   50% { transform: translate(-50%, -50%) translateY(-0.8rem); }
