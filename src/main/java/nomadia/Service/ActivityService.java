@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.swing.text.html.Option;
 import java.util.List;
 
 @Service
@@ -53,14 +55,18 @@ public class ActivityService{
                 .stream().map(ActivityResponseDTO::fromEntity).toList();
     }
 
-
     @Transactional(readOnly = true)
     public ActivityResponseDTO get(Long tripId, Long activityId) {
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
         return ActivityResponseDTO.fromEntity(a);
     }
-
+    @Transactional(readOnly = true)
+    public ActivityResponseDTO findById(Long activityId) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada"));
+        return ActivityResponseDTO.fromEntity(activity);
+    }
     public ActivityResponseDTO update(Long tripId, Long activityId, ActivityUpdateRequestDTO dto) {
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
@@ -79,7 +85,7 @@ public class ActivityService{
             a.setCost(dto.getCost());
         }
 
-        return ActivityResponseDTO.fromEntity(a); // se persiste por @Transactional
+        return ActivityResponseDTO.fromEntity(a);
     }
 
     public void delete(Long tripId, Long activityId) {

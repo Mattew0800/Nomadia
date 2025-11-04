@@ -36,13 +36,16 @@ public class AuthService {
     }
 
     public String generateToken(User user) {
-        return Jwts.builder()
+        var tokenBuilder = Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("name", user.getName())
                 .claim("role", user.getRole().name())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
-                .compact();
+                .signWith(SignatureAlgorithm.HS512, jwtSecret);
+
+        if (jwtExpirationMs > 0) {
+            tokenBuilder.setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs));
+        }
+        return tokenBuilder.compact();
     }
 }

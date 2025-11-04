@@ -48,21 +48,21 @@ public class TripController {
 //                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 //    }
 
-    @PostMapping("/{tripId}/add-users") // a chequear , en especial como vincular el id del viaje en la url
+    @PostMapping("/add-users") // a chequear , en especial como vincular el id del viaje en la url
     @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)")
-    public ResponseEntity<?> addUser(@PathVariable Long tripId,
+    public ResponseEntity<?> addUser(@RequestBody Long tripId,
                                      @Valid @RequestBody TripAddUserByEmailDTO body,
                                      @AuthenticationPrincipal UserDetailsImpl me) {
         return ResponseEntity.ok(tripService.addUserToTrip(tripId, body.getEmail(), me.getId()));
     }
 
-    @DeleteMapping("/{tripId}/users") // a chequear, en especial como vincular el id del viaje en la url
-    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)") // defensa 1
-    public ResponseEntity<Void> removeUserByEmail(@PathVariable Long tripId,
+    @DeleteMapping("/users")
+    @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)")
+    public ResponseEntity<Void> removeUserByEmail(@RequestBody Long tripId,
                                                   @Valid @RequestBody TripAddUserByEmailDTO body,
                                                   @AuthenticationPrincipal UserDetailsImpl me) {
-        tripService.removeUserFromTrip(tripId, body.getEmail(), me.getId()); // defensa 2 dentro del service
-        return ResponseEntity.noContent().build(); // 204
+        tripService.removeUserFromTrip(tripId, body.getEmail(), me.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/update") // a chequear

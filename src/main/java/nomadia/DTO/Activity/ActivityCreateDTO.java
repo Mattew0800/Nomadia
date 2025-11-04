@@ -45,6 +45,8 @@ public class ActivityCreateDTO {
 
     private LocalDate tripEndDate;
 
+    private Long tripId;
+
     @AssertTrue(message = "La fecha de la actividad debe estar dentro de las fechas del viaje")
     public boolean isDateWithinTrip() {
         if (date == null || tripStartDate == null || tripEndDate == null) return true;

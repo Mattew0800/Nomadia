@@ -25,13 +25,9 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthService authService;
 
     public UserController(UserService userService, PasswordEncoder passwordEncoder, AuthService authService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-        this.authService = authService;
     }
     @GetMapping("/me") // chequeado
     @PreAuthorize("hasRole('USER')")
@@ -46,57 +42,9 @@ public class UserController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
                                         @Valid @RequestBody UserUpdateDTO dto) {
-        User me = userService.findById(principal.getId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        if (dto.getRole() != null && dto.getRole() != me.getRole() && me.getRole() == Role.USER) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("No tenés permisos para cambiar el rol de usuario.");
-        }
-        //MODULARIZAR EN EL SERVICE
-        boolean wantsPasswordChange =
-                notBlank(dto.getOldPassword()) ||
-                        notBlank(dto.getNewPassword()) ||
-                        notBlank(dto.getNewNewPassword());
-
-        if (wantsPasswordChange) {
-            if (!notBlank(dto.getOldPassword()) ||
-                    !notBlank(dto.getNewPassword()) ||
-                    !notBlank(dto.getNewNewPassword())) {
-                return ResponseEntity.badRequest()
-                        .body("Para cambiar la contraseña debés completar todos los campos ");
-            }
-            if (!passwordEncoder.matches(dto.getOldPassword(), me.getPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("La contraseña actual es incorrecta.");
-            }
-            if (!dto.getNewPassword().equals(dto.getNewNewPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Las contraseñas nuevas no coinciden.");
-            }
-            if (passwordEncoder.matches(dto.getNewPassword(), me.getPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("La nueva contraseña no puede ser igual a la actual.");
-            }
-            dto.setPassword(dto.getNewPassword());
-        }
-
-        String oldEmail = me.getEmail();
-        User updated = userService.updateUser(me.getId(), dto, false);
-
-        UserResponseDTO response = UserResponseDTO.fromEntity(updated);
-        if (!updated.getEmail().equals(oldEmail)) {
-            String newToken = authService.generateToken((updated));
-            response.setToken(newToken);
-        }
-
+        UserResponseDTO response = userService.updateSelf(principal.getId(), dto);
         return ResponseEntity.ok(response);
     }
-
-    private boolean notBlank(String s) {
-        return s != null && !s.trim().isEmpty();
-    }
-
     @PostMapping("/create") // esto dsps se va, solo para prueba
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {

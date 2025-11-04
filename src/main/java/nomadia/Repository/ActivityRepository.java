@@ -9,4 +9,5 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByTripId(Long tripId);
     Optional<Activity> findByIdAndTripId(Long id, Long tripId);
     boolean existsByTripIdAndNameIgnoreCase(Long tripId, String name);
+    Optional<Activity> findById(Long activityId);
 }
