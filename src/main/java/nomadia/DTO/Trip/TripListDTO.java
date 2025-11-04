@@ -1,12 +1,14 @@
 package nomadia.DTO.Trip;
 
 import lombok.*;
+import nomadia.DTO.Activity.ActivityResponseDTO;
 import nomadia.Enum.State;
 import nomadia.Enum.TripType;
 import nomadia.Model.Trip;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,8 +25,9 @@ public class TripListDTO {
     private TripType type;
     private BigDecimal budget;
     private long durationDays;
+    private List<ActivityResponseDTO> activities;
 
-    public static TripListDTO fromEntity(Trip trip) { // a modificar
+    public static TripListDTO fromEntity(Trip trip) {
         if (trip == null) return null;
 
         return TripListDTO.builder()
@@ -36,6 +39,12 @@ public class TripListDTO {
                 .type(trip.getType())
                 .budget(trip.getBudget())
                 .durationDays(trip.getDurationDays())
-                .build();
+                .activities(
+                        trip.getActivities() != null
+                                ? trip.getActivities().stream()
+                                .map(ActivityResponseDTO::fromEntity)
+                                .toList()
+                                : null
+                )  .build();
     }
 }

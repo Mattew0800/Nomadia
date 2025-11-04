@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +16,7 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
     List<Trip> findByUsers_Id(Long userId);
     Optional<Trip> findByNameIgnoreCaseAndUsers_Id(String name, Long userId);
 
-
+    Optional<Trip> findById(Long id);
     @Query("SELECT t FROM Trip t JOIN t.users u WHERE u.id = :userId")
     List<Trip> findTripsByUserId(@Param("userId") Long userId);
 

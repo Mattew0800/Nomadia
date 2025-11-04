@@ -2,11 +2,13 @@ package nomadia.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import nomadia.DTO.Activity.ActivityCreateDTO;
 import nomadia.DTO.Trip.TripCreateDTO;
 import nomadia.DTO.Trip.TripListDTO;
 import nomadia.DTO.Trip.TripResponseDTO;
 import nomadia.DTO.Trip.TripUpdateDTO;
 import nomadia.Enum.State;
+import nomadia.Model.Activity;
 import nomadia.Model.Trip;
 import nomadia.Model.User;
 import nomadia.Repository.TripRepository;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,8 +55,25 @@ public class TripService {
         tripRepository.insertCreator(userId, saved.getId());
         return TripResponseDTO.fromEntity(saved);
     }
+    public Optional<Trip> findById(Long tripId) {
+        return tripRepository.findById(tripId);
+    }
 
-    /** Solo el CREADOR puede agregar usuarios */
+    private void validateActivityOverlap(ActivityCreateDTO newActivity, List<Activity> existingActivities) {
+        for (Activity activity : existingActivities) {
+            if (activity.getDate().equals(newActivity.getDate())) {
+                boolean overlap =
+                        !newActivity.getEndTime().isBefore(activity.getStartTime()) &&
+                                !newActivity.getStartTime().isAfter(activity.getEndTime());
+                if (overlap) {
+                    throw new IllegalArgumentException(
+                            "La actividad '" + newActivity.getName() + "' se solapa con otra actividad existente el mismo día."
+                    );
+                }
+            }
+        }
+    }
+
     public Optional<TripResponseDTO> addUserToTrip(Long tripId, Long userIdToAdd, Long requesterId) {
         if (!tripRepository.existsByIdAndCreatedBy_Id(tripId, requesterId)) {
             throw new SecurityException("Solo el creador puede agregar usuarios.");

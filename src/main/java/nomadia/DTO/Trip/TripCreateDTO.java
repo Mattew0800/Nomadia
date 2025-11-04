@@ -2,12 +2,16 @@ package nomadia.DTO.Trip;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
+import nomadia.DTO.Activity.ActivityCreateDTO;
 import nomadia.Enum.State;
 import nomadia.Enum.TripType;
+import nomadia.Model.Activity;
 import nomadia.Model.Trip;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -38,11 +42,18 @@ public class TripCreateDTO {
     @PositiveOrZero(message = "El presupuesto no puede ser negativo")
     private BigDecimal budget;
 
+    private List<ActivityCreateDTO> activities;
 
-    @AssertTrue(message = "La fecha de finalización debe ser posterior a la de inicio")
+    @AssertTrue(message = "La fecha de finalización debe ser posterior a la fecha de inicio")
     public boolean isEndAfterStart() {
         if (startDate == null || endDate == null) return true;
         return endDate.isAfter(startDate);
+    }
+
+    @AssertTrue(message = "La fecha de inicio no puede ser anterior a hoy")
+    public boolean isStartTodayOrFuture() {
+        if (startDate == null) return true;
+        return !startDate.isBefore(LocalDate.now());
     }
 
     public Trip toEntity() {
@@ -54,6 +65,25 @@ public class TripCreateDTO {
         trip.setState(this.state);
         trip.setType(this.type);
         trip.setBudget(this.budget);
+
+        if (activities != null) {
+            trip.setActivities(
+                    activities.stream()
+                            .map(dto -> {
+                                Activity activity = new Activity();
+                                activity.setName(dto.getName());
+                                activity.setDate(dto.getDate());
+                                activity.setDescription(dto.getDescription());
+                                activity.setCost(dto.getCost());
+                                activity.setStartTime(dto.getStartTime());
+                                activity.setEndTime(dto.getEndTime());
+                                activity.setTrip(trip);
+                                return activity;
+                            })
+                            .collect(Collectors.toList())
+            );
+        }
+
         return trip;
     }
 }

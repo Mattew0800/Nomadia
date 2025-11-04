@@ -1,6 +1,6 @@
 package nomadia.Service;
 
-import nomadia.DTO.Activity.ActivityCreateRequestDTO;
+import nomadia.DTO.Activity.ActivityCreateDTO;
 import nomadia.DTO.Activity.ActivityResponseDTO;
 import nomadia.DTO.Activity.ActivityUpdateRequestDTO;
 import nomadia.Model.Activity;
@@ -26,28 +26,22 @@ public class ActivityService{
     }
 
 
-    public ActivityResponseDTO create(Long tripId, ActivityCreateRequestDTO dto) {
+    public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto) {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
 
-        if (dto.getName() == null || dto.getName().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es obligatorio");
-        if (dto.getDescription() == null || dto.getDescription().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La descripción es obligatoria");
-        if (dto.getCost() == null || dto.getCost() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo no puede ser negativo");
+        dto.setTripStartDate(trip.getStartDate());
+        dto.setTripEndDate(trip.getEndDate());
 
-        if (activityRepository.existsByTripIdAndNameIgnoreCase(tripId, dto.getName()))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una actividad con ese nombre en este viaje");
-
-        Activity a = new Activity();
-        a.setName(dto.getName());
-        a.setDate(dto.getDate());
-        a.setDescription(dto.getDescription());
-        a.setCost(dto.getCost());
-        a.setTrip(trip);
-
-        return ActivityResponseDTO.fromEntity(activityRepository.save(a));
+        boolean solapamiento = trip.getActivities().stream()
+                .anyMatch(a -> a.getDate().equals(dto.getDate())
+                        && !(dto.getEndTime().isBefore(a.getStartTime()) || dto.getStartTime().isAfter(a.getEndTime())));
+        if (solapamiento) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe otra actividad en ese horario");
+        }
+        Activity activity = dto.toEntity();
+        activity.setTrip(trip);
+        return ActivityResponseDTO.fromEntity(activityRepository.save(activity));
     }
 
     @Transactional(readOnly = true)
