@@ -3,6 +3,6 @@ export interface ErrorResponse {
   message: string;
   timestamp: string;
   errors?: {
-    [key: string]: string; 
+    [key: string]: string;
   };
 }

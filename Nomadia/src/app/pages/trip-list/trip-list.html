@@ -10,12 +10,12 @@
         </button>
     </div>
 
-    
+
 
         @if(filteredViajes.length > 0){
             <section class="grid-container">
             @for (trip of filteredViajes; track trip.id) {
-                
+
             <div class="activity-card">
                 <div class="card-image-wrapper">
                     <!--<img [src]="activity.imageUrl" [alt]="activity.title" class="card-image">-->
@@ -29,7 +29,7 @@
                         <p class="activity-location">{{ trip.type }}</p>
                     </div>
                 </div>
-            </div>            
+            </div>
 
             }
             </section>
@@ -55,13 +55,27 @@
 
             <img id="centerImg" src="noTrips.png" alt="">
             </section>
+        }@else if(!showingActiveTrips){
+          <section class="grid-container">
 
+            <div class="beach-text">
+              <div class="mascot-container">
+                <img src="nomadia-penguin.png" alt="Nomadia Penguin" class="mascot">
+              </div>
+              <div class="dialog-bubble">
+                <p>Parece que aún no tienes <span class="highlight">viajes finalizados.</span> </p>
+              </div>
+            </div>
 
+            <img id="centerImg" src="noTrips.png" alt="">
+          </section>
         }
 
-        
 
-        
+
+
+
+
 
 
 
