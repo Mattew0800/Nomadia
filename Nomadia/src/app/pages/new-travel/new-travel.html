@@ -1,5 +1,29 @@
 <app-test>
-  <div class="profile-card">
+  <div class="profile-card" *ngIf="currentStep === 0">
+    <div class="profile-header">
+        <section class="profile-main">
+            <div class="profile-user-profile step-0-header">
+                <div class="user-info large">
+                    <h2 class="user-name step-0-title">Seleccionar Tipo de Viaje</h2>
+                    <p class="user-status step-0-subtitle">¿Cuál es el foco principal de tu viaje?</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="selection-grid">
+        
+        <button 
+            *ngFor="let type of tripTypes" 
+            (click)="selectTripType(type)"
+            class="type-selection-btn"
+        >
+            {{ type }}
+        </button>
+    </div>
+</div>
+
+  <div class="profile-card" *ngIf="currentStep === 1" [ngClass]="tripTypeClass">
     <div class="profile-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
       <section class="profile-main">
         <div class="profile-user-profile" style="gap:1.5rem; align-items:center;">
@@ -21,7 +45,10 @@
 
         <div>
           <label for="tipoDeViaje">Tipo de viaje</label>
-          <input id="tipoDeViaje" type="text" formControlName="type" />
+          <div class="type-input-container">
+          <input id="tipoDeViaje" class="tipoDeViaje" type="text" formControlName="type" readonly/>
+          <button type="button" class="type-btn" style="width: auto;" (click)="goToStep(0)">Modificar Tipo</button>
+          </div>
         </div>
 
         <div>

@@ -10,11 +10,12 @@
         </button>
     </div>
 
-    <section class="grid-container">
+    
 
         @if(filteredViajes.length > 0){
-
+            <section class="grid-container">
             @for (trip of filteredViajes; track trip.id) {
+                
             <div class="activity-card">
                 <div class="card-image-wrapper">
                     <!--<img [src]="activity.imageUrl" [alt]="activity.title" class="card-image">-->
@@ -28,11 +29,19 @@
                         <p class="activity-location">{{ trip.type }}</p>
                     </div>
                 </div>
-            </div>
+            </div>            
+
+            }
+            </section>
+            @if(showingActiveTrips){
+                <button class="edit-btn" id="toggleEdit" routerLink="/newTrip">Crear nuevo viaje</button>
 
             }
 
+
+
         }@else if(showingActiveTrips){
+            <section class="grid-container">
 
             <div class="beach-text">
                 <div class="mascot-container">
@@ -45,14 +54,16 @@
             </div>
 
             <img id="centerImg" src="noTrips.png" alt="">
+            </section>
 
 
         }
+
         
 
-    </section>
-    @if(!showingActiveTrips){
-    <button class="edit-btn" id="toggleEdit" routerLink="/newTrip">Crear nuevo viaje</button>
-    }
+        
+
+
+
 
 </app-test>
