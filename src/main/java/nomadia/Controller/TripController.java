@@ -3,6 +3,7 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Trip.*;
+import nomadia.Model.Trip;
 import nomadia.Service.TripService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,16 +40,16 @@ public class TripController {
         return ResponseEntity.ok(trips);
     }
 
-//    @GetMapping("/search")
-//    @PreAuthorize("hasRole('USER')")
-//    public ResponseEntity<TripResponseDTO> searchTrip(@AuthenticationPrincipal UserDetailsImpl me,
-//                                                      @RequestBody String name) {
-//        return tripService.findByNameForUser(name, me.getId())
-//                .map(ResponseEntity::ok)
-//                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-//    }
+    @PostMapping("/view-trip")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> searchTrip(@AuthenticationPrincipal UserDetailsImpl me,
+                                        @RequestBody TripIdRequestDTO request) {
+        return tripService.findById(request.getTripId())
+                .map(trip -> ResponseEntity.ok(TripResponseDTO.fromEntity(trip)))
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-    @PostMapping("/add-users") // a chequear , en especial como vincular el id del viaje en la url
+    @PostMapping("/add-users")
     @PreAuthorize("@tripSecurity.isOwner(#tripId, authentication)")
     public ResponseEntity<?> addUser(@RequestBody Long tripId,
                                      @Valid @RequestBody TripAddUserByEmailDTO body,

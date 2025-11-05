@@ -33,19 +33,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getServletPath();
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         String jwt = null;
         String email = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {//No borrar el espacio que hay en "Bearer "
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
+
             try {
                 Claims claims = Jwts.parser()
                         .setSigningKey(jwtSecret)
                         .parseClaimsJws(jwt)
                         .getBody();
+
                 email = claims.getSubject();
                 String role = (String) claims.get("role");
+
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     userService.findByEmail(email).ifPresent(user -> {
                         UserDetailsImpl userDetails = new UserDetailsImpl(
@@ -64,12 +67,39 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     });
                 }
+
+            } catch (io.jsonwebtoken.ExpiredJwtException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("El token ha expirado");
+                return;
+
+            } catch (io.jsonwebtoken.SignatureException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Firma del token inválida");
+                return;
+
+            } catch (io.jsonwebtoken.MalformedJwtException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Token mal formado");
+                return;
+
+            } catch (io.jsonwebtoken.UnsupportedJwtException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Tipo de token no soportado");
+                return;
+
+            } catch (IllegalArgumentException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Token vacío o nulo");
+                return;
+
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Token JWT inválido o expirado");
+                response.getWriter().write("Error procesando el token JWT");
                 return;
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }

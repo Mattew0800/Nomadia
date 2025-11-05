@@ -29,7 +29,7 @@ public class UserUpdateDTO {
     @Size(min = 3, max = 10, message = "El apodo debe tener entre 3 y 10 caracteres")
     private String nick;
 
-    @Size(max = 500, message = "El 'about' no debe superar 500 caracteres")
+    @Size(max = 500, message = "El sobre mi no debe superar 500 caracteres")
     private String about;
 
     @Past(message = "La fecha de nacimiento debe ser en el pasado")
@@ -49,6 +49,7 @@ public class UserUpdateDTO {
     private Integer age;
 
     private Role role;
+
     public void applyToEntity(User user, PasswordEncoder passwordEncoder, boolean allowRoleChange){
         if (this.name != null) user.setName(this.name.trim());
         if (this.email != null) user.setEmail(this.email.trim().toLowerCase());

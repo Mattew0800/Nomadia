@@ -138,8 +138,6 @@ public class TripService {
         if (!member) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario no pertenece a este viaje.");
         }
-
-        // remover por id para evitar equals por instancia
         trip.getUsers().removeIf(u -> u.getId().equals(user.getId()));
         tripRepository.save(trip); // opcional
     }
