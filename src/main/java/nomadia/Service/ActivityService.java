@@ -61,15 +61,19 @@ public class ActivityService{
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
         return ActivityResponseDTO.fromEntity(a);
     }
+
     @Transactional(readOnly = true)
     public ActivityResponseDTO findById(Long activityId) {
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada"));
         return ActivityResponseDTO.fromEntity(activity);
     }
+
+    @Transactional
     public ActivityResponseDTO update(Long tripId, Long activityId, ActivityUpdateRequestDTO dto) {
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
 
         if (dto.getName() != null && !dto.getName().isBlank()
                 && !a.getName().equalsIgnoreCase(dto.getName())
@@ -77,20 +81,26 @@ public class ActivityService{
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una actividad con ese nombre en este viaje");
         }
 
-        if (dto.getName() != null) a.setName(dto.getName());
-        if (dto.getDate() != null || a.getDate() != null) a.setDate(dto.getDate());
+        if (dto.getName() != null && !dto.getName().isBlank()) a.setName(dto.getName());
+        if (dto.getDate() != null) a.setDate(dto.getDate());
         if (dto.getDescription() != null) a.setDescription(dto.getDescription());
+
         if (dto.getCost() != null) {
-            if (dto.getCost() < 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo no puede ser negativo");
+            if (dto.getCost() < 0)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo no puede ser negativo");
             a.setCost(dto.getCost());
         }
 
-        return ActivityResponseDTO.fromEntity(a);
+        Activity updated = activityRepository.save(a);
+        return ActivityResponseDTO.fromEntity(updated);
     }
 
+    @Transactional
     public void delete(Long tripId, Long activityId) {
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
         activityRepository.delete(a);
     }
+
 }
