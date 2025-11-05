@@ -21,6 +21,8 @@ public class TripUpdateDTO {
     @Size(min = 2, max = 100)
     private String name;
 
+    private Long tripId;
+
     @FutureOrPresent(message = "La fecha de inicio debe ser hoy o futura")
     private LocalDate startDate;
 
@@ -38,6 +40,7 @@ public class TripUpdateDTO {
     private List<Activity> activities;
 
     public void applyToEntity(Trip trip) {
+        if(tripId!=null) trip.setId(tripId);
         if (name != null) trip.setName(name);
         if (startDate != null) trip.setStartDate(startDate);
         if (endDate != null) trip.setEndDate(endDate);

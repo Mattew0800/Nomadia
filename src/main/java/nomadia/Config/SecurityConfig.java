@@ -65,9 +65,11 @@ public class SecurityConfig {
                         .requestMatchers("/nomadia/trip/create").hasRole("USER")
                         .requestMatchers("/nomadia/trip/my-trips").hasRole("USER")
                         .requestMatchers("/nomadia/trip/search").hasRole("USER")
-                        .requestMatchers("/nomadia/trip/*/add-users").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/*/add-user").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/*/remove-user").hasRole("USER")
                         .requestMatchers("/nomadia/trip/*/users").hasRole("USER")
                         .requestMatchers("/nomadia/trip/update").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/delete").hasRole("USER")
 
                         .anyRequest().authenticated()
                 )

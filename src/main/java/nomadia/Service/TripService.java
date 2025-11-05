@@ -2,6 +2,7 @@ package nomadia.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Activity.ActivityCreateDTO;
 import nomadia.DTO.Trip.TripCreateDTO;
 import nomadia.DTO.Trip.TripListDTO;
@@ -11,9 +12,12 @@ import nomadia.Enum.State;
 import nomadia.Model.Activity;
 import nomadia.Model.Trip;
 import nomadia.Model.User;
+import nomadia.Repository.ActivityRepository;
 import nomadia.Repository.TripRepository;
 import nomadia.Repository.UserRepository;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,6 +30,7 @@ import java.util.Optional;
 @Transactional
 public class TripService {
 
+    private final ActivityRepository activityRepository;
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
 
@@ -42,6 +47,18 @@ public class TripService {
 
         return tripRepository.findByNameIgnoreCaseAndUsers_Id(name, userId)
                 .map(TripResponseDTO::fromEntity);
+    }
+
+    public boolean isOwner(Long tripId, Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) return false;
+        UserDetailsImpl me = (UserDetailsImpl) authentication.getPrincipal();
+        return tripRepository.existsByIdAndCreatedBy_Id(tripId, me.getId());
+    }
+
+    public boolean isMember(Long tripId, Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) return false;
+        UserDetailsImpl me = (UserDetailsImpl) authentication.getPrincipal();
+        return tripRepository.existsByIdAndUsers_Id(tripId, me.getId());
     }
 
     public TripResponseDTO createTrip(TripCreateDTO dto, Long userId) {
@@ -74,23 +91,15 @@ public class TripService {
         }
     }
 
-    public Optional<TripResponseDTO> addUserToTrip(Long tripId, Long userIdToAdd, Long requesterId) {
-        if (!tripRepository.existsByIdAndCreatedBy_Id(tripId, requesterId)) {
-            throw new SecurityException("Solo el creador puede agregar usuarios.");
-        }
+    @Transactional
+    public void deleteTrip(Long tripId) throws ChangeSetPersister.NotFoundException {
+        if (!tripRepository.existsById(tripId)) throw new ChangeSetPersister.NotFoundException();
 
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new RuntimeException("Viaje no encontrado"));
-        User user = userRepository.findById(userIdToAdd)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        boolean alreadyMember = trip.getUsers().stream().anyMatch(u -> u.getId().equals(userIdToAdd));
-        if (!alreadyMember) {
-            trip.getUsers().add(user);
-            trip = tripRepository.save(trip);
-        }
-        return Optional.of(TripResponseDTO.fromEntity(trip));
+        tripRepository.deleteRelations(tripId);
+        activityRepository.deleteByTripId(tripId);
+        tripRepository.deleteById(tripId);
     }
+
 
     @Transactional
     public Optional<TripResponseDTO> addUserToTrip(Long tripId, String email, Long requesterId) {
@@ -139,7 +148,7 @@ public class TripService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario no pertenece a este viaje.");
         }
         trip.getUsers().removeIf(u -> u.getId().equals(user.getId()));
-        tripRepository.save(trip); // opcional
+        tripRepository.save(trip);
     }
 
     public Optional<TripResponseDTO> updateTrip(Long tripId, TripUpdateDTO dto, Long userId) {

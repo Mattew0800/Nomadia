@@ -31,6 +31,10 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
     )
     void insertCreator(@Param("userId") Long userId, @Param("tripId") Long tripId);
 
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM user_trip WHERE trip_id = :tripId", nativeQuery = true)
+    int deleteRelations(@org.springframework.data.repository.query.Param("tripId") Long tripId);
 
     boolean existsByIdAndCreatedBy_Id(Long tripId, Long userId);
 

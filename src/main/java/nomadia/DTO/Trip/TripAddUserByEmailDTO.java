@@ -10,5 +10,6 @@ public class TripAddUserByEmailDTO {
     @Email(message = "Debe ser un email válido")
     private String email;
 
+    private Long tripId;
 
 }
