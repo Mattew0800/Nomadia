@@ -60,6 +60,50 @@ export class TripService {
         return this.http.get<TripResponse[]>(`${this.API_URL}/my-trips`, { headers });
     }
 
+  deleteTrip(id: number) {
+    const token = localStorage.getItem('token'); // o donde lo guardes
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.delete(`${this.API_URL}/delete`, { body: { tripId: id }, headers: headers });
+
+  }
+
+
+  getTripById(id: number): Observable<TripResponse> {
+    const token = this.authService.getToken();
+    if (!token) {
+      return new Observable(observer => {
+        observer.error(new Error('No se encontró el token de autenticación. Iniciá sesión.'));
+      });
+    }
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+    // Usando tu endpoint POST /view-trip
+    return this.http.post<TripResponse>(`${this.API_URL}/view-trip`, { tripId: id }, { headers });
+  }
+
+  updateTripName(tripId: number, name: string) {
+    const token = this.authService.getToken();
+    if (!token) {
+      return new Observable(observer => {
+        observer.error(new Error('No se encontró el token de autenticación. Iniciá sesión.'));
+      });
+    }
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+
+    // Enviamos el resto de campos igual que estaban (si no querés tocarlos en back)
+    const dto = { name }; // si tu TripUpdateDTO exige más, completalos en el componente con los valores originales
+
+    return this.http.put(`${this.API_URL}/${tripId}`, dto, { headers });
+  }
+
   getTrip(id: string) {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({

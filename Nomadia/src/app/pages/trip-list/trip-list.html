@@ -27,6 +27,8 @@
                     <div class="card-info-overlay">
                         <h3 class="activity-title">{{ trip.name }}</h3>
                         <p class="activity-location">{{ trip.type }}</p>
+                      <button class="delete-btn" (click)="deleteTrip(trip.id, $event)">🗑️</button>
+                      <a class="filters-btn" [routerLink]="['/editTrip', trip.id]">Editar nombre</a>
                     </div>
                 </div>
             </div>

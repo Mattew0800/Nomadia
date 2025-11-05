@@ -259,6 +259,25 @@
     margin: 40% 50vh;
 }
 
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 77, 77, 0.9);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.delete-btn:hover {
+  background: rgba(255, 0, 0, 0.8);
+}
+
 .edit-btn:not(.newTrip-btn) {
 
   margin-bottom: 2rem;

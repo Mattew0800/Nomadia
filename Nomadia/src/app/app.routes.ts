@@ -11,6 +11,7 @@ import { MainPage } from './pages/main-page/main-page';
 import { UserProfileEdit } from './pages/user-profile-edit/user-profile-edit';
 import { NewTravel } from './pages/new-travel/new-travel';
 import { TripList } from './pages/trip-list/trip-list';
+import {TripEdit} from './pages/edit-trip/edit-trip';
 
 export const routes: Routes = [
     {path: 'landing', component: LandingPage, canActivate: [PublicGuard]},
@@ -21,6 +22,7 @@ export const routes: Routes = [
     {path: 'editProfile', component: UserProfileEdit, canActivate: [AuthGuard]},
     {path: 'newTrip', component: NewTravel, canActivate: [AuthGuard]},
     {path: 'tripList', component: TripList, canActivate: [AuthGuard]},
+    { path: 'editTrip/:id', component: TripEdit },
     {path: 'test', component: Test},
     {path: 'error', component: ErrorPage},
     {path: '', redirectTo: 'mainPage', pathMatch: 'full'},
