@@ -4,10 +4,10 @@
             <section class="profile-main">
                 <div class="profile-user-profile">
                     <div class="user-image large">
-                        @if(user){
-                        <img src="{{user.photoUrl}}" alt="Foto de Usuario">
+                        @if(user?.photoUrl){
+                          <img src="{{user?.photoUrl}}" alt="Foto de Usuario">
                         }@else{
-                        <img src="default-user-img.jpg" alt="Foto de Usuario">
+                          <img src="default-user-img.jpg" alt="Foto de Usuario">
                         }
 
                     </div>
@@ -29,10 +29,10 @@
 
         <form id="userForm">
             <div class="form-grid">
-                @if(user){
+                @if(user?.name){
                 <div>
                     <label>Nombre completo</label>
-                    <input type="text" value={{user.name}} disabled>
+                    <input type="text" value={{user?.name}} disabled>
                 </div>
                 }@else{
                 <div>
@@ -41,22 +41,22 @@
                 </div>
                 }
 
-                @if(user){
-                <div>
-                    <label>Apodo</label>
-                    <input type="text" value="{{user.nick}}" disabled>
-                </div>
+                @if(user?.nick){
+                  <div>
+                      <label>Apodo</label>
+                      <input type="text" value="{{user?.nick}}" disabled>
+                  </div>
                 }@else{
-                <div>
-                    <label>Apodo</label>
-                    <input type="text" value="Sin asignar" disabled>
-                </div>
+                  <div>
+                      <label>Apodo</label>
+                      <input type="text" value="Sin asignar" disabled>
+                  </div>
                 }
 
-                @if(user){
+                @if(user?.email){
                 <div>
                     <label>Email</label>
-                    <input type="email" value="{{user.email}}" disabled>
+                    <input type="email" value="{{user?.email}}" disabled>
                 </div>
                 }@else{
                 <div>
@@ -65,10 +65,10 @@
                 </div>
                 }
 
-                @if(user){
+                @if(user?.phone){
                 <div>
                     <label>Teléfono</label>
-                    <input type="tel" value="+54 223 456 7890" disabled>
+                    <input type="tel" value="{{user?.phone}}" disabled>
                 </div>
                 }@else{
                 <div>
@@ -77,10 +77,10 @@
                 </div>
                 }
 
-                @if(user){
+                @if(user?.birth){
                 <div>
                     <label>Fecha de nacimiento</label>
-                    <input type="text" value="{{ user.birth | date:'dd/MM/yyyy' }}" disabled>
+                    <input type="text" value="{{ user?.birth | date:'dd/MM/yyyy' }}" disabled>
                 </div>
                 }@else{
                 <div>
@@ -90,29 +90,29 @@
                 }
 
 
-                @if(user){
-                <div>
-                    <label>Edad</label>
-                    <input type="number" value="{{user.age}}" disabled>
-                </div>
+                @if(user?.age){
+                  <div>
+                      <label>Edad</label>
+                      <input type="number" value="{{user?.age}}" disabled>
+                  </div>
                 }@else{
-                <div>
-                    <label>Edad</label>
-                    <input type="number" value="Sin asignar" disabled>
-                </div>
+                  <div>
+                      <label>Edad</label>
+                      <input type="text" value="Sin asignar" disabled>
+                  </div>
                 }
 
 
-                @if(user){
+                @if(user?.about){
                 <div id="form__grid-aboutme">
                     <label>Sobre mi</label>
-                    <textarea disabled>{{user.about}}</textarea>
+                    <textarea disabled>{{user?.about}}</textarea>
                 </div>
                 }@else{
-                <div id="form__grid-aboutme">
-                    <label>Sobre mi</label>
-                    <textarea disabled></textarea>
-                </div>
+                  <div id="form__grid-aboutme">
+                      <label>Sobre mi</label>
+                      <textarea disabled>Sin asignar</textarea>
+                  </div>
                 }
             </div>
 

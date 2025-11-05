@@ -98,10 +98,10 @@
 
 .edit-btn {
   width: 22%;
-  padding: 16px;
+  padding: 1rem 2rem;
   background: linear-gradient(135deg, #bef264 0%, #a3e635 100%);
   border: none;
-  border-radius: 12px;
+  border-radius: 1rem;
   color: #0f1419;
   font-size: 16px;
   font-weight: 600;
@@ -113,6 +113,8 @@
   overflow: hidden;
   margin-left: 3rem;
 }
+
+
 
 .edit-btn::before {
   content: '';
@@ -249,10 +251,22 @@
 }
 
 .newTrip-btn {
-  width: 100%;  
+  width: 100%;
 }
 
 #centerImg{
     display: block;
     margin: 40% 50vh;
+}
+
+.edit-btn:not(.newTrip-btn) {
+
+  margin-bottom: 2rem;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
 }

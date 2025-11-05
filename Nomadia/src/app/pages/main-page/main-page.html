@@ -1,5 +1,5 @@
 <app-test>
-    <section class="grid">
+    <section class="grid" [class.blurred]="isBlurred">
         <div class="hero">
             <img src="beach.avif" alt="Beach" />
         </div>
@@ -39,7 +39,55 @@
                         </div>
                     </li>
                 </ul>
+
             </aside>
+          <button class="edit-btn" id="toggleEdit" (click)="toggleModal(true)">Invitar Amigos</button>
+
         </div>
     </section>
+    <div id="shareModal" class="modal-overlay" [class.active]="isModalOpen" (click)="closeOnOverlay($event)">
+      <div class="modal-content"> <div class="modal-header">
+        <h2>Invitar Amigos</h2>
+        <button class="close-button" (click)="toggleModal(false)">&times;</button>
+      </div>
+        <div class="modal-body">
+          <div class="input-group">
+            <input type="text" placeholder="Correo electrónico">
+            <button class="share-btn">Invitar</button>
+          </div>
+          <h3>Miembros actuales</h3>
+          <ul class="member-list">
+            <li>
+              <div class="avatar" style="background-color: #5C6BC0;">MO</div>
+              <div>
+                <p>Matias Oyhamburu (yo)</p>
+                <span>@matiasoyhamburu</span>
+              </div>
+            </li>
+            <li>
+              <div class="avatar" style="background-color: #8E24AA;">EO</div>
+              <div>
+                <p>Emilia Ocampo</p>
+                <span>@emilia4630709</span>
+              </div>
+            </li>
+            <li>
+              <div class="avatar" style="background-color: #4CAF50;">IE</div>
+              <div>
+                <p>Ignacio erbin</p>
+                <span>@erbinignacio</span>
+              </div>
+            </li>
+            <li>
+              <div class="avatar" style="background-color: #FFB300;">J</div>
+              <div>
+                <p>Joan</p>
+                <span>@joan69252514</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
 </app-test>

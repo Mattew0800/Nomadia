@@ -1,4 +1,4 @@
-import { Component, HostListener, ElementRef, ViewChild } from '@angular/core';
+import {Component, HostListener, ElementRef, ViewChild, HostBinding} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router,RouterLink } from '@angular/router';
 import { Test } from '../test/test';
@@ -9,7 +9,7 @@ type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CommonModule, Test],
+    imports: [CommonModule, Test, RouterLink],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.css'],
 })
@@ -17,6 +17,9 @@ export class MainPage {
 
   activeNav = 0;
   setActiveNav(i: number) { this.activeNav = i; }
+  // Propiedades del modal
+  isModalOpen: boolean = false;
+  isBlurred: boolean = false;
 
   weekDays = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
 
@@ -89,6 +92,25 @@ export class MainPage {
   // --- AGENDA ---
   selectEvent(i: number) {
     this.selectedEvent = i;
+  }
+// LÓGICA DEL MODAL:
+  toggleModal(open: boolean) {
+    this.isModalOpen = open;
+    this.isBlurred = open; // Aplica la variable al grid
+  }
+
+  closeOnOverlay(event: MouseEvent) {
+    if (event.target instanceof HTMLElement && event.target.classList.contains('modal-overlay')) {
+      this.toggleModal(false);
+    }
+  }
+
+  // Se corrige la firma para el HostListener
+  @HostListener('document:keydown.escape')
+  handleEscapeKey() {
+    if (this.isModalOpen) {
+      this.toggleModal(false);
+    }
   }
 
 

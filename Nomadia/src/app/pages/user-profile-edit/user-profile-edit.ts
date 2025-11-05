@@ -10,6 +10,7 @@ import { putResponse } from '../../models/putResponse';
 import { ErrorResponse } from '../../models/ErrorResponse';
 import { User } from '../../models/User';
 import { Test } from '../test/test';
+import {AuthErrorResponse} from '../../models/AuthErrorResponse';
 
 @Component({
   selector: 'app-user-profile-edit',
@@ -28,7 +29,7 @@ export class UserProfileEdit {
   msgError?: string;
   loading = true;
   errorMessages: { [key: string]: string } = {};
-  user?: User; 
+  user?: User;
   DEFAULT_PHOTO = 'default-user-img.jpg';
 
 
@@ -60,7 +61,7 @@ export class UserProfileEdit {
   ngOnInit(): void {
     this.userService.getCurrentUser().subscribe({
       next: (user) => {
-        this.user = user; 
+        this.user = user;
 
         // Convertir birth a YYYY-MM-DD si existe
         const birthStr = user.birth
@@ -125,7 +126,7 @@ onSelectPhoto(event: any) {
       this.photoPreview = reader.result as string;
       this.form.patchValue({ photo: this.photoPreview });
     };
-    reader.readAsDataURL(file); 
+    reader.readAsDataURL(file);
   }
 }
 
@@ -144,73 +145,76 @@ removePhoto() {
   }
 
   save() {
-  this.submitted = true;
-  this.msgError = undefined;
-  this.msgOk = undefined;
+    this.submitted = true;
+    this.msgError = undefined;
+    this.msgOk = undefined;
 
-  if (!this.form.valid || !this.passwordsMatch()) {
-    console.log('Formulario inválido');
-    return;
+    if (!this.form.valid || !this.passwordsMatch()) {
+      console.log('Formulario inválido');
+      return;
+    }
+
+    // Convertimos birth a Date
+    const birthDate = this.form.value.birth ? new Date(this.form.value.birth) : null;
+
+    // Armar payload según UserUpdateDTO
+    const payload: putResponse = {
+      name: this.form.value.name,
+      nick: this.form.value.nick,
+      email: this.form.value.email,
+      phone: this.form.value.phone,
+      about: this.form.value.about,
+      photoUrl: this.photoPreview || null,
+      birth: birthDate,
+      age: this.form.value.age,
+      oldPassword: this.form.value.currentPass || null,
+      newPassword: this.form.value.newPass || null,
+      newNewPassword: this.form.value.confirmPass || null
+    };
+
+
+    console.log('Payload que se enviará al backend:', payload);
+
+    this.userService.updateUser(payload).subscribe({
+        next: (res: UpdateUserResponse) => {
+          this.msgOk = 'Perfil actualizado con éxito.';
+
+          this.errorMessages = {};
+
+
+          if (res.newToken) {
+            this.authService.setToken(res.newToken);
+          }
+        },
+        error: (err) => {
+          // CasTEA al nuevo tipo que incluye 'newToken'
+          const backendError = err.error as AuthErrorResponse; // ⬅️ CORRECCIÓN AQUÍ
+
+          // 1. Almacenar el nuevo token si se recibe
+          if (backendError?.newToken) {
+            this.authService.setToken(backendError.newToken);
+          }
+
+          // 2. Manejo de mensajes de error (el resto de la lógica sigue igual)
+          if (backendError?.errors) {
+            this.errorMessages = backendError.errors;
+          } else {
+            this.msgError =
+              backendError?.message ||
+              (err.status === 401
+                ? 'Sesión expirada.'
+                : 'Error al actualizar el perfil.');
+          }
+        }
+
+      });
   }
-
-  // Convertimos birth a Date
-  const birthDate = this.form.value.birth ? new Date(this.form.value.birth) : null;
-
-  // Armar payload según UserUpdateDTO
-const payload: putResponse = {
-  name: this.form.value.name,
-  nick: this.form.value.nick,
-  email: this.form.value.email,
-  phone: this.form.value.phone,
-  about: this.form.value.about,
-  photoUrl: this.photoPreview || null,
-  birth: birthDate,
-  age: this.form.value.age,
-  oldPassword: this.form.value.currentPass || null,
-  newPassword: this.form.value.newPass || null,
-  newNewPassword: this.form.value.confirmPass || null
-};
-
-
-  console.log('Payload que se enviará al backend:', payload);
-
-  this.userService.updateUser(payload).subscribe({  
-      next: (res: UpdateUserResponse) => {
-        this.msgOk = 'Perfil actualizado con éxito.';
-
-        this.errorMessages = {};
-
-
-        if (res.newToken) {
-          this.authService.setToken(res.newToken); 
-        }
-      },
-      error: (err) => {
-        const backendError = err.error as ErrorResponse;
-
-        if (err.newToken) {
-          this.authService.setToken(err.newToken); 
-        }
-
-        if (backendError?.errors) {          
-          this.errorMessages = backendError.errors;
-        } else {
-          this.msgError =
-            backendError?.message ||
-            (err.status === 401
-              ? 'Sesión expirada.'
-              : 'Error al actualizar el perfil.');
-        }
-      }
-
-    });
-  } 
 
   cancel() {
     this.router.navigate(['/profile']);
   }
 
-  logout() {  
+  logout() {
     this.authService.removeToken();
     this.router.navigate(['/login']);
   }
