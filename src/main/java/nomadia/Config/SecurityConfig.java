@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/nomadia/auth/logout").hasRole("USER")
                         .requestMatchers("/nomadia/auth/register").permitAll()
                         .requestMatchers("/nomadia/auth/login").permitAll()
-                        
+                        .requestMatchers("/nomadia/auth/register-admin").permitAll()
                         // Endpoints usuario
                         .requestMatchers("/nomadia/user/me").hasRole("USER")
                         .requestMatchers("/nomadia/user/me/update").hasRole("USER")

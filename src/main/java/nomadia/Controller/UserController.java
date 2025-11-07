@@ -45,6 +45,7 @@ public class UserController {
         UserResponseDTO response = userService.updateSelf(principal.getId(), dto);
         return ResponseEntity.ok(response);
     }
+
     @PostMapping("/create") // esto dsps se va, solo para prueba
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {

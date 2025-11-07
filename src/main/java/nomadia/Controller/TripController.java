@@ -1,5 +1,6 @@
 package nomadia.Controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Trip.*;
@@ -54,27 +55,35 @@ public class TripController {
     }
 
     @PostMapping("/add-user")
-    @PreAuthorize("@tripSecurity.isOwner(#body.tripId, #me.id)")
-    public ResponseEntity<String> addUser(
-                                     @Valid @RequestBody TripAddUserByEmailDTO body,
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> addUser(@Valid @RequestBody TripAddUserByEmailDTO dto,
                                      @AuthenticationPrincipal UserDetailsImpl me) {
-        try{
-            tripService.addUserToTrip(body.getTripId(), body.getEmail(), me.getId());
-            return ResponseEntity.ok("Usuario agregado con exito");
 
+        if (!tripService.isOwner(dto.getTripId(), me.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("No tenés permiso para modificar este viaje");
+        }
+        try {
+            tripService.addUserToTrip(dto.getTripId(), dto.getEmail(), me.getId());
+            return ResponseEntity.ok("Usuario agregado con éxito");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("El usuario o el viaje no existen");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al agregar el usuario al viaje");
         }
     }
 
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> deleteTrip(
-            @RequestBody TripIdRequestDTO dto,
-            @AuthenticationPrincipal UserDetailsImpl me,// a chequear
-            Authentication authentication) {
-        if (!tripService.isOwner(dto.getTripId(), authentication)) {
+    public ResponseEntity<?> deleteTrip(@RequestBody TripIdRequestDTO dto,
+                                        @AuthenticationPrincipal UserDetailsImpl me) {
+        if (!tripService.isOwner(dto.getTripId(), me.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("No tenés permiso para eliminar este viaje");
         }
@@ -93,34 +102,45 @@ public class TripController {
         }
     }
 
-    @PutMapping("/update") // a chequear
+
+    @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> updateTrip(
-                                        @Valid @RequestBody TripUpdateDTO dto,
-                                        @AuthenticationPrincipal UserDetailsImpl me,Authentication authentication) {
-        if (!tripService.isOwner(dto.getTripId(), authentication)) {
+    public ResponseEntity<?> updateTrip(@Valid @RequestBody TripUpdateDTO dto,
+                                        @AuthenticationPrincipal UserDetailsImpl me) {
+
+        if (!tripService.isOwner(dto.getTripId(), me.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("No tenés permiso para eliminar este viaje");
         }
+
         return tripService.updateTrip(dto.getTripId(), dto, me.getId())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+
     @PutMapping("/remove-user")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> removeUser(@Valid @RequestBody TripAddUserByEmailDTO dto,
-                                             @AuthenticationPrincipal UserDetailsImpl me,
-                                            Authentication authentication
-                                             ){
-        if (!tripService.isOwner(dto.getTripId(), authentication)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<?> removeUser(@Valid @RequestBody TripAddUserByEmailDTO dto,
+                                        @AuthenticationPrincipal UserDetailsImpl me) {
+        if (!tripService.isOwner(dto.getTripId(), me.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("No tenés permiso para modificar este viaje");
         }
-        try{
+
+        try {
             tripService.removeUserFromTrip(dto.getTripId(), dto.getEmail(), me.getId());
             return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("El usuario o el viaje no existen");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ocurrió un error al intentar remover el usuario");
         }
     }
+
 }

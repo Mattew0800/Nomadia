@@ -49,17 +49,17 @@ public class TripService {
                 .map(TripResponseDTO::fromEntity);
     }
 
-    public boolean isOwner(Long tripId, Authentication authentication) {
-        if (authentication == null || authentication.getPrincipal() == null) return false;
-        UserDetailsImpl me = (UserDetailsImpl) authentication.getPrincipal();
-        return tripRepository.existsByIdAndCreatedBy_Id(tripId, me.getId());
+    public boolean isOwner(Long tripId, Long userId) {
+        if (tripId == null || userId == null) return false;
+        return tripRepository.existsByIdAndCreatedBy_Id(tripId, userId);
     }
 
-    public boolean isMember(Long tripId, Authentication authentication) {
-        if (authentication == null || authentication.getPrincipal() == null) return false;
-        UserDetailsImpl me = (UserDetailsImpl) authentication.getPrincipal();
-        return tripRepository.existsByIdAndUsers_Id(tripId, me.getId());
+
+    public boolean isMember(Long tripId, Long userId) {
+        if (tripId == null || userId == null) return false;
+        return tripRepository.existsByIdAndUsers_Id(tripId, userId);
     }
+
 
     public TripResponseDTO createTrip(TripCreateDTO dto, Long userId) {
         Trip trip = dto.toEntity();
@@ -72,6 +72,7 @@ public class TripService {
         tripRepository.insertCreator(userId, saved.getId());
         return TripResponseDTO.fromEntity(saved);
     }
+
     public Optional<Trip> findById(Long tripId) {
         return tripRepository.findById(tripId);
     }
