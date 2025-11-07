@@ -71,7 +71,7 @@ export class TripService {
   }
 
 
-  getTripById(id: number): Observable<TripResponse> {
+  getTripById(id: string): Observable<TripResponse> {
     const token = this.authService.getToken();
     if (!token) {
       return new Observable(observer => {
@@ -86,7 +86,7 @@ export class TripService {
     return this.http.post<TripResponse>(`${this.API_URL}/view-trip`, { tripId: id }, { headers });
   }
 
-  updateTripName(tripId: number, name: string) {
+  updateTripName(tripId: string, name: string) {
     const token = this.authService.getToken();
     if (!token) {
       return new Observable(observer => {
@@ -99,19 +99,11 @@ export class TripService {
     });
 
     // Enviamos el resto de campos igual que estaban (si no querés tocarlos en back)
-    const dto = { name }; // si tu TripUpdateDTO exige más, completalos en el componente con los valores originales
+    const dto = { name, tripId }; // si tu TripUpdateDTO exige más, completalos en el componente con los valores originales
 
-    return this.http.put(`${this.API_URL}/${tripId}`, dto, { headers });
+    return this.http.put(`${this.API_URL}/update`, dto, { headers });
   }
 
-  getTrip(id: string) {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.http.get<TripResponse>(`${this.API_URL}/my-trips`, { headers });
-  }
 
 
 

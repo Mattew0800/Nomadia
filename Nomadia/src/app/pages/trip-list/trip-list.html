@@ -16,7 +16,7 @@
             <section class="grid-container">
             @for (trip of filteredViajes; track trip.id) {
 
-            <div class="activity-card" routerLink="">
+            <div class="activity-card" (click)="selectTrip(trip.id)">
                 <div class="card-image-wrapper">
                     <!--<img [src]="activity.imageUrl" [alt]="activity.title" class="card-image">-->
 
@@ -27,8 +27,13 @@
                     <div class="card-info-overlay">
                         <h3 class="activity-title">{{ trip.name }}</h3>
                         <p class="activity-location">{{ trip.type }}</p>
-                      <button class="delete-btn" (click)="deleteTrip(trip.id, $event)">🗑️</button>
-                      <a class="filters-btn" [routerLink]="['/editTrip', trip.id]">Editar nombre</a>
+
+                      <button (click)="deleteTrip(trip.id, $event)"><i class="fa-solid fa-trash delete-btn"></i></button>
+
+                      <button [routerLink]="['/editTrip', trip.id]"><i class="fa-solid fa-pen trip-edit-btn"></i></button>
+
+
+
                     </div>
                 </div>
             </div>

@@ -62,6 +62,7 @@
   /* Gradiente transparente a oscuro para asegurar contraste */
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
   z-index: 10;
+
 }
 
 /* Contenedor de la información que se superpone */
@@ -73,6 +74,7 @@
   z-index: 20; /* Aseguramos que esté por encima del gradiente */
   width: 100%;
   box-sizing: border-box;
+
 }
 
 .activity-title {
@@ -261,21 +263,32 @@
 
 .delete-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(255, 77, 77, 0.9);
-  border: none;
-  border-radius: 50%;
-  color: white;
-  font-size: 1rem;
-  width: 32px;
-  height: 32px;
+  color: #aae941;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 1.3rem;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: filter, color 0.3s ease;
 }
 
 .delete-btn:hover {
-  background: rgba(255, 0, 0, 0.8);
+  filter: drop-shadow(4px 4px 1px #362222);
+  color: #eb3f3a;
+}
+
+.trip-edit-btn{
+  position: absolute;
+  color: #aae941;
+  bottom: 1rem;
+  right: 3rem;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: filter, color 0.3s ease;
+}
+
+.trip-edit-btn:hover {
+  filter: drop-shadow(4px 4px 1px #362222);
+  color: #eb3f3a;
 }
 
 .edit-btn:not(.newTrip-btn) {

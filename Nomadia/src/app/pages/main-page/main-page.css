@@ -78,24 +78,54 @@
 .agenda-card{ grid-column:2;grid-row: 2; }
 
 /* El hero ocupa la columna izquierda y “abarca” ambas filas de la derecha */
-.hero{
-  grid-column:1;
-  grid-row: 1;  /* se estira verticalmente junto a la columna derecha */
-  background:#151B2C;
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,.06);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  display: flex;
+/* ===== ESTILOS PARA EL NOMBRE DEL VIAJE EN EL HERO ===== */
+
+/* 1. Modificar .hero para permitir posicionamiento absoluto interno */
+.hero {
+  /* Mantenemos tus estilos existentes, solo añadimos position: relative */
+  grid-column: 1;
+  grid-row: 1;
+  background: #151B2C;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, .06);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex; /* Esto se cambia por flex-direction: column si quieres que el título esté debajo */
+  position: relative; /* **CRUCIAL: Para posicionar el título de forma absoluta** */
   height: 50%;
   margin-right: 1rem;
-}
-.hero img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
 
+  /* Cambiamos a columna para apilar la imagen y el título si el título no es absoluto,
+     pero para un título sobre la imagen, mantendremos position: relative en .hero
+     y posicionamiento absoluto en .trip-title */
+  display: block; /* Mejor cambiar a block si el título es absoluto */
+}
+
+/* 2. Estilo y Posicionamiento del Título */
+.trip-title {
+  position: absolute;
+  bottom: 0; /* Lo coloca en la parte inferior del .hero */
+  left: 0;
+  right: 0;
+  /* Relleno para que no esté pegado a los bordes */
+  padding: 1rem 1.5rem;
+  /* Fondo semi-transparente para asegurar legibilidad sobre la imagen */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+  color: var(--text);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0; /* Eliminar el margen predeterminado del h2 */
+  z-index: 10; /* Asegura que esté sobre la imagen */
+}
+
+/* Si tu imagen no es un background (como en tu caso), esto es importante */
+.hero img {
+  /* Mantén tus estilos de imagen existentes */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Asegúrate de que la imagen no oculte el título, aunque con z-index en el título ya se soluciona */
 }
 
 /* ===== TARJETAS ===== */

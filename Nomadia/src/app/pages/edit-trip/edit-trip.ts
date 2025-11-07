@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -19,7 +19,7 @@ type TripDetails = TripResponse & {
   templateUrl: './edit-trip.html',
   styleUrls: ['./edit-trip.css']
 })
-export class TripEdit {
+export class TripEdit implements OnInit {
 
   // Sólo NAME editable
   public form = new FormGroup({
@@ -31,7 +31,7 @@ export class TripEdit {
   msgError?: string;
   loading = true;
 
-  private tripId!: number;
+  private tripId!: string;
   trip?: TripDetails; // para mostrar campos en modo lectura
 
   constructor(
@@ -41,7 +41,7 @@ export class TripEdit {
   ) {}
 
   ngOnInit(): void {
-    this.tripId = Number(this.route.snapshot.paramMap.get('id'));
+    this.tripId = String(this.route.snapshot.paramMap.get('id'));
     if (!this.tripId) {
       this.msgError = 'ID de viaje inválido.';
       this.loading = false;

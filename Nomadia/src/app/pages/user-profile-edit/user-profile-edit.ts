@@ -181,14 +181,13 @@ removePhoto() {
 
           this.errorMessages = {};
 
-
           if (res.newToken) {
             this.authService.setToken(res.newToken);
           }
         },
         error: (err) => {
           // CasTEA al nuevo tipo que incluye 'newToken'
-          const backendError = err.error as AuthErrorResponse; // ⬅️ CORRECCIÓN AQUÍ
+          const backendError = err.error as AuthErrorResponse;
 
           // 1. Almacenar el nuevo token si se recibe
           if (backendError?.newToken) {

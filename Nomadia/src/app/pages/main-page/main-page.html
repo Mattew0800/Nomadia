@@ -1,7 +1,13 @@
 <app-test>
     <section class="grid" [class.blurred]="isBlurred">
         <div class="hero">
-            <img src="beach.avif" alt="Beach" />
+          @if(currentTrip?.type){
+            <img [src]="'tripTypes/' + this.currentTrip?.type + '.jpg'" alt="" srcset="">
+          }
+          @if(currentTrip?.name){
+            <h2 class="trip-title">{{ currentTrip?.name }}</h2>
+          }
+
         </div>
 
         <!-- Columna derecha: calendario + tareas -->
@@ -44,6 +50,8 @@
           <button class="edit-btn" id="toggleEdit" (click)="toggleModal(true)">Invitar Amigos</button>
 
         </div>
+
+
     </section>
     <div id="shareModal" class="modal-overlay" [class.active]="isModalOpen" (click)="closeOnOverlay($event)">
       <div class="modal-content"> <div class="modal-header">
@@ -89,5 +97,7 @@
         </div>
       </div>
     </div>
+
+
 
 </app-test>
