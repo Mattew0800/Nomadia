@@ -1,10 +1,8 @@
 package nomadia.DTO.Activity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Setter
-@Getter
+@Data
 public class ActivityIdRequestDTO {
     private Long activityId;
     private Long tripId;

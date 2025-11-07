@@ -2,7 +2,6 @@ package nomadia.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Activity.ActivityCreateDTO;
 import nomadia.DTO.Trip.TripCreateDTO;
 import nomadia.DTO.Trip.TripListDTO;
@@ -17,11 +16,9 @@ import nomadia.Repository.TripRepository;
 import nomadia.Repository.UserRepository;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +31,7 @@ public class TripService {
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
 
-    public List<TripListDTO> findMyTrips(Long userId) {
+    public List<TripListDTO> getMyTrips(Long userId) {
         return tripRepository.findTripsByUserId(userId)
                 .stream()
                 .map(TripListDTO::fromEntity)

@@ -1,11 +1,10 @@
 package nomadia.DTO.Trip;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
-@Getter
-@Setter
-public class TripIdRequestDTO
-{
+@Data
+public class TripIdRequestDTO {
+    @NotNull(message = "El id del viaje es necesario")
     private Long tripId;
 }

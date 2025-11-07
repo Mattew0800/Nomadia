@@ -1,7 +1,10 @@
 package nomadia.DTO.Trip;
 
 import jakarta.validation.constraints.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import nomadia.Enum.State;
 import nomadia.Enum.TripType;
 import nomadia.Model.Activity;
@@ -14,8 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TripUpdateDTO {
 
     @Size(min = 2, max = 100)

@@ -1,7 +1,10 @@
 package nomadia.DTO.Trip;
 
 import jakarta.validation.constraints.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import nomadia.DTO.Activity.ActivityCreateDTO;
 import nomadia.Enum.State;
 import nomadia.Enum.TripType;
@@ -13,8 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

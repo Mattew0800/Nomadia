@@ -4,15 +4,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nomadia.Model.Activity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class ActivityUpdateRequestDTO {
 
@@ -42,4 +43,30 @@ public class ActivityUpdateRequestDTO {
 
     @NotNull(message = "La hora de fin es obligatoria")
     private LocalTime endTime;
+
+    public void applyToEntity(Activity activity) {
+        if (this.name != null && !this.name.isBlank()) {
+            activity.setName(this.name);
+        }
+        if (this.date != null) {
+            activity.setDate(this.date);
+        }
+        if (this.description != null && !this.description.isBlank()) {
+            activity.setDescription(this.description);
+        }
+        if (this.cost != null) {
+            activity.setCost(this.cost);
+        }
+        if (this.startTime != null) {
+            activity.setStartTime(this.startTime);
+        }
+        if (this.endTime != null) {
+            activity.setEndTime(this.endTime);
+        }
+    }
+
+
+    public boolean isTimeValid() {
+        return startTime == null || endTime == null || startTime.isBefore(endTime);
+    }
 }

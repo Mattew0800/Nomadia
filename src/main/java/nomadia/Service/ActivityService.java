@@ -71,6 +71,7 @@ public class ActivityService{
 
     @Transactional
     public ActivityResponseDTO update(Long tripId, Long activityId, ActivityUpdateRequestDTO dto) {
+
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
@@ -80,17 +81,7 @@ public class ActivityService{
                 && activityRepository.existsByTripIdAndNameIgnoreCase(tripId, dto.getName())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una actividad con ese nombre en este viaje");
         }
-
-        if (dto.getName() != null && !dto.getName().isBlank()) a.setName(dto.getName());
-        if (dto.getDate() != null) a.setDate(dto.getDate());
-        if (dto.getDescription() != null) a.setDescription(dto.getDescription());
-
-        if (dto.getCost() != null) {
-            if (dto.getCost() < 0)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo no puede ser negativo");
-            a.setCost(dto.getCost());
-        }
-
+        dto.applyToEntity(a);
         Activity updated = activityRepository.save(a);
         return ActivityResponseDTO.fromEntity(updated);
     }

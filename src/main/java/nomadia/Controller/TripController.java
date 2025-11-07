@@ -10,10 +10,8 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.access.method.P;
 
 
 import java.util.List;
@@ -31,17 +29,25 @@ public class TripController {
 
     @PostMapping("/create") //chequeado
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,
-                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        TripResponseDTO created = tripService.createTrip(dto, userDetails.getId());
+    public ResponseEntity<?> createTrip(@Valid @RequestBody TripCreateDTO dto,
+                                                      @AuthenticationPrincipal UserDetailsImpl me) {
+        TripResponseDTO created =null;
+        try{
+            created=tripService.createTrip(dto, me.getId());
+        }catch (RuntimeException e){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(created);
     }
 
     @GetMapping("/my-trips")// chequeado
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<TripListDTO>> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<TripListDTO> trips = tripService.findMyTrips(userDetails.getId());
+    public ResponseEntity<?> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl me) {
+        List<TripListDTO> trips=tripService.getMyTrips(me.getId());
+        if(trips.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No tenes viajes realizados");
+        }
         return ResponseEntity.ok(trips);
     }
 
@@ -49,6 +55,9 @@ public class TripController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> searchTrip(@AuthenticationPrincipal UserDetailsImpl me,
                                         @RequestBody TripIdRequestDTO request) {
+        if(tripService.isMember(request.getTripId(), me.getId())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tenes permisos para ver este viaje");
+        }
         return tripService.findById(request.getTripId())
                 .map(trip -> ResponseEntity.ok(TripResponseDTO.fromEntity(trip)))
                 .orElse(ResponseEntity.notFound().build());
