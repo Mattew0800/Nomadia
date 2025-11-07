@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("nomadia/trip")
@@ -27,18 +29,20 @@ public class TripController {
         this.tripService = tripService;
     }
 
-    @PostMapping("/create") //chequeado
+    @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> createTrip(@Valid @RequestBody TripCreateDTO dto,
-                                                      @AuthenticationPrincipal UserDetailsImpl me) {
-        TripResponseDTO created =null;
-        try{
-            created=tripService.createTrip(dto, me.getId());
-        }catch (RuntimeException e){
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<?> createTrip(
+            @Valid @RequestBody TripCreateDTO dto,
+            @AuthenticationPrincipal UserDetailsImpl me) {
+        try {
+            TripResponseDTO created = tripService.createTrip(dto, me.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "No se pudo crear el viaje"));
         }
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(created);
     }
 
     @GetMapping("/my-trips")// chequeado
@@ -73,8 +77,8 @@ public class TripController {
                     .body("No tenés permiso para modificar este viaje");
         }
         try {
-            tripService.addUserToTrip(dto.getTripId(), dto.getEmail(), me.getId());
-            return ResponseEntity.ok("Usuario agregado con éxito");
+            Optional<TripResponseDTO> dtoo= tripService.addUserToTrip(dto.getTripId(), dto.getEmail(), me.getId());
+            return ResponseEntity.ok().body(dtoo);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("El usuario o el viaje no existen");
@@ -86,7 +90,6 @@ public class TripController {
                     .body("Error al agregar el usuario al viaje");
         }
     }
-
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('USER')")
@@ -111,7 +114,6 @@ public class TripController {
         }
     }
 
-
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateTrip(@Valid @RequestBody TripUpdateDTO dto,
@@ -126,7 +128,6 @@ public class TripController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-
 
     @PutMapping("/remove-user")
     @PreAuthorize("hasRole('USER')")
@@ -151,5 +152,4 @@ public class TripController {
                     .body("Ocurrió un error al intentar remover el usuario");
         }
     }
-
 }

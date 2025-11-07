@@ -15,8 +15,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,6 +31,7 @@ public class UserController {
     public UserController(UserService userService, PasswordEncoder passwordEncoder, AuthService authService) {
         this.userService = userService;
     }
+
     @GetMapping("/me") // chequeado
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserResponseDTO> getSelf(@AuthenticationPrincipal UserDetailsImpl principal) {
@@ -42,9 +45,15 @@ public class UserController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
                                         @Valid @RequestBody UserUpdateDTO dto) {
-        UserResponseDTO response = userService.updateSelf(principal.getId(), dto);
-        return ResponseEntity.ok(response);
+        try {
+            UserResponseDTO response = userService.updateSelf(principal.getId(), dto);
+            return ResponseEntity.ok(response);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(Map.of("error", e.getReason()));
+        }
     }
+
 
     @PostMapping("/create") // esto dsps se va, solo para prueba
     @PreAuthorize("hasRole('ADMIN')")
@@ -69,7 +78,6 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
 
     @DeleteMapping("/delete-user/{id}")
     @PreAuthorize("hasRole('ADMIN')")

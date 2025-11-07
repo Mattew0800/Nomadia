@@ -74,20 +74,6 @@ public class TripService {
         return tripRepository.findById(tripId);
     }
 
-    private void validateActivityOverlap(ActivityCreateDTO newActivity, List<Activity> existingActivities) {
-        for (Activity activity : existingActivities) {
-            if (activity.getDate().equals(newActivity.getDate())) {
-                boolean overlap =
-                        !newActivity.getEndTime().isBefore(activity.getStartTime()) &&
-                                !newActivity.getStartTime().isAfter(activity.getEndTime());
-                if (overlap) {
-                    throw new IllegalArgumentException(
-                            "La actividad '" + newActivity.getName() + "' se solapa con otra actividad existente el mismo día."
-                    );
-                }
-            }
-        }
-    }
 
     @Transactional
     public void deleteTrip(Long tripId) throws ChangeSetPersister.NotFoundException {

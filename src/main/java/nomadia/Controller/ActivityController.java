@@ -99,5 +99,4 @@ public class ActivityController {
                     .body(Map.of("error", e.getReason()));
         }
     }
-
 }
