@@ -37,6 +37,7 @@ public class TripUpdateDTO {
     private String description;
 
     private State state;
+
     private TripType type;
 
     @PositiveOrZero(message = "El presupuesto no puede ser negativo")

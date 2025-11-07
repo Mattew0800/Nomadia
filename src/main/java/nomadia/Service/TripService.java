@@ -87,14 +87,13 @@ public class TripService {
 
 
     @Transactional
-    public Optional<TripResponseDTO> addUserToTrip(Long tripId, String email, Long ownerId) {
+    public Optional<TripResponseDTO> addUserToTrip(Long tripId, String email) {
 
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new EntityNotFoundException("El viaje no existe"));
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("El usuario no existe"));
-
         if (isMember(tripId, user.getId())) {
             throw new IllegalStateException("El usuario ya está agregado a este viaje");
         }
@@ -110,29 +109,21 @@ public class TripService {
 
 
     @Transactional
-    public void removeUserFromTrip(Long tripId, String email, Long requesterId) {
+    public void removeUserFromTrip(Long tripId, String email) {
+
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "El viaje no existe."));
-
-        if (trip.getCreatedBy() == null || !trip.getCreatedBy().getId().equals(requesterId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Solo el creador del viaje puede eliminar usuarios.");
-        }
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "No existe un usuario con ese email."));
 
-        if (trip.getCreatedBy().getId().equals(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "No podés quitar al creador del viaje.");
-        }
-
-        boolean member = trip.getUsers().stream().anyMatch(u -> u.getId().equals(user.getId()));
-        if (!member) {
+        if (!isMember(tripId, user.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario no pertenece a este viaje.");
         }
-        trip.getUsers().removeIf(u -> u.getId().equals(user.getId()));
+        user.getTrips().remove(trip);
+        trip.getUsers().remove(user);
         tripRepository.save(trip);
     }
 
