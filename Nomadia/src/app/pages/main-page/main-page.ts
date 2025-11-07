@@ -4,6 +4,7 @@ import {Router, RouterLink} from '@angular/router';
 import {Test} from '../test/test';
 import {TripService} from '../../services/trip-service';
 import {TripResponse} from '../../models/TripResponse';
+import {ReactiveFormsModule} from '@angular/forms';
 
 type AgendaItem = { time: string; label: string; desc: string; color: 'yellow' | 'purple' | 'blue' };
 
@@ -11,7 +12,7 @@ type AgendaItem = { time: string; label: string; desc: string; color: 'yellow' |
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CommonModule, Test],
+  imports: [CommonModule, Test, ReactiveFormsModule],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.css'],
 })
@@ -136,7 +137,7 @@ export class MainPage implements OnInit {
     this.selectedEvent = i;
   }
 
-// LÓGICA DEL MODAL:
+  // LÓGICA DEL MODAL:
   toggleModal(open: boolean) {
     this.isModalOpen = open;
     this.isBlurred = open; // Aplica la variable al grid
