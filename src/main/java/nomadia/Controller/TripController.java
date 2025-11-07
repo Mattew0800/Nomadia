@@ -59,7 +59,7 @@ public class TripController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> searchTrip(@AuthenticationPrincipal UserDetailsImpl me,
                                         @RequestBody TripIdRequestDTO request) {
-        if(tripService.isMember(request.getTripId(), me.getId())){
+        if(!tripService.isMember(request.getTripId(), me.getId())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tenes permisos para ver este viaje");
         }
         return tripService.findById(request.getTripId())
@@ -78,7 +78,7 @@ public class TripController {
         }
         try {
             Optional<TripResponseDTO> dtoo= tripService.addUserToTrip(dto.getTripId(), dto.getEmail(), me.getId());
-            return ResponseEntity.ok().body(dtoo);
+            return ResponseEntity.ok(Map.of("data",dto));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("El usuario o el viaje no existen");
