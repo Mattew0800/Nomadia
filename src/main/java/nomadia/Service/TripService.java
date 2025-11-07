@@ -1,5 +1,6 @@
 package nomadia.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nomadia.DTO.Activity.ActivityCreateDTO;
@@ -86,27 +87,27 @@ public class TripService {
 
 
     @Transactional
-    public Optional<TripResponseDTO> addUserToTrip(Long tripId, String email, Long requesterId) {
-        if (!tripRepository.existsByIdAndCreatedBy_Id(tripId, requesterId)) {
-            throw new SecurityException("Solo el creador puede agregar usuarios.");
-        }
+    public Optional<TripResponseDTO> addUserToTrip(Long tripId, String email, Long ownerId) {
 
         Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new RuntimeException("Viaje no encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("El viaje no existe"));
+
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("El usuario no existe"));
 
-        if (trip.getUsers().contains(user)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya está en el viaje");
+        if (isMember(tripId, user.getId())) {
+            throw new IllegalStateException("El usuario ya está agregado a este viaje");
         }
 
-        boolean alreadyMember = trip.getUsers().stream().anyMatch(u -> u.getId().equals(user.getId()));
-        if (!alreadyMember) {
-            trip.getUsers().add(user);
-            trip = tripRepository.save(trip);
-        }
+        user.getTrips().add(trip);
+
+        trip.getUsers().add(user);
+
+        userRepository.save(user);
+
         return Optional.of(TripResponseDTO.fromEntity(trip));
     }
+
 
     @Transactional
     public void removeUserFromTrip(Long tripId, String email, Long requesterId) {
