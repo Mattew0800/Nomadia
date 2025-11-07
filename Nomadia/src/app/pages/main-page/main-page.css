@@ -383,3 +383,124 @@
     max-width: 95%;
   }
 }
+
+
+/* === CONTROLES DE MES/AÑO EN EL CALENDARIO === */
+
+/* Contenedor: mantiene línea y espacio entre selects */
+.calendar .cal-head .month {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #C7D2F0;
+  letter-spacing: .8px;
+  font-size: 12px;
+}
+
+/* Base para ambos selects (look pill, fondo oscuro como los días) */
+.calendar .month-select,
+.calendar .year-select {
+  appearance: none;              /* saca la flecha nativa */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #0F1628;           /* mismo fondo que .day */
+  color: #DDE6FF;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  padding: 6px 28px 6px 10px;    /* extra padding right para la “flecha” */
+  line-height: 1;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  cursor: pointer;
+  box-shadow: none;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .12s ease;
+}
+
+/* Hover/focus coherente con tus tarjetas/botones */
+.calendar .month-select:hover,
+.calendar .year-select:hover {
+  border-color: rgba(255,255,255,.18);
+}
+
+.calendar .month-select:focus,
+.calendar .year-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(236, 80, 44, 0.25);
+}
+
+/* “Flecha” custom (simple, SVG embebido) */
+.calendar .month-select,
+.calendar .year-select {
+  background-image:
+    linear-gradient(transparent, transparent), /* placeholder para safari */
+    url("data:image/svg+xml;utf8,<svg fill='%23B7C2DF' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M5.5 7.5l4.5 4.5 4.5-4.5' stroke='%23B7C2DF' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px 12px;
+}
+
+.calendar .year-select {
+  position: relative;   /* necesario para que z-index tenga efecto */
+  z-index: 50;          /* podés subirlo si sigue tapado (ej: 100, 200, etc.) */
+}
+
+.calendar {
+  overflow: visible;
+}
+
+/* Tamaños: mes un poco más ancho que año */
+.calendar .month-select { min-width: 9.5rem; }
+.calendar .year-select  { min-width: 5.5rem; }
+
+/* Estado activo (cuando el usuario abrió el dropdown) */
+.calendar .month-select:active,
+.calendar .year-select:active {
+  transform: scale(0.99);
+}
+
+/* Ajuste de alineación del header para que todo quede centradito */
+.calendar .cal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar .cal-head .more {
+  flex: 0 0 auto;
+}
+
+/* Si querés un bloque con flechas y selects (por si agregás prev/next) */
+.calendar .cal-head .month-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Botoncitos nav (si los usás) */
+.calendar .cal-head .nav {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: #0F1628;
+  color: #B7C2DF;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background .2s ease, transform .12s ease;
+}
+.calendar .cal-head .nav:hover { background: #121a2f; }
+.calendar .cal-head .nav:active { transform: translateY(1px); }
+
+/* Responsive fino para caber en pantallas chicas */
+@media (max-width: 520px) {
+  .calendar .month-select { min-width: 8rem; }
+  .calendar .year-select  { min-width: 5rem; }
+  .calendar .cal-head .month { gap: 6px; }
+}
+
+
+

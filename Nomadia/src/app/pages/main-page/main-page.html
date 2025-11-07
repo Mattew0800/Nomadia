@@ -2,7 +2,7 @@
     <section class="grid" [class.blurred]="isBlurred">
         <div class="hero">
           @if(currentTrip?.type){
-            <img [src]="'tripTypes/' + this.currentTrip?.type + '.jpg'" alt="" srcset="">
+            <img [src]="'tripTypes/' + (currentTrip?.type || 'default') + '.jpg'" alt="" />
           }
           @if(currentTrip?.name){
             <h2 class="trip-title">{{ currentTrip?.name }}</h2>
@@ -14,13 +14,30 @@
         <form class="right-col">
             <aside class="calendar card">
                 <div class="cal-head">
-                    <div class="month">{{ monthLabel }}</div>
-                    <button class="more"><i class="fa-solid fa-ellipsis"></i></button>
+                  <div class="month">
+                    <select
+                      [(ngModel)]="currentMonth"
+                      name="calendarMonth"
+                      (ngModelChange)="onMonthYearChange()"
+                      class="month-select">
+                      <option *ngFor="let m of monthNames; let i = index" [value]="i">{{ m }}</option>
+                    </select>
+
+                    <select
+                      [(ngModel)]="currentYear"
+                      name="calendarYear"
+                      (ngModelChange)="onMonthYearChange()"
+                      class="year-select">
+                      <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+                    </select>
+                  </div>
+
+                  <button class="more"><i class="fa-solid fa-ellipsis"></i></button>
                 </div>
 
-                <div class="weekdays">
-                    <span *ngFor="let w of weekDays">{{ w }}</span>
-                </div>
+              <div class="weekdays">
+                <span *ngFor="let w of weekDaysView">{{ w }}</span>
+              </div>
 
                 <div class="days" id="days-grid">
                     <ng-container *ngFor="let cell of calendarCells; let i = index">
@@ -69,28 +86,29 @@
               <div class="avatar" style="background-color: #5C6BC0;">MO</div>
               <div>
                 <p>Matias Oyhamburu (yo)</p>
-                <span>@matiasoyhamburu</span>
+                <span>&#64;matiasoyhamburu</span>
               </div>
-            </li>
-            <li>
+              </li>
+
+              <li>
               <div class="avatar" style="background-color: #8E24AA;">EO</div>
               <div>
                 <p>Emilia Ocampo</p>
-                <span>@emilia4630709</span>
+                <span>&#64;emilia4630709</span>
               </div>
             </li>
             <li>
               <div class="avatar" style="background-color: #4CAF50;">IE</div>
               <div>
                 <p>Ignacio erbin</p>
-                <span>@erbinignacio</span>
+                <span>&#64;erbinignacio</span>
               </div>
             </li>
             <li>
               <div class="avatar" style="background-color: #FFB300;">J</div>
               <div>
                 <p>Joan</p>
-                <span>@joan69252514</span>
+                <span>&#64;joan69252514</span>
               </div>
             </li>
           </ul>
