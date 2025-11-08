@@ -11,7 +11,7 @@
         </div>
 
         <!-- Columna derecha: calendario + tareas -->
-        <form class="right-col">
+        <div class="right-col">
             <aside class="calendar card">
                 <div class="cal-head">
                   <div class="month">
@@ -50,7 +50,12 @@
             </aside>
 
             <aside class="agenda-card card">
-                <div class="date-title">{{ selectedDayTitle }}</div>
+                <div class="agenda-header">
+                  <div class="date-title">{{ selectedDayTitle }}</div>
+                  <button class="add-event-btn" (click)="openCreateActivity()"  title="Crear actividad">
+                  <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
                 <ul class="agenda" id="agenda-list">
                     <li *ngFor="let ev of agenda; let i = index" class="event" [ngClass]="ev.color"
                         [class.selected-event]="selectedEvent === i" tabindex="0" (click)="selectEvent(i)"
@@ -66,7 +71,7 @@
             </aside>
           <button class="edit-btn" id="toggleEdit" (click)="toggleModal(true)">Invitar Amigos</button>
 
-        </form>
+        </div>
 
 
     </section>
@@ -116,6 +121,41 @@
       </div>
     </div>
 
+  <!-- Modal Crear Actividad -->
+  <div class="modal-overlay" [class.active]="isCreateOpen" (click)="closeAnyOverlay($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Crear actividad</h2>
+        <button class="close-button" (click)="closeCreateActivity()">&times;</button>
+      </div>
 
+      <div class="modal-body">
+        <form [formGroup]="createForm" (ngSubmit)="submitCreateActivity()">
+          <div class="input-group">
+            <input formControlName="name" type="text" placeholder="Nombre" />
+          </div>
+
+          <div class="input-group">
+            <input formControlName="date" type="date" />
+          </div>
+
+          <div class="input-group" style="gap:10px;">
+            <input formControlName="startTime" type="time" />
+            <input formControlName="endTime" type="time" />
+          </div>
+
+          <div class="input-group">
+            <input formControlName="cost" type="number" min="0" step="0.01" placeholder="Costo" />
+          </div>
+
+          <div class="input-group">
+            <input formControlName="description" type="text" placeholder="Descripción" />
+          </div>
+
+          <button class="share-btn" type="submit">Guardar</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
 </app-test>

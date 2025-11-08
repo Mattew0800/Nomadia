@@ -502,5 +502,55 @@
   .calendar .cal-head .month { gap: 6px; }
 }
 
+.agenda-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
 
+.add-event-btn {
+  background: var(--accent-orange);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.add-event-btn:hover {
+  background: #ff7a2d;
+  transform: scale(1.05);
+}
+
+.agenda-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.add-event-btn { /* ya te lo pasé antes */ }
+
+.modal-overlay {
+  position: fixed; /* importante */
+  inset: 0;
+  z-index: 9999;   /* por encima del grid */
+}
+
+.modal-content {
+  position: relative; /* para que z-index aplique si lo subís */
+  z-index: 10000;
+}
+
+.grid.blurred {
+  filter: blur(5px);
+  pointer-events: none; /* OK: bloquea el grid, pero el modal está por encima */
+}
 

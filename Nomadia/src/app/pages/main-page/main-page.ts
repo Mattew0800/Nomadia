@@ -4,7 +4,8 @@ import {Router, RouterLink} from '@angular/router';
 import {Test} from '../test/test';
 import {TripService} from '../../services/trip-service';
 import {TripResponse} from '../../models/TripResponse';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivityService} from '../../services/activity-service';
 
 type AgendaItem = { time: string; label: string; desc: string; color: 'yellow' | 'purple' | 'blue' };
 
@@ -29,11 +30,14 @@ export class MainPage implements OnInit {
   isModalOpen: boolean = false;
   isBlurred: boolean = false;
 
+  isCreateOpen = false;
+  createForm!: FormGroup;
+
   weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   get weekDaysView(): string[] {
     return this.startWeekOnMonday
-      ? ['MON','TUE','WED','THU','FRI','SAT','SUN']
+      ? ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
       : this.weekDays;
   }
 
@@ -63,13 +67,14 @@ export class MainPage implements OnInit {
   public currentTrip: TripResponse | null = null;
 
 
-  constructor(private router: Router, public tService: TripService) {
+  constructor(private router: Router, public tService: TripService, private fb: FormBuilder, private activityApi: ActivityService) {
     this.renderCalendar(this.currentMonth, this.currentYear);
   }
 
   ngOnInit() {
     this.loadTripFromLocalStorage();
     this.initYears();
+    this.initCreateForm();
   }
 
   private fetchTripData(id: string) {
@@ -79,6 +84,8 @@ export class MainPage implements OnInit {
         // Posiciono automáticamente calendario en la fecha de inicio del viaje
         const start = this.getTripStartDate(trip); // lee trip.startDate (string)
         if (start) this.goToDate(start);
+        this.loadAgendaForSelectedDay();
+
         console.log('Viaje cargado:', this.currentTrip);
       },
       error: (e: any) => {
@@ -88,11 +95,10 @@ export class MainPage implements OnInit {
   }
 
   private loadTripFromLocalStorage() {
-    // intento de obtener el id del viaje seleccionado
+
     const tripId = localStorage.getItem('selectedTripId');
 
     if (tripId) {
-      // se carga el viaje seleccionado mediante el id
       this.fetchTripData(tripId);
 
     } else {
@@ -123,6 +129,11 @@ export class MainPage implements OnInit {
     this.updateSelectedDayTitle();
   }
 
+  onMonthYearChange() {
+    // se llama desde los <select> con [(ngModel)]
+    this.renderCalendar(this.currentMonth, this.currentYear);
+  }
+
   isToday(day: number | null): boolean {
     if (day === null) return false;
     return (
@@ -135,6 +146,7 @@ export class MainPage implements OnInit {
   selectDay(day: number) {
     this.selectedDay = day;
     this.updateSelectedDayTitle();
+    this.loadAgendaForSelectedDay();
   }
 
   private updateSelectedDayTitle() {
@@ -148,20 +160,40 @@ export class MainPage implements OnInit {
   }
 
   private initYears() {
-    this.years=[];
+    this.years = [];
     const start = this.today.getFullYear() - 10;
     const end = this.today.getFullYear() + 10;
     for (let y = start; y <= end; y++) this.years.push(y);
   }
 
-  onMonthYearChange() {
-    // se llama desde los <select> con [(ngModel)]
-    this.renderCalendar(this.currentMonth, this.currentYear);
-  }
 
   // --- AGENDA ---
   selectEvent(i: number) {
     this.selectedEvent = i;
+  }
+
+  private loadAgendaForSelectedDay() {
+    if (!this.currentTrip || this.selectedDay == null) return;
+
+    this.activityApi.listByTrip(Number(this.currentTrip.id)).subscribe({
+      next: (list) => {
+        const y = this.currentYear, m = this.currentMonth + 1, d = this.selectedDay!;
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const selectedStr = `${y}-${pad(m)}-${pad(d)}`;
+
+        const sameDay = list.filter(a => (a.date ?? '').startsWith(selectedStr));
+
+        this.agenda = sameDay
+          .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+          .map(a => ({
+            time: (a.startTime || '').slice(0, 5),
+            label: a.name,
+            desc: a.description,
+            color: 'blue' as const
+          }));
+      },
+      error: (e) => console.error(e)
+    });
   }
 
   // LÓGICA DEL MODAL:
@@ -172,15 +204,97 @@ export class MainPage implements OnInit {
 
   closeOnOverlay(event: MouseEvent) {
     if (event.target instanceof HTMLElement && event.target.classList.contains('modal-overlay')) {
-      this.toggleModal(false);
+      this.isModalOpen = false;
+      this.isCreateOpen = false;
+      this.isBlurred = false;
     }
   }
 
   @HostListener('document:keydown.escape')
   handleEscapeKey() {
-    if (this.isModalOpen) {
-      this.toggleModal(false);
+    if (this.isModalOpen || this.isCreateOpen) {
+      this.isModalOpen = false;
+      this.isCreateOpen = false;
+      this.isBlurred = false;
     }
+  }
+
+  private initCreateForm() {
+    this.createForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
+      date: ['', Validators.required],          // YYYY-MM-DD
+      description: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2000)]],
+      cost: [0, [Validators.required, Validators.min(0)]],
+      startTime: ['09:00', Validators.required], // HH:mm
+      endTime: ['10:00', Validators.required],   // HH:mm
+    });
+  }
+
+  openCreateActivity() {
+    const y = this.currentYear;
+    const m = this.currentMonth + 1;
+    const d = this.selectedDay ?? 1;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const yyyyMMdd = `${y}-${pad(m)}-${pad(d)}`;
+
+    this.createForm.reset({
+      name: '',
+      date: yyyyMMdd,
+      description: '',
+      cost: 0,
+      startTime: '09:00',
+      endTime: '10:00'
+    });
+
+    this.isCreateOpen = true;
+    this.isBlurred = true; // mismo blur que el otro modal
+  }
+
+  closeCreateActivity() {
+    this.isCreateOpen = false;
+    this.isBlurred = false;
+  }
+
+  // Cierra cualquier overlay si clickeás afuera (sirve para ambos modales)
+  closeAnyOverlay(event: MouseEvent) {
+    if (event.target instanceof HTMLElement && event.target.classList.contains('modal-overlay')) {
+      this.isModalOpen = false;  // invitar amigos
+      this.isCreateOpen = false; // crear actividad
+      this.isBlurred = false;
+    }
+  }
+
+  submitCreateActivity() {
+    if (!this.currentTrip) return;
+
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      return;
+    }
+
+    const v = this.createForm.value;
+
+    const payload = {
+      name: v.name,
+      date: v.date, // 'YYYY-MM-DD'
+      description: v.description,
+      cost: Number(v.cost),
+      startTime: v.startTime, // 'HH:mm'
+      endTime: v.endTime,     // 'HH:mm'
+      // Opcionales para que pasen los @AssertTrue del back:
+      tripStartDate: (this.currentTrip as any)?.startDate ?? undefined,
+      tripEndDate: (this.currentTrip as any)?.endDate ?? undefined,
+    };
+
+    this.activityApi.create(Number((this.currentTrip as any).id), payload).subscribe({
+      next: () => {
+        this.loadAgendaForSelectedDay(); // refrescá la lista
+        this.closeCreateActivity();
+      },
+      error: (e) => {
+        console.error(e);
+      }
+    });
   }
 
   /** Parsea 'YYYY-MM-DD' como fecha local (sin shift por timezone). Si viene ISO con tiempo/Z, usa Date normal. */
@@ -237,6 +351,4 @@ export class MainPage implements OnInit {
     this.updateSelectedDayTitle();
   }
 }
-
-
 
