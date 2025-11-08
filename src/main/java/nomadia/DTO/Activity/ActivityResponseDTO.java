@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import nomadia.Model.Activity;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -20,6 +21,8 @@ public class ActivityResponseDTO {
     private String description;
     private Double cost;
     private Long tripId;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     public static ActivityResponseDTO fromEntity(Activity a) {
         ActivityResponseDTO dto = new ActivityResponseDTO();
@@ -29,6 +32,8 @@ public class ActivityResponseDTO {
         dto.setDescription(a.getDescription());
         dto.setCost(a.getCost());
         dto.setTripId(a.getTrip().getId());
+        dto.setStartTime(a.getStartTime());
+        dto.setEndTime(a.getEndTime());
         return dto;
     }
 }

@@ -1,6 +1,10 @@
 package nomadia.Controller;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
 import jakarta.validation.Valid;
+import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.ActivityAndTrip.ActivityWithTripDTO;
 import nomadia.DTO.Activity.*;
 import nomadia.DTO.ActivityAndTrip.ActivityUpdateWithTripDTO;
@@ -9,6 +13,7 @@ import nomadia.Service.ActivityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -97,6 +102,36 @@ public class ActivityController {
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode())
                     .body(Map.of("error", e.getReason()));
+        }
+    }
+
+    //nacho
+    @RestController
+    @RequestMapping("/nomadia/me/activities")
+    public class MeActivitiesController {
+
+        private final ActivityService activityService;
+
+        public MeActivitiesController(ActivityService activityService) {
+            this.activityService = activityService;
+        }
+
+        @PostMapping("/list")
+        @PreAuthorize("hasRole('USER')")
+        public ResponseEntity<?> listMine(@AuthenticationPrincipal UserDetailsImpl me) {
+            var list = activityService.getActivitiesForUser(me.getId(), null, null, null, null);
+            if (list.isEmpty()) return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(list);
+        }
+
+        @PostMapping("/list/filter")
+        @PreAuthorize("hasRole('USER')")
+        public ResponseEntity<?> listMineFiltered(@AuthenticationPrincipal UserDetailsImpl me,
+                                                  @RequestBody ActivityFilterRequestDTO req) {
+            var list = activityService.getActivitiesForUser(
+                    me.getId(), req.getFromDate(), req.getToDate(), req.getFromTime(), req.getToTime());
+            if (list.isEmpty()) return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(list);
         }
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.swing.text.html.Option;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -82,6 +83,18 @@ public class ActivityService{
         return activityRepository.findByTripId(tripId)
                 .stream().map(ActivityResponseDTO::fromEntity).toList();
     }
+//nacho
+@Transactional(readOnly = true)
+public List<ActivityResponseDTO> getActivitiesForUser(
+        Long userId,
+        LocalDate fromDate, LocalDate toDate,
+        LocalTime fromTime, LocalTime toTime) {
+
+    return activityRepository.findAllByUserTrips(userId, fromDate, toDate, fromTime, toTime)
+            .stream()
+            .map(ActivityResponseDTO::fromEntity)
+            .toList();
+}
 
     @Transactional(readOnly = true)
     public ActivityResponseDTO get(Long tripId, Long activityId) {
