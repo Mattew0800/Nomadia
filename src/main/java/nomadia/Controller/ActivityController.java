@@ -46,10 +46,14 @@ public class ActivityController {
 
     @PostMapping("/list")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> listMine(@AuthenticationPrincipal UserDetailsImpl me, @RequestBody TripIdRequestDTO dto){
-        var list = activityService.getActivitiesForUserAndTrip(me.getId(), null, null, null, null, dto.getTripId());
-        if (list.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(list);
+    public ResponseEntity<?> listMine(@AuthenticationPrincipal UserDetailsImpl me, @RequestBody ActivityFilterRequestDTO dto){
+        try{
+            var list = activityService.getActivitiesForUserAndTrip(me.getId(), dto.getFromDate(),dto.getToDate(),dto.getFromTime(),dto.getToTime(),dto.getTripId());
+            if (list.isEmpty()) return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(list);
+        }catch (ResponseStatusException e){
+            return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));
+        }
     }
 
     @PostMapping("/get")
