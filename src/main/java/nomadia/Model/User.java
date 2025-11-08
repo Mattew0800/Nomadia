@@ -3,6 +3,7 @@ package nomadia.Model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,6 +36,11 @@ public class User {
     @Column(nullable = false,length = 10)
     private Role role;
 
+    @Pattern(
+            regexp = "^$|^[\\S\\s]{3,10}$",
+            message = "El sobre mi debe tener entre 3 y 10 caracteres si se proporciona"
+    )
+    @Column(nullable = true)
     private String about;
 
     @NotBlank(message = "El email es requerido")
@@ -43,7 +49,10 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Size(min=3,max= 10,message = "El apodo debe tener entre 3 y 10 caracteres")
+    @Pattern(
+            regexp = "^$|^[\\S\\s]{3,10}$",
+            message = "El apodo debe tener entre 3 y 10 caracteres si se proporciona"
+    )
     @Column(nullable = true)
     private String nick;
 

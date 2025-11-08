@@ -1,5 +1,6 @@
 package nomadia.DTO.User;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import nomadia.Enum.Role;
@@ -20,16 +21,25 @@ public class UserUpdateDTO {
     @Size(min = 6, message = "La contraseña debe tener 6 caracteres como mínimo")
     private String password;
 
-    @Pattern(regexp = "^\\+?[0-9\\s-]{7,20}$",
-            message = "El teléfono debe contener solo números, espacios, guiones y opcionalmente un '+' inicial")
+    @Pattern(
+            regexp = "^$|^\\+?[0-9\\s-]{7,20}$",
+            message = "El teléfono debe contener solo números, espacios, guiones y opcionalmente un '+' inicial"
+    )
     private String phone;
 
     private String photoUrl;
 
-    @Size(min = 3, max = 10, message = "El apodo debe tener entre 3 y 10 caracteres")
+    @Pattern(
+            regexp = "^$|^[\\S\\s]{3,10}$",
+            message = "El apodo debe tener entre 3 y 10 caracteres si se proporciona"
+    )
     private String nick;
 
-    @Size(max = 500, message = "El sobre mi no debe superar 500 caracteres")
+    @Pattern(
+            regexp = "^$|^[\\S\\s]{3,10}$",
+            message = "El sobre mi debe tener entre 3 y 10 caracteres si se proporciona"
+    )
+    @Column(nullable = true)
     private String about;
 
     @Past(message = "La fecha de nacimiento debe ser en el pasado")

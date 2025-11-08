@@ -108,7 +108,7 @@ public class UserService {
 
         if (dto.getEmail() != null &&
                 userRepository.existsByEmailIgnoreCaseAndIdNot(dto.getEmail().trim().toLowerCase(), id)) {
-            throw new IllegalArgumentException("El email ya está en uso por otro usuario.");
+            throw new IllegalArgumentException("El email ya está en uso");
         }
         dto.applyToEntity(existing, passwordEncoder, allowRoleChange);
         return userRepository.save(existing);
