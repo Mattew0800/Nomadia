@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.swing.text.html.Option;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -27,6 +28,11 @@ public class ActivityService{
         this.tripRepository = tripRepository;
     }
 
+    private boolean overlaps(LocalTime aStart, LocalTime aEnd,
+                             LocalTime bStart, LocalTime bEnd) {
+        // [aStart, aEnd) vs [bStart, bEnd)
+        return aStart.isBefore(bEnd) && bStart.isBefore(aEnd);
+    }
 
     public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto) {
         Trip trip = tripRepository.findById(tripId)
@@ -35,16 +41,38 @@ public class ActivityService{
         dto.setTripStartDate(trip.getStartDate());
         dto.setTripEndDate(trip.getEndDate());
 
-        boolean solapamiento = trip.getActivities().stream()
-                .anyMatch(a -> a.getDate().equals(dto.getDate())
-                        && !(dto.getEndTime().isBefore(a.getStartTime()) || dto.getStartTime().isAfter(a.getEndTime())));
-        if (solapamiento) {
+        List<Activity> sameDay = activityRepository.findByTripIdAndDate(tripId, dto.getDate());
+
+        boolean conflict = sameDay.stream().anyMatch(a ->
+                overlaps(dto.getStartTime(), dto.getEndTime(), a.getStartTime(), a.getEndTime())
+        );
+
+        if (conflict) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe otra actividad en ese horario");
         }
+
         Activity activity = dto.toEntity();
         activity.setTrip(trip);
         return ActivityResponseDTO.fromEntity(activityRepository.save(activity));
     }
+
+//    public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto) {
+//        Trip trip = tripRepository.findById(tripId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
+//
+//        dto.setTripStartDate(trip.getStartDate());
+//        dto.setTripEndDate(trip.getEndDate());
+//
+//        boolean solapamiento = trip.getActivities().stream()
+//                .anyMatch(a -> a.getDate().equals(dto.getDate())
+//                        && !(dto.getEndTime().isBefore(a.getStartTime()) || dto.getStartTime().isAfter(a.getEndTime())));
+//        if (solapamiento) {
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe otra actividad en ese horario");
+//        }
+//        Activity activity = dto.toEntity();
+//        activity.setTrip(trip);
+//        return ActivityResponseDTO.fromEntity(activityRepository.save(activity));
+//    }
 
     @Transactional(readOnly = true)
     public List<ActivityResponseDTO> listByTrip(Long tripId) {
