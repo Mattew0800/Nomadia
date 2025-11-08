@@ -82,7 +82,7 @@ public class TripController {
             return ResponseEntity.ok(Map.of("message","Usuario agregado con Exito"));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("El usuario o el viaje no existen");
+                    .body(e.getMessage());
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
