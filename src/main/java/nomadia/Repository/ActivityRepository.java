@@ -26,13 +26,27 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     }
 
     @Query("""
-SELECT a FROM Activity a JOIN a.trip t
-WHERE t.createdBy.id = ?1
-  AND (?2 IS NULL OR a.date >= ?2)
-  AND (?3 IS NULL OR a.date <= ?3)
-  AND (?4 IS NULL OR ?5 IS NULL OR (a.startTime < ?5 AND a.endTime > ?4))
+SELECT DISTINCT a
+FROM Activity a
+JOIN a.trip t
+LEFT JOIN t.users u
+WHERE u.id = :userId
+  AND (:tripId IS NULL OR t.id = :tripId)
+  AND (:fromDate IS NULL OR a.date >= :fromDate)
+  AND (:toDate IS NULL OR a.date <= :toDate)
+  AND (:fromTime IS NULL OR :toTime IS NULL OR (a.startTime < :toTime AND a.endTime > :fromTime))
 ORDER BY a.date ASC, a.startTime ASC, a.name ASC
 """)
     List<Activity> findAllByUserTrips(
-            Long userId, LocalDate fromDate, LocalDate toDate, LocalTime fromTime, LocalTime toTime);
+            @Param("userId") Long userId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            @Param("fromTime") LocalTime fromTime,
+            @Param("toTime") LocalTime toTime,
+            @Param("tripId") Long tripId
+    );
+
+
+
 }
+

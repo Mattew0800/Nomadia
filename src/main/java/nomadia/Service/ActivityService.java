@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -35,12 +34,15 @@ public class ActivityService{
         return aStart.isBefore(bEnd) && bStart.isBefore(aEnd);
     }
 
+    @Transactional
     public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto) {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
 
-        dto.setTripStartDate(trip.getStartDate());
-        dto.setTripEndDate(trip.getEndDate());
+
+        if (dto.getDate().isBefore(trip.getStartDate()) || dto.getDate().isAfter(trip.getEndDate())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de la actividad debe estar dentro del rango del viaje");
+        }
 
         List<Activity> sameDay = activityRepository.findByTripIdAndDate(tripId, dto.getDate());
 
@@ -54,26 +56,11 @@ public class ActivityService{
 
         Activity activity = dto.toEntity();
         activity.setTrip(trip);
-        return ActivityResponseDTO.fromEntity(activityRepository.save(activity));
+
+        Activity saved = activityRepository.save(activity);
+        return ActivityResponseDTO.fromEntity(saved);
     }
 
-//    public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto) {
-//        Trip trip = tripRepository.findById(tripId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
-//
-//        dto.setTripStartDate(trip.getStartDate());
-//        dto.setTripEndDate(trip.getEndDate());
-//
-//        boolean solapamiento = trip.getActivities().stream()
-//                .anyMatch(a -> a.getDate().equals(dto.getDate())
-//                        && !(dto.getEndTime().isBefore(a.getStartTime()) || dto.getStartTime().isAfter(a.getEndTime())));
-//        if (solapamiento) {
-//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe otra actividad en ese horario");
-//        }
-//        Activity activity = dto.toEntity();
-//        activity.setTrip(trip);
-//        return ActivityResponseDTO.fromEntity(activityRepository.save(activity));
-//    }
 
     @Transactional(readOnly = true)
     public List<ActivityResponseDTO> listByTrip(Long tripId) {
@@ -83,21 +70,28 @@ public class ActivityService{
         return activityRepository.findByTripId(tripId)
                 .stream().map(ActivityResponseDTO::fromEntity).toList();
     }
-//nacho
+
 @Transactional(readOnly = true)
-public List<ActivityResponseDTO> getActivitiesForUser(
+public List<ActivityResponseDTO> getActivitiesForUserAndTrip(
         Long userId,
         LocalDate fromDate, LocalDate toDate,
-        LocalTime fromTime, LocalTime toTime) {
+        LocalTime fromTime, LocalTime toTime,Long tripId) {
 
-    return activityRepository.findAllByUserTrips(userId, fromDate, toDate, fromTime, toTime)
+    if (tripId != null && !tripRepository.existsByIdAndUserId(tripId, userId)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No perteneces a este viaje");
+    }
+    if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rango de fechas es inválido");
+    }
+    return activityRepository.findAllByUserTrips(userId, fromDate, toDate, fromTime, toTime,tripId)
             .stream()
             .map(ActivityResponseDTO::fromEntity)
             .toList();
 }
 
     @Transactional(readOnly = true)
-    public ActivityResponseDTO get(Long tripId, Long activityId) {
+    public ActivityResponseDTO get(Long tripId, Long activityId,Long userId) {
+
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
         return ActivityResponseDTO.fromEntity(a);

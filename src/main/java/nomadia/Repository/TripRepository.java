@@ -22,6 +22,17 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
 
     @Query("select t.createdBy.id from Trip t where t.id = :tripId")
     Optional<Long> findOwnerId(@Param("tripId") Long tripId);
+    @Query("""
+    SELECT COUNT(t) > 0
+    FROM Trip t
+    LEFT JOIN t.users u
+    WHERE t.id = :tripId AND (t.createdBy.id = :userId OR u.id = :userId)
+""")
+    boolean existsByIdAndUserId(
+            @Param("tripId") Long tripId,
+            @Param("userId") Long userId
+    );
+
 
     @Modifying
     @Transactional

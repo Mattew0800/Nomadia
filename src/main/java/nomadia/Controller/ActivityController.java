@@ -1,15 +1,11 @@
 package nomadia.Controller;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwt;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
-import nomadia.DTO.ActivityAndTrip.ActivityWithTripDTO;
 import nomadia.DTO.Activity.*;
-import nomadia.DTO.ActivityAndTrip.ActivityUpdateWithTripDTO;
 import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.Service.ActivityService;
+import nomadia.Service.TripService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +13,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,18 +20,21 @@ import java.util.Map;
 public class ActivityController {
 
     private final ActivityService activityService;
+    private final TripService tripService;
 
-    public ActivityController(ActivityService activityService) {
+
+    public ActivityController(ActivityService activityService, TripService tripService) {
         this.activityService = activityService;
+        this.tripService = tripService;
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> create(@Valid @RequestBody ActivityWithTripDTO request) {
+    public ResponseEntity<?> create(@Valid @RequestBody ActivityCreateDTO request) {
         try {
             ActivityResponseDTO response = activityService.create(
                     request.getTripId(),
-                    request.getActivity()
+                    request
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (ResponseStatusException e) {
@@ -48,23 +46,17 @@ public class ActivityController {
 
     @PostMapping("/list")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> listByTrip(@RequestBody TripIdRequestDTO tripIdRequestDTO) {
-        try {
-            List<ActivityResponseDTO> list = activityService.listByTrip(tripIdRequestDTO.getTripId());
-            return ResponseEntity.ok(list);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity
-                    .status(e.getStatusCode())
-                    .body(Map.of("error", e.getReason()));
-        }
+    public ResponseEntity<?> listMine(@AuthenticationPrincipal UserDetailsImpl me, @RequestBody TripIdRequestDTO dto){
+        var list = activityService.getActivitiesForUserAndTrip(me.getId(), null, null, null, null, dto.getTripId());
+        if (list.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(list);
     }
-
 
     @PostMapping("/get")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getById(@RequestBody ActivityIdRequestDTO request) {
+    public ResponseEntity<?> getById(@RequestBody ActivityIdRequestDTO dto) {
         try {
-            ActivityResponseDTO response = activityService.findById(request.getActivityId());
+            ActivityResponseDTO response = activityService.findById(dto.getActivityId());
             return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
             return ResponseEntity
@@ -79,12 +71,12 @@ public class ActivityController {
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> update(@Valid @RequestBody ActivityUpdateWithTripDTO request) {
+    public ResponseEntity<?> update(@Valid @RequestBody ActivityUpdateRequestDTO dto) {
         try {
             ActivityResponseDTO response = activityService.update(
-                    request.getTripId(),
-                    request.getActivityId(),
-                    request.getUpdate()
+                    dto.getTripId(),
+                    dto.getActivityId(),
+                    dto
             );
             return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
@@ -102,36 +94,6 @@ public class ActivityController {
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode())
                     .body(Map.of("error", e.getReason()));
-        }
-    }
-
-    //nacho
-    @RestController
-    @RequestMapping("/nomadia/me/activities")
-    public class MeActivitiesController {
-
-        private final ActivityService activityService;
-
-        public MeActivitiesController(ActivityService activityService) {
-            this.activityService = activityService;
-        }
-
-        @PostMapping("/list")
-        @PreAuthorize("hasRole('USER')")
-        public ResponseEntity<?> listMine(@AuthenticationPrincipal UserDetailsImpl me) {
-            var list = activityService.getActivitiesForUser(me.getId(), null, null, null, null);
-            if (list.isEmpty()) return ResponseEntity.noContent().build();
-            return ResponseEntity.ok(list);
-        }
-
-        @PostMapping("/list/filter")
-        @PreAuthorize("hasRole('USER')")
-        public ResponseEntity<?> listMineFiltered(@AuthenticationPrincipal UserDetailsImpl me,
-                                                  @RequestBody ActivityFilterRequestDTO req) {
-            var list = activityService.getActivitiesForUser(
-                    me.getId(), req.getFromDate(), req.getToDate(), req.getFromTime(), req.getToTime());
-            if (list.isEmpty()) return ResponseEntity.noContent().build();
-            return ResponseEntity.ok(list);
         }
     }
 }

@@ -15,6 +15,8 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @Builder
 public class ActivityCreateDTO {
+    @NotNull
+    private Long tripId;
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 2, max = 120, message = "El nombre debe tener entre 2 y 120 caracteres")
@@ -37,23 +39,6 @@ public class ActivityCreateDTO {
     @NotNull(message = "La hora de fin es obligatoria")
     private LocalTime endTime;
 
-    @AssertTrue(message = "La hora de inicio debe ser anterior a la hora de fin")
-    public boolean isStartBeforeEnd() {
-        if (startTime == null || endTime == null) return true;
-        return startTime.isBefore(endTime);
-    }
-
-    private LocalDate tripStartDate;
-
-    private LocalDate tripEndDate;
-
-    private Long tripId;
-
-    @AssertTrue(message = "La fecha de la actividad debe estar dentro de las fechas del viaje")
-    public boolean isDateWithinTrip() {
-        if (date == null || tripStartDate == null || tripEndDate == null) return true;
-        return !date.isBefore(tripStartDate) && !date.isAfter(tripEndDate);
-    }
     public Activity toEntity() {
         Activity activity = new Activity();
         activity.setName(this.name);
@@ -64,5 +49,4 @@ public class ActivityCreateDTO {
         activity.setEndTime(this.endTime);
         return activity;
     }
-
 }

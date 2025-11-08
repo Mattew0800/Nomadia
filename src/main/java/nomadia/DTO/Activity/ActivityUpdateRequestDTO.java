@@ -1,15 +1,9 @@
 package nomadia.DTO.Activity;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import nomadia.Model.Activity;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -17,11 +11,11 @@ import java.time.LocalTime;
 @NoArgsConstructor
 public class ActivityUpdateRequestDTO {
 
+    @NotNull(message = "El ID del viaje es obligatorio")
+    private Long tripId;
+
     @NotNull(message = "El ID de la actividad es obligatorio")
     private Long activityId;
-
-    @NotNull(message = "El ID del trip es obligatorio")
-    private Long tripId;
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 2, max = 120)
@@ -45,26 +39,13 @@ public class ActivityUpdateRequestDTO {
     private LocalTime endTime;
 
     public void applyToEntity(Activity activity) {
-        if (this.name != null && !this.name.isBlank()) {
-            activity.setName(this.name);
-        }
-        if (this.date != null) {
-            activity.setDate(this.date);
-        }
-        if (this.description != null && !this.description.isBlank()) {
-            activity.setDescription(this.description);
-        }
-        if (this.cost != null) {
-            activity.setCost(this.cost);
-        }
-        if (this.startTime != null) {
-            activity.setStartTime(this.startTime);
-        }
-        if (this.endTime != null) {
-            activity.setEndTime(this.endTime);
-        }
+        activity.setName(this.name);
+        activity.setDate(this.date);
+        activity.setDescription(this.description);
+        activity.setCost(this.cost);
+        activity.setStartTime(this.startTime);
+        activity.setEndTime(this.endTime);
     }
-
 
     public boolean isTimeValid() {
         return startTime == null || endTime == null || startTime.isBefore(endTime);
