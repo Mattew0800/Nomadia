@@ -37,9 +37,30 @@ export class ActivityService {
     );
   }
 
-  // Extra por si luego lo usás
-  getById(activityId: number): Observable<ActivityResponseDTO> {
-    const headers = this.authHeaders();
-    return this.http.post<ActivityResponseDTO>(`${this.API_URL}/get`, { activityId }, { headers });
+  delete(tripId: number, activityId: number): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.API_URL}/delete`,
+      { tripId, activityId },
+      { headers: this.authHeaders() }
+    );
+  }
+
+  listMine(): Observable<ActivityResponseDTO[]> {
+    return this.http.post<ActivityResponseDTO[]>(
+      `http://localhost:8080/nomadia/me/activities/list`, {},  // endpoint nuevo
+      { headers: this.authHeaders() }
+    );
+  }
+
+  listMineFiltered(body: {
+    fromDate?: string;
+    toDate?: string;
+    fromTime?: string;
+    toTime?: string;
+  }): Observable<ActivityResponseDTO[]> {
+    return this.http.post<ActivityResponseDTO[]>(
+      `http://localhost:8080/nomadia/me/activities/list/filter`, body,
+      { headers: this.authHeaders() }
+    );
   }
 }

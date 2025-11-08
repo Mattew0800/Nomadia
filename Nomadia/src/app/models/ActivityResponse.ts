@@ -7,4 +7,6 @@ export interface ActivityResponseDTO {
   startTime: string;     // 'HH:mm:ss' o 'HH:mm' (según tu back)
   endTime: string;
   tripId: number;
+
+
 }
