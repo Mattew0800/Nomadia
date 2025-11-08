@@ -82,9 +82,11 @@
       </div>
         <div class="modal-body">
           <div class="input-group">
-            <input type="text" placeholder="Correo electrónico">
-            <button class="share-btn">Invitar</button>
+            <input #email type="text" placeholder="Correo electrónico">
+            <button class="share-btn" (click)="addUser(String(currentTrip?.id),String(email.value))">Invitar</button>
           </div>
+          <p *ngIf="msgOk" style="margin-top:1rem; color:#d1f366;">{{ msgOk }}</p>
+          <p *ngIf="msgError" style="margin-top:1rem; color:#eb3f3a;">{{ msgError }}</p>
           <h3>Miembros actuales</h3>
           <ul class="member-list">
             <li>

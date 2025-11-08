@@ -1,4 +1,5 @@
 export interface ActivityCreateDTO {
+  tripId: string;
   name: string;
   date: string;          // 'YYYY-MM-DD'
   description: string;

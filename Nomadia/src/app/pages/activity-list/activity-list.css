@@ -2,7 +2,9 @@
 .activity-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  width: 80%;
+  margin: 1rem 3rem;
+  gap: 1rem;
 }
 
 /* filtros */
@@ -65,6 +67,7 @@
   border: 1px solid rgba(255,255,255,.07);
   cursor: pointer;
   transition: background 0.25s ease;
+
 }
 .activity-card:hover { background: #202842; }
 

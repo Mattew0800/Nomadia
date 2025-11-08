@@ -25,9 +25,10 @@ export class ActivityService {
     });
   }
 
-  create(tripId: number, activity: ActivityCreateDTO) {
+  create(activity: ActivityCreateDTO) {
+
     return this.http.post<ActivityResponseDTO>(
-      `${this.API_URL}/create`, { tripId, activity }, { headers: this.authHeaders() }
+      `${this.API_URL}/create`, activity, { headers: this.authHeaders() }
     );
   }
 
@@ -47,7 +48,7 @@ export class ActivityService {
 
   listMine(): Observable<ActivityResponseDTO[]> {
     return this.http.post<ActivityResponseDTO[]>(
-      `http://localhost:8080/nomadia/me/activities/list`, {},  // endpoint nuevo
+      `http://localhost:8080/nomadia/activities/list`, {},  // endpoint nuevo
       { headers: this.authHeaders() }
     );
   }
@@ -59,7 +60,7 @@ export class ActivityService {
     toTime?: string;
   }): Observable<ActivityResponseDTO[]> {
     return this.http.post<ActivityResponseDTO[]>(
-      `http://localhost:8080/nomadia/me/activities/list/filter`, body,
+      `http://localhost:8080/nomadia/activities/list`, body,
       { headers: this.authHeaders() }
     );
   }

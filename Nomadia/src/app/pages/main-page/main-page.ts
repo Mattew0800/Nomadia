@@ -22,6 +22,9 @@ export class MainPage implements OnInit {
   activeNav = 0;
   startWeekOnMonday = true;
 
+  msgOk?: string;
+  msgError?: string;
+
   setActiveNav(i: number) {
     this.activeNav = i;
   }
@@ -58,9 +61,7 @@ export class MainPage implements OnInit {
   years: number[] = [];
 
   agenda: AgendaItem[] = [
-    {time: '08:00', label: 'Marketing', desc: '5 posts on instagram', color: 'yellow'},
-    {time: '10:00', label: 'Animation', desc: 'Platform App Concept', color: 'purple'},
-    {time: '11:00', label: 'Animation', desc: 'Platform Concept', color: 'blue'},
+
   ];
   selectedEvent: number | null = null;
 
@@ -275,6 +276,7 @@ export class MainPage implements OnInit {
     const v = this.createForm.value;
 
     const payload = {
+      tripId: (this.currentTrip as any).id,
       name: v.name,
       date: v.date, // 'YYYY-MM-DD'
       description: v.description,
@@ -286,7 +288,7 @@ export class MainPage implements OnInit {
       tripEndDate: (this.currentTrip as any)?.endDate ?? undefined,
     };
 
-    this.activityApi.create(Number((this.currentTrip as any).id), payload).subscribe({
+    this.activityApi.create(payload).subscribe({
       next: () => {
         this.loadAgendaForSelectedDay(); // refrescá la lista
         this.closeCreateActivity();
@@ -350,5 +352,43 @@ export class MainPage implements OnInit {
     this.selectedDay = d;
     this.updateSelectedDayTitle();
   }
+
+  addUser(tripId: string,email: string){
+    this.tService.addUser(tripId,email).subscribe({
+      next: () => {
+        this.tService.users = [...this.tService.users, email];
+        this.msgOk = "Usuario invitado con exito.";
+        this.msgError = "";
+      },
+      error: (e: any) => {
+        console.log(e);
+
+        let msg = '';
+        this.msgOk = "";
+
+        // Caso 1: errores de validación del backend
+        if (e.error?.errors) {
+          // tomamos todos los errores del objeto y los unimos
+          msg = Object.values(e.error.errors).join(', ');
+        }
+        // Caso 2: mensaje general del backend
+        else if (e.error?.message) {
+          msg = e.error.message;
+        }
+        // Caso 3: backend devuelve string
+        else if (typeof e.error === 'string') {
+          msg = e.error;
+        }
+        // Caso 4: último recurso
+        else {
+          msg = `Error ${e.status}`;
+        }
+
+        this.msgError = msg;
+      }
+    })
+  }
+
+  protected readonly String = String;
 }
 
