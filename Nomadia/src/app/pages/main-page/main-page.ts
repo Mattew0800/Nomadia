@@ -22,8 +22,11 @@ export class MainPage implements OnInit {
   activeNav = 0;
   startWeekOnMonday = true;
 
-  msgOk?: string;
-  msgError?: string;
+  msgInviteOk?: string;
+  msgInviteError?: string;
+
+  msgCreateOk?: string;
+  msgCreateError?: string;
 
   setActiveNav(i: number) {
     this.activeNav = i;
@@ -254,15 +257,8 @@ export class MainPage implements OnInit {
   closeCreateActivity() {
     this.isCreateOpen = false;
     this.isBlurred = false;
-  }
-
-  // Cierra cualquier overlay si clickeás afuera (sirve para ambos modales)
-  closeAnyOverlay(event: MouseEvent) {
-    if (event.target instanceof HTMLElement && event.target.classList.contains('modal-overlay')) {
-      this.isModalOpen = false;  // invitar amigos
-      this.isCreateOpen = false; // crear actividad
-      this.isBlurred = false;
-    }
+    this.msgCreateOk = '';
+    this.msgCreateError = '';
   }
 
   submitCreateActivity() {
@@ -290,14 +286,23 @@ export class MainPage implements OnInit {
 
     this.activityApi.create(payload).subscribe({
       next: () => {
-        this.loadAgendaForSelectedDay(); // refrescá la lista
+        this.loadAgendaForSelectedDay();
+        this.msgCreateOk="Actividad creada con exito."
+        this.msgCreateError = '';
         this.closeCreateActivity();
+
       },
       error: (e) => {
         console.error(e);
+        this.msgCreateOk = '';
+        this.msgCreateError = e.error.error;
+
       }
+
     });
+
   }
+
 
   /** Parsea 'YYYY-MM-DD' como fecha local (sin shift por timezone). Si viene ISO con tiempo/Z, usa Date normal. */
   private parseTripDate(raw: string | null | undefined): Date | null {
@@ -357,14 +362,14 @@ export class MainPage implements OnInit {
     this.tService.addUser(tripId,email).subscribe({
       next: () => {
         this.tService.users = [...this.tService.users, email];
-        this.msgOk = "Usuario invitado con exito.";
-        this.msgError = "";
+        this.msgInviteOk = "Usuario invitado con exito.";
+        this.msgInviteError = "";
       },
       error: (e: any) => {
         console.log(e);
 
         let msg = '';
-        this.msgOk = "";
+        this.msgInviteOk = "";
 
         // Caso 1: errores de validación del backend
         if (e.error?.errors) {
@@ -384,7 +389,7 @@ export class MainPage implements OnInit {
           msg = `Error ${e.status}`;
         }
 
-        this.msgError = msg;
+        this.msgInviteError = msg;
       }
     })
   }
