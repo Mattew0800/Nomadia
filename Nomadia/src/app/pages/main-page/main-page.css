@@ -472,14 +472,12 @@
   flex: 0 0 auto;
 }
 
-/* Si querés un bloque con flechas y selects (por si agregás prev/next) */
 .calendar .cal-head .month-controls {
   display: inline-flex;
   align-items: center;
   gap: 10px;
 }
 
-/* Botoncitos nav (si los usás) */
 .calendar .cal-head .nav {
   width: 34px;
   height: 34px;
@@ -495,7 +493,6 @@
 .calendar .cal-head .nav:hover { background: #121a2f; }
 .calendar .cal-head .nav:active { transform: translateY(1px); }
 
-/* Responsive fino para caber en pantallas chicas */
 @media (max-width: 520px) {
   .calendar .month-select { min-width: 8rem; }
   .calendar .year-select  { min-width: 5rem; }
@@ -536,21 +533,48 @@
   align-items: center;
   margin-bottom: 8px;
 }
-.add-event-btn { /* ya te lo pasé antes */ }
+.add-event-btn {  }
 
 .modal-overlay {
-  position: fixed; /* importante */
+  position: fixed;
   inset: 0;
-  z-index: 9999;   /* por encima del grid */
+  z-index: 9999;
 }
 
 .modal-content {
-  position: relative; /* para que z-index aplique si lo subís */
+  position: relative;
   z-index: 10000;
 }
 
 .grid.blurred {
   filter: blur(5px);
-  pointer-events: none; /* OK: bloquea el grid, pero el modal está por encima */
+  pointer-events: none;
 }
 
+.event {
+
+  position: relative;
+
+  padding-right: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 1rem;
+  color: #999;
+  transition: color 0.2s;
+}
+
+.delete-btn:hover {
+  color: #d9534f;
+}

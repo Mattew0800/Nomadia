@@ -7,7 +7,14 @@ import {TripResponse} from '../../models/TripResponse';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivityService} from '../../services/activity-service';
 
-type AgendaItem = { time: string; label: string; desc: string; color: 'yellow' | 'purple' | 'blue' };
+type AgendaItem = {
+  time: string;
+  label: string;
+  desc: string;
+  color: 'yellow' | 'purple' | 'blue' ;
+  tripId: string;
+  activityId: string;
+};
 
 
 @Component({
@@ -17,6 +24,7 @@ type AgendaItem = { time: string; label: string; desc: string; color: 'yellow' |
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.css'],
 })
+
 export class MainPage implements OnInit {
 
   activeNav = 0;
@@ -193,7 +201,9 @@ export class MainPage implements OnInit {
             time: (a.startTime || '').slice(0, 5),
             label: a.name,
             desc: a.description,
-            color: 'blue' as const
+            color: 'blue' as const,
+            tripId: String(this.currentTrip!.id),
+            activityId: String(a.id)
           }));
       },
       error: (e) => console.error(e)
@@ -279,7 +289,6 @@ export class MainPage implements OnInit {
       cost: Number(v.cost),
       startTime: v.startTime, // 'HH:mm'
       endTime: v.endTime,     // 'HH:mm'
-      // Opcionales para que pasen los @AssertTrue del back:
       tripStartDate: (this.currentTrip as any)?.startDate ?? undefined,
       tripEndDate: (this.currentTrip as any)?.endDate ?? undefined,
     };
@@ -304,7 +313,7 @@ export class MainPage implements OnInit {
   }
 
 
-  /** Parsea 'YYYY-MM-DD' como fecha local (sin shift por timezone). Si viene ISO con tiempo/Z, usa Date normal. */
+  /** se parsea 'YYYY-MM-DD' como fecha local (sin shift por timezone). Si viene ISO con tiempo/Z, usa Date normal. */
   private parseTripDate(raw: string | null | undefined): Date | null {
     if (!raw) return null;
 
@@ -321,13 +330,13 @@ export class MainPage implements OnInit {
     return isNaN(d.getTime()) ? null : d;
   }
 
-  /** Lee startDate del trip (TripResponse o TripCreate) y devuelve Date */
+  /** se lee startDate del trip (TripResponse o TripCreate) y devuelve Date */
   private getTripStartDate(trip: TripResponse | { startDate?: string }): Date | null {
     const raw = (trip as any)?.startDate ?? null;
     return this.parseTripDate(raw);
   }
 
-  /** Si el año no está en el rango del selector, lo extiendo para que aparezca */
+  /** si el año no está en el rango del selector, lo extiendo para que aparezca */
   private ensureYearInRange(year: number) {
     if (!this.years || this.years.length === 0) return;
     const min = Math.min(...this.years);
@@ -339,7 +348,7 @@ export class MainPage implements OnInit {
     }
   }
 
-  /** Posiciona el calendario en la fecha indicada y selecciona ese día */
+  /** se posiciona el calendario en la fecha indicada y selecciona ese día */
   private goToDate(date: Date) {
     const m = date.getMonth();
     const y = date.getFullYear();
@@ -371,20 +380,20 @@ export class MainPage implements OnInit {
         let msg = '';
         this.msgInviteOk = "";
 
-        // Caso 1: errores de validación del backend
+        // errores de validación del backend
         if (e.error?.errors) {
           // tomamos todos los errores del objeto y los unimos
           msg = Object.values(e.error.errors).join(', ');
         }
-        // Caso 2: mensaje general del backend
+        // mensaje general del backend
         else if (e.error?.message) {
           msg = e.error.message;
         }
-        // Caso 3: backend devuelve string
+        // backend devuelve string
         else if (typeof e.error === 'string') {
           msg = e.error;
         }
-        // Caso 4: último recurso
+        // último recurso
         else {
           msg = `Error ${e.status}`;
         }
@@ -392,6 +401,40 @@ export class MainPage implements OnInit {
         this.msgInviteError = msg;
       }
     })
+  }
+
+  deleteEvent(index: number) {
+
+    const eventToDelete = this.agenda[index];
+
+    if (!eventToDelete || !eventToDelete.tripId || !eventToDelete.activityId) {
+      console.error('IDs de viaje o actividad faltantes en el evento.');
+      return;
+    }
+
+    const tripId = eventToDelete.tripId;
+    const activityId = eventToDelete.activityId;
+
+    this.activityApi.deleteActivity(tripId, activityId).subscribe({
+      next: () => {
+
+        this.agenda.splice(index, 1);
+
+        if (this.selectedEvent !== null) {
+          if (this.selectedEvent === index) {
+            this.selectedEvent = null;
+          } else if (this.selectedEvent > index) {
+            this.selectedEvent--;
+          }
+        }
+
+        console.log(`Actividad ${activityId} borrada del servidor y de la UI.`);
+
+      },
+      error: (err: any) => {
+        console.error('Error al borrar la actividad del servidor:', err);
+      }
+    });
   }
 
   protected readonly String = String;

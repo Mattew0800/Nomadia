@@ -62,9 +62,16 @@
                         (keydown.enter)="selectEvent(i)" (keydown.space)="selectEvent(i)">
                         <span class="time">{{ ev.time }}</span>
                         <div class="details">
-                            <div class="label">{{ ev.label }}</div>
+
+                            <div class="label">{{ ev.label }} </div>
                             <div class="desc">{{ ev.desc }}</div>
+
                         </div>
+
+                      <button class="delete-btn" (click)="deleteEvent(i); $event.stopPropagation()">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+
                     </li>
                 </ul>
 

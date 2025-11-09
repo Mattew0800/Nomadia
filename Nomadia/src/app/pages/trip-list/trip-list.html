@@ -16,7 +16,7 @@
             <section class="grid-container">
             @for (trip of filteredViajes; track trip.id) {
 
-            <div class="activity-card" (click)="selectTrip(trip.id)">
+            <div class="activity-card" (click)="selectTrip(String(trip.id))">
                 <div class="card-image-wrapper">
                     <!--<img [src]="activity.imageUrl" [alt]="activity.title" class="card-image">-->
 

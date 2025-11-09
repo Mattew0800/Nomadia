@@ -1,5 +1,5 @@
 export interface TripResponse{
-    id: number;
+    id: string;
     name: string;
     state: string;
     type: string;

@@ -35,7 +35,7 @@ export class TripList implements OnInit {
     })
   }
 
-  selectTrip(tripId: number) {
+  selectTrip(tripId: string) {
     // se guarda el id en local storage para mantenerlo oculto
     localStorage.setItem('selectedTripId', tripId.toString());
 
@@ -52,7 +52,7 @@ export class TripList implements OnInit {
     return this.tService.trips.filter(t => t.state === targetState);
   }
 
-  deleteTrip(id: number, event: Event) {
+  deleteTrip(id: string, event: Event) {
     event.stopPropagation(); // evita que haga clic sobre la card
     if (confirm('¿Seguro que querés eliminar este viaje?')) {
       this.tService.deleteTrip(id).subscribe({
@@ -68,4 +68,5 @@ export class TripList implements OnInit {
     }
   }
 
+  protected readonly String = String;
 }

@@ -13,43 +13,30 @@ export class ActivityService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  private authHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    if (!token) {
-      // mismo patrón que usaste en TripService
-      throw new Error('No se encontró el token de autenticación. Iniciá sesión.');
-    }
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
 
   create(activity: ActivityCreateDTO) {
 
     return this.http.post<ActivityResponseDTO>(
-      `${this.API_URL}/create`, activity, { headers: this.authHeaders() }
+      `${this.API_URL}/create`,
+      activity,
+      { headers: this.authService.authHeaders() }
     );
   }
 
   listByTrip(tripId: number) {
     return this.http.post<ActivityResponseDTO[]>(
-      `${this.API_URL}/list`, { tripId }, { headers: this.authHeaders() }
+      `${this.API_URL}/list`,
+      { tripId },
+      { headers: this.authService.authHeaders() }
     );
   }
 
-  delete(tripId: number, activityId: number): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${this.API_URL}/delete`,
-      { tripId, activityId },
-      { headers: this.authHeaders() }
-    );
-  }
 
   listMine(): Observable<ActivityResponseDTO[]> {
     return this.http.post<ActivityResponseDTO[]>(
-      `http://localhost:8080/nomadia/activities/list`, {},  // endpoint nuevo
-      { headers: this.authHeaders() }
+      `http://localhost:8080/nomadia/activities/list`,
+      {},
+      { headers:  this.authService.authHeaders() }
     );
   }
 
@@ -60,8 +47,22 @@ export class ActivityService {
     toTime?: string;
   }): Observable<ActivityResponseDTO[]> {
     return this.http.post<ActivityResponseDTO[]>(
-      `http://localhost:8080/nomadia/activities/list`, body,
-      { headers: this.authHeaders() }
+      `http://localhost:8080/nomadia/activities/list`,
+      body,
+      { headers:  this.authService.authHeaders() }
     );
   }
+
+  deleteActivity(tripId: string, activityId: string) {
+
+    const headers = {headers:  this.authService.authHeaders()};
+    const body = {tripId, activityId};
+
+    return this.http.post(
+      `${this.API_URL}/delete`,
+      body,
+      headers);
+  }
+
+
 }
