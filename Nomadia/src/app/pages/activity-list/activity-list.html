@@ -43,9 +43,18 @@
       <div class="content">
         <div class="row between">
           <h3 class="title">{{ a.name }}</h3>
+          <div class="side">
           <div class="price" *ngIf="a.cost != null">
             {{ a.cost | currency:'ARS':'symbol':'1.0-0' }}
           </div>
+          <div class="actions">
+            <button class="btn-delete"
+                    title="Eliminar"
+                    (click)="$event.stopPropagation(); onDelete(a)">
+              ✕
+            </button>
+          </div>
+        </div>
         </div>
 
         <div class="meta">
