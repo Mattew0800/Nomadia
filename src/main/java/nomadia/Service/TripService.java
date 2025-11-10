@@ -108,18 +108,21 @@ public class TripService {
     }
 
     @Transactional
-    public void addUserToTrip(Long tripId, String email) {
+    public UserResponseDTO addUserToTrip(Long tripId, String email) {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new EntityNotFoundException("El viaje no existe"));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("El usuario no existe"));
-
+        if (!isOwner(tripId , user.getId())){
+            throw new IllegalStateException("No tenés permiso para modificar este viaje");
+        }
         if (isMember(tripId, user.getId())) {
             throw new IllegalStateException("El usuario ya está agregado a este viaje");
         }
         user.getTrips().add(trip);
         trip.getUsers().add(user);
         userRepository.save(user);
+        return UserResponseDTO.fromEntity(user);
     }
 
 
