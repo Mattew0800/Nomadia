@@ -77,4 +77,25 @@ export class ActivityListComponent implements OnInit {
   onSelect(a: ActivityResponseDTO) {
     this.select.emit(a);
   }
+
+  // activity-list.ts
+  onDelete(a: ActivityResponseDTO) {
+    if (!confirm(`¿Eliminar la actividad "${a.name}"?`)) return;
+
+    this.activityService.deleteActivity(String(a.tripId), String(a.id)).subscribe({
+      next: () => {
+        // sacar del array sin volver a llamar a la API
+        this.activities = this.activities.filter(x => x.id !== a.id);
+      },
+      error: (e) => {
+        console.error(e);
+        const msg =
+          e?.status === 403 ? 'No tenés permiso para eliminar esta actividad.' :
+            e?.status === 404 ? 'La actividad no existe o no pertenece a este viaje.' :
+              e?.error?.error || 'No se pudo eliminar la actividad.';
+        alert(msg);
+      }
+    });
+  }
+
 }

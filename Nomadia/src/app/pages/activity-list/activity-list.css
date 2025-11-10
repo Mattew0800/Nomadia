@@ -85,3 +85,38 @@
 .desc { margin-top: 8px; color: var(--text-muted, #8b93a7); font-size: 0.9rem; line-height: 1.3; }
 
 .empty { text-align: center; color: var(--text-muted, #8b93a7); font-style: italic; margin-top: 1rem; }
+
+.actions { display: flex; gap: 8px; align-items: center; }
+
+.btn-delete {
+  background: transparent;
+  border: 1px solid rgba(236,80,44,.35);
+  color: #ec502c;
+  border-radius: 10px;
+  padding: 15px 20px;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+}
+.btn-delete:hover {
+  background: rgba(236,80,44,.12);
+  border-color: #ec502c;
+}
+
+.side{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end; /* alinea a la derecha */
+  gap:6px;
+  min-width:88px; /* evita que salte de línea en pantallas angostas */
+}
+
+.side .price{
+  font-size:1rem;
+  font-weight:600;
+  color:var(--accent-orange, #ec502c);
+  text-align:right;
+}
+
+/* ya tenés .btn-delete; opcional un pequeño margen */
+.side .btn-delete{ margin-top:4px; }
