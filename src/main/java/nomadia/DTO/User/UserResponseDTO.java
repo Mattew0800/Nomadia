@@ -23,7 +23,7 @@ public class UserResponseDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String token;
 
-    public static UserResponseDTO fromEntity(User user) {
+    public static UserResponseDTO fromEntity(User user,boolean role) {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());
         dto.setName(user.getName());
@@ -35,7 +35,9 @@ public class UserResponseDTO {
         dto.setAbout(user.getAbout());
         dto.setBirth(user.getBirth());
         dto.setAge(user.getAge());
-        dto.setRole(user.getRole());
+        if(role){
+            dto.setRole(user.getRole());
+        }
         return dto;
     }
     public UserResponseDTO withToken(String token) {

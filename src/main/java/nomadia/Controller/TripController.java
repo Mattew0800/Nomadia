@@ -1,27 +1,19 @@
 package nomadia.Controller;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Trip.*;
 import nomadia.Service.TripService;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("nomadia/trip")
-@CrossOrigin (origins={"http://localhost:4200","http://localhost:8080"})
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080"})
 public class TripController {
 
     private final TripService tripService;
@@ -32,41 +24,30 @@ public class TripController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> createTrip(
+    public ResponseEntity<TripResponseDTO> createTrip(
             @Valid @RequestBody TripCreateDTO dto,
             @AuthenticationPrincipal UserDetailsImpl me) {
-        try {
-            TripResponseDTO created = tripService.createTrip(dto, me.getId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "No se pudo crear el viaje"));
-        }
+        TripResponseDTO created = tripService.createTrip(dto, me.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping("/my-trips")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl me) {
-        List<TripListDTO> trips=tripService.getMyTrips(me.getId());
-        if(trips.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No tenes viajes realizados");
+    public ResponseEntity<List<TripListDTO>> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl me) {
+        List<TripListDTO> trips = tripService.getMyTrips(me.getId());
+        if (trips.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
         return ResponseEntity.ok(trips);
     }
 
     @PostMapping("/view-trip")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> viewTrip(@AuthenticationPrincipal UserDetailsImpl me,
-                                      @RequestBody TripIdRequestDTO request) {
-        try {
-            TripResponseDTO trip = tripService.viewTrip(request.getTripId(), me.getId());
-            return ResponseEntity.ok(trip);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode())
-                    .body(Map.of("error", e.getReason()));
-        }
+    public ResponseEntity<TripResponseDTO> viewTrip(
+            @AuthenticationPrincipal UserDetailsImpl me,
+            @RequestBody TripIdRequestDTO request) {
+        TripResponseDTO trip = tripService.viewTrip(request.getTripId(), me.getId());
+        return ResponseEntity.ok(trip);
     }
 
     @PostMapping("/get-travelers")
@@ -74,96 +55,46 @@ public class TripController {
     public ResponseEntity<?> listTravelers(
             @AuthenticationPrincipal UserDetailsImpl me,
             @RequestBody TripIdRequestDTO dto) {
-        try {
-            var travelers = tripService.getTravelers(dto.getTripId(), me.getId());
-            if (travelers.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(travelers);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode())
-                    .body(Map.of("error", e.getReason()));
+        var travelers = tripService.getTravelers(dto.getTripId(), me.getId());
+        if (travelers.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.ok(travelers);
     }
 
     @PostMapping("/add-user")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> addUser(@Valid @RequestBody TripAddUserByEmailDTO dto,
-                                     @AuthenticationPrincipal UserDetailsImpl me) {
-        try {
-            return ResponseEntity.ok(tripService.addUserToTrip(dto.getTripId(), dto.getEmail()));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al agregar el usuario al viaje");
-        }
+    public ResponseEntity<?> addUser(
+            @Valid @RequestBody TripAddUserByEmailDTO dto,
+            @AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.ok(tripService.addUserToTrip(dto.getTripId(), dto.getEmail(),me.getId()));
     }
 
     @PutMapping("/remove-user")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> removeUser(@Valid @RequestBody TripAddUserByEmailDTO dto,
-                                        @AuthenticationPrincipal UserDetailsImpl me) {
-        if (!tripService.isOwner(dto.getTripId(), me.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("No tenés permiso para modificar este viaje");
-        }
-        try {
-            tripService.removeUserFromTrip(dto.getTripId(), dto.getEmail());
-            return ResponseEntity.ok().body("Usuario removido con exito");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("El usuario o el viaje no existen");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Ocurrió un error al intentar remover el usuario");
-        }
+    public ResponseEntity<?> removeUser(
+            @Valid @RequestBody TripAddUserByEmailDTO dto,
+            @AuthenticationPrincipal UserDetailsImpl me) {
+        tripService.removeUserFromTrip(dto.getTripId(), dto.getEmail(), me.getId());
+        return ResponseEntity.ok("Usuario removido con exito");
     }
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> deleteTrip(@RequestBody TripIdRequestDTO dto,
-                                        @AuthenticationPrincipal UserDetailsImpl me) {
-        if (!tripService.isOwner(dto.getTripId(), me.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("No tenés permiso para eliminar este viaje");
-        }
-        try {
-            tripService.deleteTrip(dto.getTripId());
-            return ResponseEntity.noContent().build();
-        } catch (ChangeSetPersister.NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("El viaje no existe");
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("No se puede eliminar el viaje: tiene relaciones activas");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al eliminar el viaje");
-        }
+    public ResponseEntity<?> deleteTrip(
+            @RequestBody TripIdRequestDTO dto,
+            @AuthenticationPrincipal UserDetailsImpl me) {
+        tripService.deleteTrip(dto.getTripId(),me.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> updateTrip(@Valid @RequestBody TripUpdateDTO dto,
-                                        @AuthenticationPrincipal UserDetailsImpl me) {
-
-        if (!tripService.isOwner(dto.getTripId(), me.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("No tenés permiso para eliminar este viaje");
-        }
-
+    public ResponseEntity<?> updateTrip(
+            @Valid @RequestBody TripUpdateDTO dto,
+            @AuthenticationPrincipal UserDetailsImpl me) {
         return tripService.updateTrip(dto.getTripId(), dto, me.getId())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-
-
 }

@@ -1,9 +1,9 @@
 package nomadia.Exception;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Cuando tirás new ResponseStatusException(...) en el Service
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<String> handleRSE(ResponseStatusException ex) {
         return ResponseEntity
@@ -20,7 +19,6 @@ public class GlobalExceptionHandler {
                 .body(ex.getReason());
     }
 
-    // Cuando algo no existe (si usás EntityNotFoundException también)
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleENF(EntityNotFoundException ex) {
         return ResponseEntity
@@ -28,7 +26,6 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
-    // Errores de validación @Valid → devolvemos solo los mensajes
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidation(MethodArgumentNotValidException ex) {
         String msg = ex.getBindingResult().getFieldErrors().stream()
@@ -40,7 +37,6 @@ public class GlobalExceptionHandler {
                 .body(msg);
     }
 
-    // Validación en parámetros (Path / Query)
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraint(ConstraintViolationException ex) {
         String msg = ex.getConstraintViolations().stream()
@@ -52,7 +48,6 @@ public class GlobalExceptionHandler {
                 .body(msg);
     }
 
-    // Restricciones de BD (FK, UNIQUE, etc.)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrity(DataIntegrityViolationException ex) {
         return ResponseEntity
@@ -60,7 +55,6 @@ public class GlobalExceptionHandler {
                 .body("Operación no permitida por restricciones de datos");
     }
 
-    // Último fallback (cualquier error no previsto)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneric(Exception ex) {
         return ResponseEntity

@@ -18,11 +18,14 @@ import nomadia.Repository.TripRepository;
 import nomadia.Repository.UserRepository;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +71,7 @@ public class TripService {
         }
         return trip.getUsers()
                 .stream()
-                .map(UserResponseDTO::fromEntity)
+                .map(user -> UserResponseDTO.fromEntity(user, false)) // 'false' indica que no mostramos role
                 .toList();
     }
 
@@ -97,23 +100,27 @@ public class TripService {
     public Optional<Trip> findById(Long tripId) {
         return tripRepository.findById(tripId);
     }
-
     @Transactional
-    public void deleteTrip(Long tripId) throws ChangeSetPersister.NotFoundException {
-        if (!tripRepository.existsById(tripId)) throw new ChangeSetPersister.NotFoundException();
+    public void deleteTrip(Long tripId,Long id) {
+        if (!isOwner(tripId, id)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para eliminar este viaje");
+        }
+        if (!tripRepository.existsById(tripId))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El viaje no existe");
 
         tripRepository.deleteRelations(tripId);
         activityRepository.deleteByTripId(tripId);
         tripRepository.deleteById(tripId);
     }
 
+
     @Transactional
-    public UserResponseDTO addUserToTrip(Long tripId, String email) {
+    public UserResponseDTO addUserToTrip(Long tripId, String email,Long userId) {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new EntityNotFoundException("El viaje no existe"));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("El usuario no existe"));
-        if (!isOwner(tripId , user.getId())){
+        if (!isOwner(tripId,userId)){
             throw new IllegalStateException("No tenés permiso para modificar este viaje");
         }
         if (isMember(tripId, user.getId())) {
@@ -122,12 +129,15 @@ public class TripService {
         user.getTrips().add(trip);
         trip.getUsers().add(user);
         userRepository.save(user);
-        return UserResponseDTO.fromEntity(user);
+        return UserResponseDTO.fromEntity(user,false);
     }
 
 
     @Transactional
-    public void removeUserFromTrip(Long tripId, String email) {
+    public void removeUserFromTrip(Long tripId, String email,Long userId) {
+        if (!isOwner(tripId, userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
+        }
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "El viaje no existe."));
@@ -143,6 +153,9 @@ public class TripService {
     }
 
     public Optional<TripResponseDTO> updateTrip(Long tripId, TripUpdateDTO dto, Long userId) {
+        if (!isOwner(dto.getTripId(), userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
+        }
         if (dto.getName() != null &&
                 tripRepository.existsByNameIgnoreCaseAndUsers_Id(dto.getName(), userId)) {
             throw new IllegalArgumentException("Ya tenés otro viaje con ese nombre.");
@@ -153,6 +166,4 @@ public class TripService {
             return TripResponseDTO.fromEntity(updated);
         });
     }
-
-
 }

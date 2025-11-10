@@ -22,10 +22,12 @@ public class ActivityService{
 
     private final ActivityRepository activityRepository;
     private final TripRepository tripRepository;
+    private final TripService tripService;
 
-    public ActivityService(ActivityRepository activityRepository, TripRepository tripRepository) {
+    public ActivityService(ActivityRepository activityRepository, TripRepository tripRepository, TripService tripService) {
         this.activityRepository = activityRepository;
         this.tripRepository = tripRepository;
+        this.tripService = tripService;
     }
 
     private boolean overlaps(LocalTime aStart, LocalTime aEnd,
@@ -35,32 +37,27 @@ public class ActivityService{
     }
 
     @Transactional
-    public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto) {
+    public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto,Long userId) {
+        if(!tripService.isMember(tripId,userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
+        }
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
-
-
         if (dto.getDate().isBefore(trip.getStartDate()) || dto.getDate().isAfter(trip.getEndDate())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de la actividad debe estar dentro del rango del viaje");
         }
-
         List<Activity> sameDay = activityRepository.findByTripIdAndDate(tripId, dto.getDate());
-
         boolean conflict = sameDay.stream().anyMatch(a ->
                 overlaps(dto.getStartTime(), dto.getEndTime(), a.getStartTime(), a.getEndTime())
         );
-
         if (conflict) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe otra actividad en ese horario");
         }
-
         Activity activity = dto.toEntity();
         activity.setTrip(trip);
-
         Activity saved = activityRepository.save(activity);
         return ActivityResponseDTO.fromEntity(saved);
     }
-
 
     @Transactional(readOnly = true)
     public List<ActivityResponseDTO> listByTrip(Long tripId) {
@@ -71,27 +68,25 @@ public class ActivityService{
                 .stream().map(ActivityResponseDTO::fromEntity).toList();
     }
 
-@Transactional(readOnly = true)
-public List<ActivityResponseDTO> getActivitiesForUserAndTrip(
-        Long userId,
-        LocalDate fromDate, LocalDate toDate,
-        LocalTime fromTime, LocalTime toTime,Long tripId) {
-
-    if (tripId != null && !tripRepository.existsByIdAndUserId(tripId, userId)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No perteneces a este viaje");
+    @Transactional(readOnly = true)
+    public List<ActivityResponseDTO> getActivitiesForUserAndTrip(
+            Long userId,
+            LocalDate fromDate, LocalDate toDate,
+            LocalTime fromTime, LocalTime toTime,Long tripId) {
+        if (tripId != null && !tripRepository.existsByIdAndUserId(tripId, userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No perteneces a este viaje");
+        }
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rango de fechas es inválido");
+        }
+        return activityRepository.findAllByUserTrips(userId, fromDate, toDate, fromTime, toTime,tripId)
+                .stream()
+                .map(ActivityResponseDTO::fromEntity)
+                .toList();
     }
-    if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rango de fechas es inválido");
-    }
-    return activityRepository.findAllByUserTrips(userId, fromDate, toDate, fromTime, toTime,tripId)
-            .stream()
-            .map(ActivityResponseDTO::fromEntity)
-            .toList();
-}
 
     @Transactional(readOnly = true)
     public ActivityResponseDTO get(Long tripId, Long activityId,Long userId) {
-
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
         return ActivityResponseDTO.fromEntity(a);
@@ -105,23 +100,26 @@ public List<ActivityResponseDTO> getActivitiesForUserAndTrip(
     }
 
     @Transactional
-    public ActivityResponseDTO update(Long tripId, Long activityId, ActivityUpdateRequestDTO dto) {
-
+    public ActivityResponseDTO update(Long tripId, Long activityId, ActivityUpdateRequestDTO dto,Long userId) {
+        if(!tripService.isMember(tripId,userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar esta actividad");
+        }
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
-
         dto.applyToEntity(a);
         Activity updated = activityRepository.save(a);
         return ActivityResponseDTO.fromEntity(updated);
     }
 
     @Transactional
-    public void delete(Long tripId, Long activityId) {
+    public void delete(Long tripId, Long activityId,Long userId) {
+        if (!tripService.isMember(tripId,userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar esta actividad");
+        }
         Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
         activityRepository.delete(a);
     }
-
 }

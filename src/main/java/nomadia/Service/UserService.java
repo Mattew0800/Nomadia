@@ -55,7 +55,7 @@ public class UserService {
         String oldEmail = me.getEmail();
         User updated = updateUser(me.getId(), dto, false);
 
-        UserResponseDTO response = UserResponseDTO.fromEntity(updated);
+        UserResponseDTO response = UserResponseDTO.fromEntity(updated,false );
 
         if (!updated.getEmail().equals(oldEmail)) {
             String newToken = authService.generateToken(updated);

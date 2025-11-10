@@ -3,7 +3,6 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Activity.*;
-import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.Service.ActivityService;
 import nomadia.Service.TripService;
 import org.springframework.http.HttpStatus;
@@ -11,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,7 +21,6 @@ public class ActivityController {
     private final ActivityService activityService;
     private final TripService tripService;
 
-
     public ActivityController(ActivityService activityService, TripService tripService) {
         this.activityService = activityService;
         this.tripService = tripService;
@@ -30,74 +28,54 @@ public class ActivityController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> create(@Valid @RequestBody ActivityCreateDTO request) {
-        try {
-            ActivityResponseDTO response = activityService.create(
-                    request.getTripId(),
-                    request
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity
-                    .status(e.getStatusCode())
-                    .body(Map.of("error", e.getReason()));
-        }
+    public ResponseEntity<ActivityResponseDTO> create(@Valid @RequestBody ActivityCreateDTO request, @AuthenticationPrincipal UserDetailsImpl me) {
+        ActivityResponseDTO response = activityService.create(
+                request.getTripId(),
+                request,me.getId()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/list")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> listMine(@AuthenticationPrincipal UserDetailsImpl me, @RequestBody ActivityFilterRequestDTO dto){
-        try{
-            var list = activityService.getActivitiesForUserAndTrip(me.getId(), dto.getFromDate(),dto.getToDate(),dto.getFromTime(),dto.getToTime(),dto.getTripId());
-            if (list.isEmpty()) return ResponseEntity.noContent().build();
-            return ResponseEntity.ok(list);
-        }catch (ResponseStatusException e){
-            return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));
+    public ResponseEntity<List<ActivityResponseDTO>> listMine(
+            @AuthenticationPrincipal UserDetailsImpl me,
+            @RequestBody ActivityFilterRequestDTO dto) {
+
+        var list = activityService.getActivitiesForUserAndTrip(
+                me.getId(),
+                dto.getFromDate(), dto.getToDate(),
+                dto.getFromTime(), dto.getToTime(),
+                dto.getTripId()
+        );
+        if (list.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.ok(list);
     }
 
     @PostMapping("/get")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getById(@RequestBody ActivityIdRequestDTO dto) {
-        try {
-            ActivityResponseDTO response = activityService.findById(dto.getActivityId());
-            return ResponseEntity.ok(response);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity
-                    .status(e.getStatusCode())
-                    .body(Map.of("error", e.getReason()));
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Error interno del servidor"));
-        }
+    public ResponseEntity<ActivityResponseDTO> getById(@RequestBody ActivityIdRequestDTO dto) {
+        ActivityResponseDTO response = activityService.findById(dto.getActivityId());
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> update(@Valid @RequestBody ActivityUpdateRequestDTO dto) {
-        try {
-            ActivityResponseDTO response = activityService.update(
-                    dto.getTripId(),
-                    dto.getActivityId(),
-                    dto
-            );
-            return ResponseEntity.ok(response);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode())
-                    .body(Map.of("error", e.getReason()));
-        }
+    public ResponseEntity<ActivityResponseDTO> update(@Valid @RequestBody ActivityUpdateRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
+        ActivityResponseDTO response = activityService.update(
+                dto.getTripId(),
+                dto.getActivityId(),
+                dto, me.getId()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/delete")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> delete(@RequestBody ActivityIdRequestDTO request) {
-        try {
-            activityService.delete(request.getTripId(), request.getActivityId());
-            return ResponseEntity.ok(Map.of("message", "Actividad eliminada correctamente"));
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode())
-                    .body(Map.of("error", e.getReason()));
-        }
+    public ResponseEntity<?> delete(@RequestBody ActivityIdRequestDTO request, @AuthenticationPrincipal UserDetailsImpl me) {
+        activityService.delete(request.getTripId(), request.getActivityId(),me.getId());
+        return ResponseEntity.ok(Map.of("message", "Actividad eliminada correctamente"));
     }
 }

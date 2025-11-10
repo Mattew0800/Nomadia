@@ -32,7 +32,7 @@ public class UserController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserResponseDTO> getSelf(@AuthenticationPrincipal UserDetailsImpl principal) {
         return userService.findById(principal.getId())
-                .map(UserResponseDTO::fromEntity)
+                .map(user->UserResponseDTO.fromEntity(user,true))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
@@ -54,14 +54,14 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
         var saved = userService.createUser(dto.toEntity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDTO.fromEntity(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDTO.fromEntity(saved,true));
     }
 
     @GetMapping("/get-all") //chequeado
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponseDTO> getAllUsers() {
         return userService.findAll().stream()
-                .map(UserResponseDTO::fromEntity)
+                .map(user->UserResponseDTO.fromEntity(user,true))
                 .collect(Collectors.toList());
     }
 
@@ -69,7 +69,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> getUser(@PathVariable("id") Long id) {
         return userService.findById(id)
-                .map(UserResponseDTO::fromEntity)
+                .map(user->UserResponseDTO.fromEntity(user,true))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

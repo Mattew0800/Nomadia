@@ -52,25 +52,26 @@ public class SecurityConfig {
                         .requestMatchers("/nomadia/auth/logout").hasRole("USER")
                         .requestMatchers("/nomadia/auth/register").permitAll()
                         .requestMatchers("/nomadia/auth/login").permitAll()
-                        .requestMatchers("/nomadia/auth/register-admin").permitAll()
-                        // Endpoints usuario
+                        .requestMatchers("/nomadia/auth/register-admin").permitAll()//sacar despues
                         .requestMatchers("/nomadia/user/me").hasRole("USER")
                         .requestMatchers("/nomadia/user/me/update").hasRole("USER")
-
-                        // Endpoints admin
                         .requestMatchers("/nomadia/user/create").hasRole("ADMIN")
                         .requestMatchers("/nomadia/user/get-all").hasRole("ADMIN")
                         .requestMatchers("/nomadia/user/get-user/{id}").hasRole("ADMIN")
                         .requestMatchers("/nomadia/user/delete-user/{id}").hasRole("ADMIN")
                         .requestMatchers("/nomadia/trip/create").hasRole("USER")
                         .requestMatchers("/nomadia/trip/my-trips").hasRole("USER")
-                        .requestMatchers("/nomadia/trip/search").hasRole("USER")
-                        .requestMatchers("/nomadia/trip/*/add-user").hasRole("USER")
-                        .requestMatchers("/nomadia/trip/*/remove-user").hasRole("USER")
-                        .requestMatchers("/nomadia/trip/*/users").hasRole("USER")
-                        .requestMatchers("/nomadia/trip/update").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/view-trip").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/get-travelers").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/add-user").hasRole("USER")
+                        .requestMatchers("/nomadia/trip/remove-user").hasRole("USER")
                         .requestMatchers("/nomadia/trip/delete").hasRole("USER")
-
+                        .requestMatchers("/nomadia/trip/update").hasRole("USER")
+                        .requestMatchers("/nomadia/activities/create").hasRole("USER")
+                        .requestMatchers("/nomadia/activities/list").hasRole("USER")
+                        .requestMatchers("/nomadia/activities/delete").hasRole("USER")
+                        .requestMatchers("/nomadia/activities/update").hasRole("USER")
+                        .requestMatchers("/nomadia/activities/get").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
