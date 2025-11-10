@@ -90,14 +90,8 @@ public class TripController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> addUser(@Valid @RequestBody TripAddUserByEmailDTO dto,
                                      @AuthenticationPrincipal UserDetailsImpl me) {
-        if (!tripService.isOwner(dto.getTripId(), me.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("No tenés permiso para modificar este viaje");
-        }
-
         try {
-             tripService.addUserToTrip(dto.getTripId(), dto.getEmail());
-            return ResponseEntity.ok(Map.of("message","Usuario agregado con Exito"));
+            return ResponseEntity.ok(tripService.addUserToTrip(dto.getTripId(), dto.getEmail()));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());
