@@ -403,6 +403,10 @@ export class MainPage implements OnInit {
     })
   }
 
+  getUsers(){
+
+  }
+
   deleteEvent(index: number) {
 
     const eventToDelete = this.agenda[index];
@@ -435,6 +439,14 @@ export class MainPage implements OnInit {
         console.error('Error al borrar la actividad del servidor:', err);
       }
     });
+  }
+
+  public get nameControl() {
+    return this.createForm.get('name')!;
+  }
+
+  public get descriptionControl() {
+    return this.createForm.get('description')!;
   }
 
   protected readonly String = String;

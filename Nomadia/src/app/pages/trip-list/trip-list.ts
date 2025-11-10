@@ -57,8 +57,7 @@ export class TripList implements OnInit {
     if (confirm('¿Seguro que querés eliminar este viaje?')) {
       this.tService.deleteTrip(id).subscribe({
         next: () => {
-          // lo sacamos del array local
-          this.tService.trips = this.tService.trips.filter(trip => trip.id === id);
+          this.tService.trips = this.tService.trips.filter(trip => trip.id !== id);
           this.getTrips()
         },
         error: (err) => {

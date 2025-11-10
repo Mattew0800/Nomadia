@@ -1,14 +1,20 @@
 <app-test>
-  <!-- src/app/components/activity-list/activity-list.html -->
   <div class="activity-list">
 
     <!-- Filtros -->
     <section *ngIf="showFilters" class="filters">
       <div class="row">
+
         <label>
-          Fecha
+          Desde fecha
+          <input type="date" [(ngModel)]="fromDate">
+        </label>
+
+        <label>
+          Hasta fecha
           <input type="date" [(ngModel)]="toDate">
         </label>
+
         <label>
           Desde hora
           <input type="time" [(ngModel)]="fromTime">
@@ -17,6 +23,7 @@
           Hasta hora
           <input type="time" [(ngModel)]="toTime">
         </label>
+
         <div class="actions">
           <button type="button" (click)="fetch()">Aplicar</button>
           <button type="button" class="ghost" (click)="clearFilters()">Limpiar</button>

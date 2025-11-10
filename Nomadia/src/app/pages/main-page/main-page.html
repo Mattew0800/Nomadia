@@ -92,8 +92,8 @@
             <input #email type="text" placeholder="Correo electrónico">
             <button class="share-btn" (click)="addUser(String(currentTrip?.id),String(email.value))">Invitar</button>
           </div>
-          <p *ngIf="msgInviteOk" style="margin-top:1rem; color:#d1f366;">{{ msgInviteOk }}</p>
-          <p *ngIf="msgInviteError" style="margin-top:1rem; color:#eb3f3a;">{{ msgInviteError }}</p>
+          <p *ngIf="msgInviteOk" class="error">{{ msgInviteOk }}</p>
+          <p *ngIf="msgInviteError" class="error">{{ msgInviteError }}</p>
           <h3>Miembros actuales</h3>
           <ul class="member-list">
             <li>
@@ -160,6 +160,14 @@
           <div class="input-group">
             <input formControlName="description" type="text" placeholder="Descripción" />
           </div>
+
+          @if(nameControl.touched && nameControl.invalid){
+            <p class="error">Nombre invalido.</p>
+          }
+
+          @if(descriptionControl.touched && descriptionControl.invalid){
+            <p class="error">Descripcion invalida</p>
+          }
 
           <button class="share-btn" type="submit">Guardar</button>
 

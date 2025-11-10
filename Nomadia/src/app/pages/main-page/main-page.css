@@ -323,7 +323,6 @@
 }
 
 .share-btn {
-  /* Usamos tu color de acento principal para el botón de compartir */
   background-color: var(--accent-orange);
   color: white;
   border: none;
@@ -333,6 +332,7 @@
   font-size: 1rem;
   font-weight: 600;
   transition: opacity 0.2s ease;
+  margin-top: 0.6rem;
 }
 
 .share-btn:hover {
@@ -576,5 +576,10 @@
 }
 
 .delete-btn:hover {
+  color: #d9534f;
+}
+
+.error{
+  margin-top:1rem;
   color: #d9534f;
 }

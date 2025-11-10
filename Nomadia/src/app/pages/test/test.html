@@ -1,4 +1,5 @@
 <div class="app-container">
+
     <!-- Sidebar -->
     <aside class="sidebar">
         <!-- Background gradient effect -->
@@ -48,7 +49,7 @@
                 <span>Viajes</span>
             </div>
 
-            <div class="nav-item">
+            <div class="nav-item" routerLink="/activities" routerLinkActive="active">
                 <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path
                         d="M8.09311 21.4884L12.0001 18.5581C12.0826 18.4958 12.1966 18.4958 12.2791 18.5581L16.1861 21.4884C16.6955 21.8699 17.3289 22.0479 17.9624 21.9876C18.5961 21.9273 19.1844 21.633 19.6127 21.1624C20.0411 20.6916 20.2787 20.0782 20.2792 19.4419V5.0232C20.2781 4.22167 19.9594 3.45327 19.3927 2.88656C18.8258 2.31969 18.0574 2.00092 17.2559 2H7.0236C6.22207 2.00093 5.45368 2.31971 4.88681 2.88656C4.3201 3.45327 4.00132 4.22163 4.00024 5.0232V19.4419C4.00024 20.0785 4.23773 20.6922 4.66598 21.1632C5.09439 21.6341 5.68307 21.9284 6.31672 21.9886C6.95052 22.0487 7.58405 21.8704 8.09327 21.4884H8.09311ZM5.39539 5.02328C5.39586 4.59175 5.56763 4.17797 5.87288 3.87275C6.17795 3.56752 6.59172 3.3959 7.0234 3.39543H17.2561H17.2559C17.6876 3.39589 18.1014 3.56751 18.4064 3.87275C18.7117 4.17798 18.8834 4.59175 18.8839 5.02328V19.442C18.8839 19.7313 18.776 20.0102 18.5812 20.2244C18.3865 20.4383 18.119 20.5721 17.8309 20.5995C17.5428 20.6268 17.255 20.5458 17.0234 20.3722L13.1164 17.4428C12.8341 17.2326 12.4916 17.1191 12.1397 17.1191C11.7878 17.1191 11.4453 17.2326 11.163 17.4428L7.25599 20.3722C7.02442 20.5458 6.73665 20.6268 6.44853 20.5995C6.16043 20.5721 5.89286 20.4383 5.69823 20.2244C5.50341 20.0102 5.39549 19.7313 5.39549 19.442L5.39539 5.02328Z"
@@ -131,21 +132,26 @@
 
             <!-- User Profile Section -->
                 <div class="user-profile">
-                    @if(user?.photoUrl){
-                        <div class="user-image"><img src="{{user?.photoUrl}}" alt="" srcset=""></div>
-                    }@else{
-                        <div class="user-image"><img src="default-user-img.jpg" alt="" srcset=""></div>
-                    }
+                    @if(user){
+                      @if(user?.photoUrl){
+                          <div class="user-image"><img src="{{user?.photoUrl}}" alt="" srcset=""></div>
+                      }@else{
+                          <div class="user-image"><img src="default-user-img.jpg" alt="" srcset=""></div>
+                      }
 
-                    <div class="user-info">
-                        @if(user?.nick){
-                            <div class="user-name">{{user?.nick}}</div>
-                        }@else{
-                            <div class="user-name">Yo</div>
-                        }
+                      <div class="user-info">
+
+                          @if(user?.nick){
+                              <div class="user-name">{{user?.nick}}</div>
+                          }@else{
+                              <div class="user-name">Yo</div>
+                          }
+
 
                         <div class="user-status">Traveler Pro</div>
-                    </div>
+                      </div>
+                    }
+
                     <div class="d-flex">
                         <div class="dropdown">
                             <button class="dropdown-btn" #userMenuBtn aria-haspopup="true" [attr.aria-expanded]="showMenu" (click)="toggleMenu($event)">
