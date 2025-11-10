@@ -2,11 +2,11 @@
   @if(currentTrip){
     <section class="grid" [class.blurred]="isBlurred">
         <div class="hero">
-          @if(currentTrip?.type){
-            <img [src]="'tripTypes/' + (currentTrip?.type || 'default') + '.jpg'" alt="" />
+          @if(currentTrip.type){
+            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.jpg'" alt="" />
           }
-          @if(currentTrip?.name){
-            <h2 class="trip-title">{{ currentTrip?.name }}</h2>
+          @if(currentTrip.name){
+            <h2 class="trip-title">{{ currentTrip.name }}</h2>
           }
 
         </div>
@@ -91,41 +91,25 @@
         <div class="modal-body">
           <div class="input-group">
             <input #email type="text" placeholder="Correo electrónico">
-            <button class="share-btn" (click)="addUser(String(currentTrip?.id),String(email.value))">Invitar</button>
+            <button class="share-btn" (click)="addUser(String(currentTrip.id),(String(email.value)))">Invitar</button>
+
           </div>
           <p *ngIf="msgInviteOk" class="error">{{ msgInviteOk }}</p>
           <p *ngIf="msgInviteError" class="error">{{ msgInviteError }}</p>
           <h3>Miembros actuales</h3>
           <ul class="member-list">
+            @for(user of this.tService.users; track $index){
+
             <li>
               <div class="avatar" style="background-color: #5C6BC0;">MO</div>
               <div>
-                <p>Matias Oyhamburu (yo)</p>
-                <span>&#64;matiasoyhamburu</span>
+                <p>{{user.name}}</p>
+
+                <span>{{user.email}}</span>
+
               </div>
               </li>
-
-              <li>
-              <div class="avatar" style="background-color: #8E24AA;">EO</div>
-              <div>
-                <p>Emilia Ocampo</p>
-                <span>&#64;emilia4630709</span>
-              </div>
-            </li>
-            <li>
-              <div class="avatar" style="background-color: #4CAF50;">IE</div>
-              <div>
-                <p>Ignacio erbin</p>
-                <span>&#64;erbinignacio</span>
-              </div>
-            </li>
-            <li>
-              <div class="avatar" style="background-color: #FFB300;">J</div>
-              <div>
-                <p>Joan</p>
-                <span>&#64;joan69252514</span>
-              </div>
-            </li>
+            }
           </ul>
         </div>
       </div>

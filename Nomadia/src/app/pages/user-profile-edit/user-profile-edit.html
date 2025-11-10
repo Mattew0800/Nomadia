@@ -5,17 +5,19 @@
         <div class="profile-header">
             <section class="profile-main">
                 <div class="profile-user-profile">
+                  @if(user){
                     <div class="user-image large">
                         <img [src]="photoPreview || 'default-user-img.jpg'" alt="Foto de Usuario">
                     </div>
                     <div class="user-info large">
-                        @if(user?.name){
-                        <h2 class="user-name">{{user?.name}}</h2>
+                        @if(user.name){
+                        <h2 class="user-name">{{user.name}}</h2>
                         }@else{
                         <h2 class="user-name">Yo</h2>
                         }
                         <p class="user-status">Traveler Pro</p>
                     </div>
+                  }
                 </div>
             </section>
         </div>

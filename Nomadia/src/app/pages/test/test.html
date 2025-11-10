@@ -132,15 +132,15 @@
             <!-- User Profile Section -->
                 <div class="user-profile">
                   @if(user){
-                    @if(user?.photoUrl){
-                        <div class="user-image"><img src="{{user?.photoUrl}}" alt="" srcset=""></div>
+                    @if(user.photoUrl){
+                        <div class="user-image"><img src="{{user.photoUrl}}" alt="" srcset=""></div>
                     }@else{
                         <div class="user-image"><img src="default-user-img.jpg" alt="" srcset=""></div>
                     }
 
                     <div class="user-info">
-                        @if(user?.nick){
-                            <div class="user-name">{{user?.nick}}</div>
+                        @if(user.nick){
+                            <div class="user-name">{{user.nick}}</div>
                         }@else{
                             <div class="user-name">Yo</div>
                         }

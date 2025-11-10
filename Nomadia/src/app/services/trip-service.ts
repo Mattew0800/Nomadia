@@ -4,6 +4,8 @@ import {Observable} from 'rxjs';
 import {AuthService} from './auth-service';
 import {TripResponse} from '../models/TripResponse';
 import {TripCreate} from '../models/TripCreate';
+import {User} from '../models/User';
+import {TravelerResponse} from '../models/TravelerResponse';
 
 
 @Injectable({
@@ -14,7 +16,7 @@ export class TripService {
 
   private API_URL = 'http://localhost:8080/nomadia/trip';
   trips: TripResponse[];
-  users: String[];
+  users: TravelerResponse[];
 
   constructor(
     private http: HttpClient,
@@ -61,11 +63,20 @@ export class TripService {
   addUser(tripId: string, email: string) {
     const body = {tripId: tripId, email: email};
 
-    return this.http.post<string>(
+    return this.http.post<TravelerResponse>(
       `${this.API_URL}/add-user`,
       body,
       {headers: this.authService.authHeaders()});
   }
+
+  getUsers(tripId: string){
+    return this.http.post<TravelerResponse[]>(
+      `${this.API_URL}/get-travelers`,
+      {tripId: tripId},
+      {headers: this.authService.authHeaders()});
+  }
+
+
 
 
 

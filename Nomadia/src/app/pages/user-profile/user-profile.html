@@ -2,14 +2,17 @@
     <div class="profile-card">
         <div class="profile-header">
             <section class="profile-main">
+
                 <div class="profile-user-profile">
+                  @if(user){
                     <div class="user-image large">
-                        @if(user?.photoUrl){
-                          <img src="{{user?.photoUrl}}" alt="Foto de Usuario">
+                      @if(user){
+                        @if(user.photoUrl){
+                          <img src="{{user.photoUrl}}" alt="Foto de Usuario">
                         }@else{
                           <img src="default-user-img.jpg" alt="Foto de Usuario">
                         }
-
+                      }
                     </div>
                     <div class="user-info large">
                         @if(user){
@@ -17,10 +20,10 @@
                         <p class="user-status">Traveler Pro</p>
                         }@else{
                         <h2 class="user-name">Yo</h2>
-                        <p class="user-status">Traveler Pro</p>
-                        }
+                        <p class="user-status">Traveler Pro</p>                        }
 
                     </div>
+                  }
                 </div>
             </section>
 
@@ -101,7 +104,6 @@
                       <input type="text" value="Sin asignar" disabled>
                   </div>
                 }
-
 
                 @if(user?.about){
                 <div id="form__grid-aboutme">

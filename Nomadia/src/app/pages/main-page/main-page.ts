@@ -6,6 +6,8 @@ import {TripService} from '../../services/trip-service';
 import {TripResponse} from '../../models/TripResponse';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivityService} from '../../services/activity-service';
+import {User} from '../../models/User';
+import {TravelerResponse} from '../../models/TravelerResponse';
 
 type AgendaItem = {
   time: string;
@@ -93,8 +95,7 @@ export class MainPage implements OnInit {
     this.tService.getTripById(id).subscribe({
       next: (trip: TripResponse) => {
         this.currentTrip = trip;
-        // Posiciono automáticamente calendario en la fecha de inicio del viaje
-        const start = this.getTripStartDate(trip); // lee trip.startDate (string)
+        const start = this.getTripStartDate(trip);
         if (start) this.goToDate(start);
         this.loadAgendaForSelectedDay();
 
@@ -114,6 +115,7 @@ export class MainPage implements OnInit {
 
     if (tripId) {
       this.fetchTripData(tripId);
+      this.getTravelers(tripId);
 
     } else {
       console.warn('No se encontró un ID de viaje en localStorage');
@@ -181,7 +183,6 @@ export class MainPage implements OnInit {
   }
 
 
-  // --- AGENDA ---
   selectEvent(i: number) {
     this.selectedEvent = i;
   }
@@ -370,47 +371,25 @@ export class MainPage implements OnInit {
   }
 
   addUser(tripId: string,email: string){
+
     this.tService.addUser(tripId,email).subscribe({
-      next: () => {
-        this.tService.users = [...this.tService.users, email];
+      next: (traveler: TravelerResponse) => {
+        this.tService.users = [...this.tService.users, traveler];
         this.msgInviteOk = "Usuario invitado con exito.";
         this.msgInviteError = "";
       },
       error: (e: any) => {
         console.log(e);
 
-        let msg = '';
         this.msgInviteOk = "";
+        this.msgInviteError = e.error;
 
-        // errores de validación del backend
-        if (e.error?.errors) {
-          // tomamos todos los errores del objeto y los unimos
-          msg = Object.values(e.error.errors).join(', ');
-        }
-        // mensaje general del backend
-        else if (e.error?.message) {
-          msg = e.error.message;
-        }
-        // backend devuelve string
-        else if (typeof e.error === 'string') {
-          msg = e.error;
-        }
-        // último recurso
-        else {
-          msg = `Error ${e.status}`;
-        }
-
-        this.msgInviteError = msg;
       }
     })
   }
 
-  getUsers(){
-
-  }
 
   deleteEvent(index: number) {
-
     const eventToDelete = this.agenda[index];
 
     if (!eventToDelete || !eventToDelete.tripId || !eventToDelete.activityId) {
@@ -423,7 +402,6 @@ export class MainPage implements OnInit {
 
     this.activityApi.deleteActivity(tripId, activityId).subscribe({
       next: () => {
-
         this.agenda.splice(index, 1);
 
         if (this.selectedEvent !== null) {
@@ -450,6 +428,19 @@ export class MainPage implements OnInit {
   public get descriptionControl() {
     return this.createForm.get('description')!;
   }
+
+  getTravelers(tripId: string) {
+    return this.tService.getUsers(tripId).subscribe({
+      next: (users: TravelerResponse[]) => {
+        this.tService.users = users;
+      },
+      error: (e) => {
+        console.log(e)
+      }
+    })
+  }
+
+
 
   protected readonly String = String;
 }
