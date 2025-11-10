@@ -102,6 +102,8 @@ export class MainPage implements OnInit {
       },
       error: (e: any) => {
         console.error('Error al cargar el viaje con ID:', id, e);
+        localStorage.removeItem('selectedTripId');
+        this.router.navigate(['/tripList']);
       }
     });
   }
@@ -115,7 +117,7 @@ export class MainPage implements OnInit {
 
     } else {
       console.warn('No se encontró un ID de viaje en localStorage');
-      this.router.navigate(['/error']);
+      this.router.navigate(['/tripList']);
     }
   }
 

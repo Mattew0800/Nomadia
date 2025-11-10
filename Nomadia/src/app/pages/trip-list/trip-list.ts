@@ -49,7 +49,7 @@ export class TripList implements OnInit {
 
   get filteredViajes() {
     const targetState = this.showingActiveTrips ? 'CONFIRMADO' : 'FINALIZADO';
-    return this.tService.trips.filter(t => t.state === targetState);
+    return (this.tService.trips ?? []).filter(t => t.state === targetState);
   }
 
   deleteTrip(id: string, event: Event) {
