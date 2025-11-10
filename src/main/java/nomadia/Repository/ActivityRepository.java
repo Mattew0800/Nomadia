@@ -34,7 +34,10 @@ WHERE u.id = :userId
   AND (:tripId IS NULL OR t.id = :tripId)
   AND (:fromDate IS NULL OR a.date >= :fromDate)
   AND (:toDate IS NULL OR a.date <= :toDate)
-  AND (:fromTime IS NULL OR :toTime IS NULL OR (a.startTime < :toTime AND a.endTime > :fromTime))
+  AND (
+        (:fromTime IS NULL AND :toTime IS NULL)
+        OR (a.startTime < :toTime AND a.endTime > :fromTime)
+      )
 ORDER BY a.date ASC, a.startTime ASC, a.name ASC
 """)
     List<Activity> findAllByUserTrips(
@@ -45,6 +48,7 @@ ORDER BY a.date ASC, a.startTime ASC, a.name ASC
             @Param("toTime") LocalTime toTime,
             @Param("tripId") Long tripId
     );
+
 
 
 

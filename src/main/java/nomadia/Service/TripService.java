@@ -8,6 +8,7 @@ import nomadia.DTO.Trip.TripCreateDTO;
 import nomadia.DTO.Trip.TripListDTO;
 import nomadia.DTO.Trip.TripResponseDTO;
 import nomadia.DTO.Trip.TripUpdateDTO;
+import nomadia.DTO.User.UserResponseDTO;
 import nomadia.Enum.State;
 import nomadia.Model.Activity;
 import nomadia.Model.Trip;
@@ -47,17 +48,39 @@ public class TripService {
                 .map(TripResponseDTO::fromEntity);
     }
 
-    public boolean isOwner(Long tripId, Long userId) {
-        if (tripId == null || userId == null) return false;
-        return tripRepository.existsByIdAndCreatedBy_Id(tripId, userId);
-    }
-
-
     public boolean isMember(Long tripId, Long userId) {
         if (tripId == null || userId == null) return false;
         return tripRepository.existsByIdAndUsers_Id(tripId, userId);
     }
 
+    public boolean isOwner(Long tripId, Long userId) {
+        if (tripId == null || userId == null) return false;
+        return tripRepository.existsByIdAndCreatedBy_Id(tripId, userId);
+    }
+
+    @Transactional
+    public List<UserResponseDTO> getTravelers(Long tripId, Long requesterId) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El viaje no existe."));
+        boolean isMember = tripRepository.existsByIdAndUserId(tripId, requesterId);
+        if (!isMember) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No perteneces a este viaje.");
+        }
+        return trip.getUsers()
+                .stream()
+                .map(UserResponseDTO::fromEntity)
+                .toList();
+    }
+
+    @Transactional
+    public TripResponseDTO viewTrip(Long tripId, Long userId) {
+        if (!isMember(tripId, userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tenés permisos para ver este viaje");
+        }
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El viaje no existe"));
+        return TripResponseDTO.fromEntity(trip);
+    }
 
     public TripResponseDTO createTrip(TripCreateDTO dto, Long userId) {
         Trip trip = dto.toEntity();
@@ -75,7 +98,6 @@ public class TripService {
         return tripRepository.findById(tripId);
     }
 
-
     @Transactional
     public void deleteTrip(Long tripId) throws ChangeSetPersister.NotFoundException {
         if (!tripRepository.existsById(tripId)) throw new ChangeSetPersister.NotFoundException();
@@ -85,40 +107,30 @@ public class TripService {
         tripRepository.deleteById(tripId);
     }
 
-
     @Transactional
-    public Optional<TripResponseDTO> addUserToTrip(Long tripId, String email) {
-
+    public void addUserToTrip(Long tripId, String email) {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new EntityNotFoundException("El viaje no existe"));
-
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("El usuario no existe"));
+
         if (isMember(tripId, user.getId())) {
             throw new IllegalStateException("El usuario ya está agregado a este viaje");
         }
-
         user.getTrips().add(trip);
-
         trip.getUsers().add(user);
-
         userRepository.save(user);
-
-        return Optional.of(TripResponseDTO.fromEntity(trip));
     }
 
 
     @Transactional
     public void removeUserFromTrip(Long tripId, String email) {
-
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "El viaje no existe."));
-
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "No existe un usuario con ese email."));
-
         if (!isMember(tripId, user.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario no pertenece a este viaje.");
         }
@@ -132,7 +144,6 @@ public class TripService {
                 tripRepository.existsByNameIgnoreCaseAndUsers_Id(dto.getName(), userId)) {
             throw new IllegalArgumentException("Ya tenés otro viaje con ese nombre.");
         }
-
         return tripRepository.findById(tripId).map(trip -> {
             dto.applyToEntity(trip);
             Trip updated = tripRepository.save(trip);

@@ -1,5 +1,6 @@
 package nomadia.DTO.User;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import nomadia.Enum.Role;
 import nomadia.Model.User;
@@ -19,7 +20,8 @@ public class UserResponseDTO {
     private String about;
     private Date birth;
     private Integer age;
-    public String token;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String token;
 
     public static UserResponseDTO fromEntity(User user) {
         UserResponseDTO dto = new UserResponseDTO();

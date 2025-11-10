@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.List;
@@ -45,7 +46,7 @@ public class TripController {
         }
     }
 
-    @GetMapping("/my-trips")// chequeado
+    @GetMapping("/my-trips")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl me) {
         List<TripListDTO> trips=tripService.getMyTrips(me.getId());
@@ -57,28 +58,45 @@ public class TripController {
 
     @PostMapping("/view-trip")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> searchTrip(@AuthenticationPrincipal UserDetailsImpl me,
-                                        @RequestBody TripIdRequestDTO request) {
-        if(!tripService.isMember(request.getTripId(), me.getId())){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tenes permisos para ver este viaje");
+    public ResponseEntity<?> viewTrip(@AuthenticationPrincipal UserDetailsImpl me,
+                                      @RequestBody TripIdRequestDTO request) {
+        try {
+            TripResponseDTO trip = tripService.viewTrip(request.getTripId(), me.getId());
+            return ResponseEntity.ok(trip);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(Map.of("error", e.getReason()));
         }
-        return tripService.findById(request.getTripId())
-                .map(trip -> ResponseEntity.ok(TripResponseDTO.fromEntity(trip)))
-                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/get-travelers")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> listTravelers(
+            @AuthenticationPrincipal UserDetailsImpl me,
+            @RequestBody TripIdRequestDTO dto) {
+        try {
+            var travelers = tripService.getTravelers(dto.getTripId(), me.getId());
+            if (travelers.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(travelers);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(Map.of("error", e.getReason()));
+        }
     }
 
     @PostMapping("/add-user")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> addUser(@Valid @RequestBody TripAddUserByEmailDTO dto,
                                      @AuthenticationPrincipal UserDetailsImpl me) {
-
         if (!tripService.isOwner(dto.getTripId(), me.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("No tenés permiso para modificar este viaje");
         }
 
         try {
-            Optional<TripResponseDTO> dtoo= tripService.addUserToTrip(dto.getTripId(), dto.getEmail());
+             tripService.addUserToTrip(dto.getTripId(), dto.getEmail());
             return ResponseEntity.ok(Map.of("message","Usuario agregado con Exito"));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

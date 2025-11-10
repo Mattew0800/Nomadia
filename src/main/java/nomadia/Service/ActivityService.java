@@ -111,11 +111,6 @@ public List<ActivityResponseDTO> getActivitiesForUserAndTrip(
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
 
-        if (dto.getName() != null && !dto.getName().isBlank()
-                && !a.getName().equalsIgnoreCase(dto.getName())
-                && activityRepository.existsByTripIdAndNameIgnoreCase(tripId, dto.getName())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una actividad con ese nombre en este viaje");
-        }
         dto.applyToEntity(a);
         Activity updated = activityRepository.save(a);
         return ActivityResponseDTO.fromEntity(updated);

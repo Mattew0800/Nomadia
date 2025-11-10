@@ -5,15 +5,11 @@ import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.User.UserCreateDTO;
 import nomadia.DTO.User.UserResponseDTO;
 import nomadia.DTO.User.UserUpdateDTO;
-import nomadia.Enum.Role;
-import nomadia.Model.User;
-import nomadia.Service.AuthService;
 import nomadia.Service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,7 +24,7 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder, AuthService authService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
@@ -53,7 +49,6 @@ public class UserController {
                     .body(Map.of("error", e.getReason()));
         }
     }
-
 
     @PostMapping("/create") // esto dsps se va, solo para prueba
     @PreAuthorize("hasRole('ADMIN')")
