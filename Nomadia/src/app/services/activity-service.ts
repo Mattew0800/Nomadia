@@ -11,12 +11,16 @@ export class ActivityService {
 
   private API_URL = 'http://localhost:8080/nomadia/activities';
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  activities : ActivityCreateDTO[];
+
+  constructor(private http: HttpClient, private authService: AuthService) {
+    this.activities = [];
+  }
 
 
   create(activity: ActivityCreateDTO) {
 
-    return this.http.post<ActivityResponseDTO>(
+    return this.http.post(
       `${this.API_URL}/create`,
       activity,
       { headers: this.authService.authHeaders() }

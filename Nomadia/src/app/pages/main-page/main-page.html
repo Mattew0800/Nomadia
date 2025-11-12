@@ -8,8 +8,17 @@
           @if(currentTrip.name){
             <h2 class="trip-title">{{ currentTrip.name }}</h2>
           }
-
         </div>
+        @if(emptyActivitiesList && !isCreateOpen && !isModalOpen){
+          <div class="beach-text">
+            <div class="mascot-container">
+              <img src="nomadia-penguin.png" alt="Nomadia Penguin" class="mascot">
+            </div>
+            <div class="dialog-bubble">
+              <p>Qué silencio...<span class="highlight">¿Nada planeado aún?</span> </p>
+            </div>
+          </div>
+        }
 
         <!-- Columna derecha: calendario + tareas -->
         <div class="right-col">
@@ -90,7 +99,6 @@
           <button class="edit-btn" id="toggleEdit" (click)="toggleModal(true)">Invitar Amigos</button>
 
         </div>
-
 
     </section>
     <div id="shareModal" class="modal-overlay" [class.active]="isModalOpen">
@@ -175,4 +183,3 @@
   }
 
 </app-test>
-

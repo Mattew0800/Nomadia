@@ -8,6 +8,8 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {ActivityService} from '../../services/activity-service';
 import {User} from '../../models/User';
 import {TravelerResponse} from '../../models/TravelerResponse';
+import {ActivityResponseDTO} from '../../models/ActivityResponse';
+import {ActivityCreateDTO} from '../../models/ActivityCreate';
 
 type AgendaItem = {
   time: string;
@@ -38,9 +40,7 @@ export class MainPage implements OnInit {
   msgCreateOk?: string;
   msgCreateError?: string;
 
-  setActiveNav(i: number) {
-    this.activeNav = i;
-  }
+  emptyActivitiesList: boolean = false;
 
   // Propiedades del modal
   isModalOpen: boolean = false;
@@ -196,6 +196,10 @@ export class MainPage implements OnInit {
         const pad = (n: number) => String(n).padStart(2, '0');
         const selectedStr = `${y}-${pad(m)}-${pad(d)}`;
 
+        if(!list){
+          this.emptyActivitiesList = true;
+        }
+
         const sameDay = list.filter(a => (a.date ?? '').startsWith(selectedStr));
 
         this.agenda = sameDay
@@ -302,6 +306,10 @@ export class MainPage implements OnInit {
         this.msgCreateOk="Actividad creada con exito."
         this.msgCreateError = '';
         this.closeCreateActivity();
+        this.activityApi.activities = [...this.activityApi.activities, payload];
+        if(this.activityApi.activities.length > 0){
+          this.emptyActivitiesList = false;
+        }
 
       },
       error: (e) => {
@@ -435,7 +443,6 @@ export class MainPage implements OnInit {
     })
   }
 
-
   deleteEvent(index: number) {
     const eventToDelete = this.agenda[index];
 
@@ -450,6 +457,11 @@ export class MainPage implements OnInit {
     this.activityApi.deleteActivity(tripId, activityId).subscribe({
       next: () => {
         this.agenda.splice(index, 1);
+        this.activityApi.activities.splice(index, 1);
+
+        if(this.activityApi.activities.length == 0){
+          this.emptyActivitiesList = true;
+        }
 
         if (this.selectedEvent !== null) {
           if (this.selectedEvent === index) {
@@ -458,6 +470,10 @@ export class MainPage implements OnInit {
             this.selectedEvent--;
           }
         }
+
+
+
+
 
         console.log(`Actividad ${activityId} borrada del servidor y de la UI.`);
 
