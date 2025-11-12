@@ -583,3 +583,38 @@
   margin-top:1rem;
   color: #d9534f;
 }
+
+/* Días dentro del rango del viaje */
+.day.in-trip {
+  background: rgba(236, 80, 44, 0.18) !important; /* naranja translúcido */
+  border-color: rgba(236, 80, 44, 0.35) !important;
+}
+
+/* Que el día seleccionado/today sigan destacando por encima */
+.day.in-trip.selected-day {
+  outline: 2px solid var(--accent-orange);
+  background: rgba(236, 80, 44, 0.28) !important;
+}
+.day.in-trip.is-today:not(.selected-day) {
+  outline: 2px solid #FF7A2D;
+}
+
+/* Marcas suaves para el inicio/fin del rango */
+.day.range-start,
+.day.range-end {
+  position: relative;
+}
+
+.day.range-start::after,
+.day.range-end::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  width: 10px;
+  border-radius: 6px;
+  background: rgba(236, 80, 44, 0.35);
+}
+
+.day.range-start::after { left: 4px; }
+.day.range-end::after   { right: 4px; }

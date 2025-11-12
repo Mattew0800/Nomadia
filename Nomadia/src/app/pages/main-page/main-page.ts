@@ -339,6 +339,53 @@ export class MainPage implements OnInit {
     return this.parseTripDate(raw);
   }
 
+  private getTripEndDate(trip: TripResponse | { endDate?: string }): Date | null {
+    const raw = (trip as any)?.endDate ?? null;
+    return this.parseTripDate(raw);
+  }
+
+  private stripTime(d: Date): Date {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  private dateForCell(day: number): Date {
+    return new Date(this.currentYear, this.currentMonth, day);
+  }
+
+  private getTripRange(): { start: Date | null; end: Date | null } {
+    if (!this.currentTrip) return { start: null, end: null };
+    const s = this.getTripStartDate(this.currentTrip);
+    const e = this.getTripEndDate(this.currentTrip);
+    if (!s || !e) return { start: null, end: null };
+    const start = this.stripTime(s);
+    const end = this.stripTime(e);
+    return start <= end ? { start, end } : { start: end, end: start };
+  }
+
+  isInTripRange(day: number | null): boolean {
+    if (day === null || !this.currentTrip) return false;
+    const { start, end } = this.getTripRange();
+    if (!start || !end) return false;
+    const d = this.stripTime(this.dateForCell(day));
+    return d >= start && d <= end;
+  }
+
+  isRangeStart(day: number | null): boolean {
+    if (day === null || !this.currentTrip) return false;
+    const { start } = this.getTripRange();
+    if (!start) return false;
+    const d = this.stripTime(this.dateForCell(day));
+    return d.getTime() === start.getTime();
+  }
+
+  isRangeEnd(day: number | null): boolean {
+    if (day === null || !this.currentTrip) return false;
+    const { end } = this.getTripRange();
+    if (!end) return false;
+    const d = this.stripTime(this.dateForCell(day));
+    return d.getTime() === end.getTime();
+  }
+
   /** si el año no está en el rango del selector, lo extiendo para que aparezca */
   private ensureYearInRange(year: number) {
     if (!this.years || this.years.length === 0) return;

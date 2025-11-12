@@ -43,9 +43,19 @@
                 <div class="days" id="days-grid">
                     <ng-container *ngFor="let cell of calendarCells; let i = index">
                         <span *ngIf="cell === null" class="muted"></span>
-                        <button *ngIf="cell !== null" type="button" class="day" [class.is-today]="isToday(cell)"
-                            [class.selected-day]="selectedDay === cell" (click)="selectDay(cell)"> {{ cell }}
-                        </button>
+                      <button
+                        *ngIf="cell !== null"
+                        type="button"
+                        class="day"
+                        [class.is-today]="isToday(cell)"
+                        [class.selected-day]="selectedDay === cell"
+                        [class.in-trip]="isInTripRange(cell)"
+                        [class.range-start]="isRangeStart(cell)"
+                        [class.range-end]="isRangeEnd(cell)"
+                        (click)="selectDay(cell)"
+                      >
+                        {{ cell }}
+                      </button>
                     </ng-container>
                 </div>
             </aside>
