@@ -7,7 +7,7 @@
         <div class="sun-rays"></div>
         <div class="beach-overlay"></div>
 
-        
+
 
         <div class="beach-text">
             <div class="mascot-container">
@@ -36,7 +36,7 @@
                 <div class="input-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" placeholder="tu@email.com" required formControlName="email" [ngClass]="{'input-invalid': invalidCredentials}">
-                    
+
                 </div>
 
                 <div class="input-group">
@@ -55,7 +55,7 @@
                     </label>
                     <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
                 </div>
-                
+
                 <button type="submit" class="btn-login">Iniciar Sesión</button>
             </form>
 
@@ -93,69 +93,3 @@
     </div>
 </div>
 
-<!--
-<script>
-    function handleLogin() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        console.log('Login attempt:', { email, password });
-
-        // Animación de salida
-        document.querySelector('.login-card').style.transform = 'scale(0.95)';
-        document.querySelector('.login-card').style.opacity = '0';
-
-        setTimeout(() => {
-            alert('¡Bienvenido a Nômàdia! 🌴🚀');
-        }, 300);
-    }
-
-    // Create floating tropical elements
-    function createFloatingElements() {
-        const container = document.getElementById('floatingElements');
-        const palmEmojis = ['🌴', '🥥', '🌺', '🐚', '⭐', '🍹'];
-
-        // Palm leaves and tropical elements
-        for (let i = 0; i < 10; i++) {
-            const leaf = document.createElement('div');
-            leaf.className = 'palm-leaf';
-            leaf.textContent = palmEmojis[Math.floor(Math.random() * palmEmojis.length)];
-            leaf.style.left = Math.random() * 100 + '%';
-            leaf.style.animationDuration = (Math.random() * 15 + 20) + 's';
-            leaf.style.animationDelay = Math.random() * 10 + 's';
-            container.appendChild(leaf);
-        }
-
-        // Wave particles (glowing dots)
-        for (let i = 0; i < 25; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'wave-particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDuration = (Math.random() * 12 + 15) + 's';
-            particle.style.animationDelay = Math.random() * 8 + 's';
-            container.appendChild(particle);
-        }
-    }
-
-    // Parallax effect on mouse move (solo imagen)
-    document.addEventListener('mousemove', (e) => {
-        const beachImg = document.querySelector('.beach-background');
-
-        if (window.innerWidth > 1024 && beachImg) {
-            const mouseX = e.clientX / window.innerWidth;
-            const mouseY = e.clientY / window.innerHeight;
-
-            const moveX = (mouseX - 0.5) * 15;
-            const moveY = (mouseY - 0.5) * 15;
-
-            beachImg.style.transition = 'transform 0.3s ease-out';
-            beachImg.style.transform = `scale(1.15) translate(${moveX * 0.3}px, ${moveY * 0.3}px)`;
-        }
-    });
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-        createFloatingElements();
-    });
-</script>
--->

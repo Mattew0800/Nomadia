@@ -6,7 +6,6 @@
         <div class="sun-rays"></div>
         <div class="beach-overlay"></div>
 
-        <div class="floating-elements" id="floatingElements"></div>
 
         <div class="beach-text">
             <div class="mascot-container">
@@ -46,7 +45,7 @@
 
                         @if(nameC?.invalid && !nameC?.hasError("required")){
                             <p class="formError">El nombre es invalido.</p>
-                        }                        
+                        }
                     }
 
                 </div>
@@ -58,7 +57,7 @@
                         'input-valid': emailC?.valid && submitted,
                         'input-invalid': emailC?.invalid && submitted
                     }">
-                    
+
                     @if(submitted){
                         @if(emailC?.hasError("required")){
                             <p class="formError">Campo obligatorio.</p>
@@ -66,7 +65,7 @@
 
                         @if(emailC?.invalid && !emailC?.hasError("required")){
                             <p class="formError">El email es invalido.</p>
-                        }                        
+                        }
                     }
                 </div>
 
@@ -85,13 +84,13 @@
 
                         @if(passwordC?.invalid && !passwordC?.hasError("required")){
                             <p class="formError">La contraseña es muy corta.</p>
-                        }                        
+                        }
                     }
                 </div>
 
                 <div class="terms-checkbox" [ngClass]="{'underline': termsC?.invalid && submitted}">
                     <input type="checkbox" id="terms" required formControlName="terms" [ngClass]="{'check-color': termsC?.invalid && submitted}">
-                    <label for="terms">Acepto los <a href="#">términos y condiciones</a> y la <a href="#">política de privacidad</a></label>                    
+                    <label for="terms">Acepto los <a href="#">términos y condiciones</a> y la <a href="#">política de privacidad</a></label>
 
                 </div>
 
@@ -133,76 +132,3 @@
         </div>
     </div>
 </div>
-<!--
-    <script>
-        function handleRegister() {
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const terms = document.getElementById('terms').checked;
-            
-            if (!terms) {
-                alert('Debes aceptar los términos y condiciones');
-                return;
-            }
-            
-            console.log('Register attempt:', { name, email, password });
-            
-            // Animación de salida
-            document.querySelector('.login-card').style.opacity = '0';
-            
-            setTimeout(() => {
-                alert('¡Cuenta creada! Bienvenido a Nômàdia 🐧🌴');
-            }, 300);
-        }
-
-        // Create floating tropical elements
-        function createFloatingElements() {
-            const container = document.getElementById('floatingElements');
-            const palmEmojis = ['🌴', '🥥', '🌺', '🐚', '⭐', '🍹'];
-            
-            // Palm leaves and tropical elements
-            for (let i = 0; i < 10; i++) {
-                const leaf = document.createElement('div');
-                leaf.className = 'palm-leaf';
-                leaf.textContent = palmEmojis[Math.floor(Math.random() * palmEmojis.length)];
-                leaf.style.left = Math.random() * 100 + '%';
-                leaf.style.animationDuration = (Math.random() * 15 + 20) + 's';
-                leaf.style.animationDelay = Math.random() * 10 + 's';
-                container.appendChild(leaf);
-            }
-            
-            // Wave particles (glowing dots)
-            for (let i = 0; i < 25; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'wave-particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (Math.random() * 12 + 15) + 's';
-                particle.style.animationDelay = Math.random() * 8 + 's';
-                container.appendChild(particle);
-            }
-        }
-
-        // Parallax effect on mouse move (solo imagen)
-        document.addEventListener('mousemove', (e) => {
-            const beachImg = document.querySelector('.beach-background');
-            
-            if (window.innerWidth > 1024 && beachImg) {
-                const mouseX = e.clientX / window.innerWidth;
-                const mouseY = e.clientY / window.innerHeight;
-                
-                const moveX = (mouseX - 0.5) * 15;
-                const moveY = (mouseY - 0.5) * 15;
-                
-                beachImg.style.transition = 'transform 0.3s ease-out';
-                beachImg.style.transform = `scale(1.15) translate(${moveX * 0.3}px, ${moveY * 0.3}px)`;
-            }
-        });
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            createFloatingElements();
-        });
-    </script>
-    
-    -->
