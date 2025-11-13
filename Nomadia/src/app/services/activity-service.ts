@@ -4,6 +4,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {ActivityResponseDTO} from '../models/ActivityResponse';
 import {ActivityCreateDTO} from '../models/ActivityCreate';
+import {ActivityUpdateDTO} from '../models/ActivityUpdateDTO';
 import {AuthService} from './auth-service';
 
 @Injectable({ providedIn: 'root' })
@@ -68,5 +69,13 @@ export class ActivityService {
       headers);
   }
 
-
+  updateActivity(tripId: string, activityId: string, dto: ActivityUpdateDTO): Observable<ActivityResponseDTO> {
+    // Por coherencia, aseguramos que id y tripId viajen completos:
+    const payload: ActivityUpdateDTO = { ...dto, id: activityId, tripId };
+    return this.http.put<ActivityResponseDTO>(
+      `${this.API_URL}/update`,   // ajustá si tu backend usa otra ruta
+      payload,
+      { headers: this.authService.authHeaders() }
+    );
+  }
 }

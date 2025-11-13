@@ -52,7 +52,7 @@
 .grid{
   display:grid;
   grid-template-columns: 1fr 22rem;   /* izquierda grande / derecha angosta */
-  grid-auto-rows: min-content;        /* las filas se ajustan al contenido */
+  grid-auto-rows:min-content;       /* las filas se ajustan al contenido */
   gap:22px;
   align-items:start;
   padding: 1rem 3rem;
@@ -92,13 +92,8 @@
   overflow: hidden;
   display: flex; /* Esto se cambia por flex-direction: column si quieres que el título esté debajo */
   position: relative; /* **CRUCIAL: Para posicionar el título de forma absoluta** */
-  height: 50%;
-  margin-right: 1rem;
-
-  /* Cambiamos a columna para apilar la imagen y el título si el título no es absoluto,
-     pero para un título sobre la imagen, mantendremos position: relative en .hero
-     y posicionamiento absoluto en .trip-title */
-  display: block; /* Mejor cambiar a block si el título es absoluto */
+  height: 20rem;
+  margin-right: 1rem ; /* Mejor cambiar a block si el título es absoluto */
 }
 
 /* 2. Estilo y Posicionamiento del Título */
@@ -618,6 +613,49 @@
 
 .day.range-start::after { left: 4px; }
 .day.range-end::after   { right: 4px; }
+
+/* Panel integrado en el flujo natural del grid */
+.edit-panel {
+  grid-column: 1; /* izquierda */
+  grid-row: 1;    /* debajo del hero */
+  background: var(--panel);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem;
+  transition: all 0.35s ease;
+  overflow: hidden;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* cuando se abre, aparece con transición */
+.edit-panel.open {
+  transform: translateY(21rem);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.edit-panel.tight {
+  margin-top: -0.25rem;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Responsive: cuando la pantalla se achica, las columnas se apilan */
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto; /* hero, form, right-col */
+    padding: 1rem;
+    gap: 12px;
+  }
+
+  .right-col {
+    margin-left: 0;
+  }
+}
 
 
 .beach-text {

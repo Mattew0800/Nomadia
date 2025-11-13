@@ -8,6 +8,7 @@
           @if(currentTrip.name){
             <h2 class="trip-title">{{ currentTrip.name }}</h2>
           }
+
         </div>
         @if(emptyActivitiesList && !isCreateOpen && !isModalOpen){
           <div class="beach-text">
@@ -20,7 +21,40 @@
           </div>
         }
 
-        <!-- Columna derecha: calendario + tareas -->
+      <!-- 🧩 Panel de edición (ahora dentro del grid, no dentro del hero) -->
+      <section class="edit-panel" [class.open]="isEditPanelOpen">
+        <form [formGroup]="editForm" (ngSubmit)="submitEditActivity()">
+
+          <div class="input-group" (click)="unlock('name')">
+            <input #nameInput type="text" formControlName="name" [readonly]="locks.name" placeholder="Nombre" />
+          </div>
+
+          <div class="input-group" (click)="unlock('date')">
+            <input #dateInput type="date" formControlName="date" [readonly]="locks.date" />
+          </div>
+
+          <div class="input-group" style="gap:10px;">
+            <input #startInput type="time" formControlName="startTime" [readonly]="locks.startTime" />
+            <input #endInput type="time" formControlName="endTime" [readonly]="locks.endTime" />
+          </div>
+
+          <div class="input-group" (click)="unlock('cost')">
+            <input #costInput type="number" formControlName="cost" [readonly]="locks.cost" min="0" step="0.01" placeholder="Costo" />
+          </div>
+
+          <div class="input-group" (click)="unlock('description')">
+            <input #descInput type="text" formControlName="description" [readonly]="locks.description" placeholder="Descripción" />
+          </div>
+
+          <button class="share-btn" type="submit">Guardar cambios</button>
+
+          <p *ngIf="msgEditOk" style="margin-top:1rem; color:#d1f366;">{{ msgEditOk }}</p>
+          <p *ngIf="msgEditError" style="margin-top:1rem; color:#eb3f3a;">{{ msgEditError }}</p>
+        </form>
+      </section>
+
+
+      <!-- Columna derecha: calendario + tareas -->
         <div class="right-col">
             <aside class="calendar card">
                 <div class="cal-head">
@@ -77,22 +111,25 @@
                   </button>
                 </div>
                 <ul class="agenda" id="agenda-list">
-                    <li *ngFor="let ev of agenda; let i = index" class="event" [ngClass]="ev.color"
-                        [class.selected-event]="selectedEvent === i" tabindex="0" (click)="selectEvent(i)"
-                        (keydown.enter)="selectEvent(i)" (keydown.space)="selectEvent(i)">
-                        <span class="time">{{ ev.time }}</span>
-                        <div class="details">
+                  <li *ngFor="let ev of agenda; let i = index"
+                      class="event"
+                      [ngClass]="ev.color"
+                      [class.selected-event]="selectedEvent === i"
+                      tabindex="0"
+                      (click)="selectEvent(i); openEditPanel(ev, i)"
+                      (keydown.enter)="selectEvent(i); openEditPanel(ev, i)"
+                      (keydown.space)="selectEvent(i); openEditPanel(ev, i)">
+                    <span class="time">{{ ev.time }}</span>
+                    <div class="details">
+                      <div class="label">{{ ev.label }}</div>
+                      <div class="desc">{{ ev.desc }}</div>
+                    </div>
 
-                            <div class="label">{{ ev.label }} </div>
-                            <div class="desc">{{ ev.desc }}</div>
-
-                        </div>
-
-                      <button class="delete-btn" (click)="deleteEvent(i); $event.stopPropagation()">
-                        <i class="fa-solid fa-xmark"></i>
-                      </button>
-
-                    </li>
+                    <!-- Botón borrar queda igual -->
+                    <button class="delete-btn" (click)="deleteEvent(i); $event.stopPropagation()">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </li>
                 </ul>
 
             </aside>

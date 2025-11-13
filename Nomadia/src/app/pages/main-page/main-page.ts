@@ -18,6 +18,11 @@ type AgendaItem = {
   color: 'yellow' | 'purple' | 'blue' ;
   tripId: string;
   activityId: string;
+
+  date: string;          // 'YYYY-MM-DD'
+  cost: number;
+  startTimeRaw?: string; // 'HH:mm'
+  endTimeRaw?: string;
 };
 
 
@@ -40,6 +45,12 @@ export class MainPage implements OnInit {
   msgCreateOk?: string;
   msgCreateError?: string;
 
+  msgEditOk?: string;
+  msgEditError?: string;
+
+  setActiveNav(i: number) {
+    this.activeNav = i;
+  }
   emptyActivitiesList: boolean = false;
 
   // Propiedades del modal
@@ -48,6 +59,25 @@ export class MainPage implements OnInit {
 
   isCreateOpen = false;
   createForm!: FormGroup;
+
+  editForm!: FormGroup;
+  isEditPanelOpen = false; // panel deslizante visible/oculto
+  private editingIndex: number | null = null;
+  private editingActivityId: string | null = null;
+  private editingTripId: string | null = null;
+
+  // 🆕: locks por campo: arrancan bloqueados (read-only)
+  locks: Record<'name' | 'date' | 'startTime' | 'endTime' | 'cost' | 'description', boolean> = {
+    name: true, date: true, startTime: true, endTime: true, cost: true, description: true
+  };
+
+  // 🆕: refs a inputs para enfocar al desbloquear
+  @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('dateInput') dateInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('startInput') startInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('endInput') endInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('costInput') costInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('descInput') descInput!: ElementRef<HTMLInputElement>;
 
   weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
@@ -89,6 +119,7 @@ export class MainPage implements OnInit {
     this.loadTripFromLocalStorage();
     this.initYears();
     this.initCreateForm();
+    this.initEditForm();
   }
 
   private fetchTripData(id: string) {
@@ -163,6 +194,10 @@ export class MainPage implements OnInit {
     this.selectedDay = day;
     this.updateSelectedDayTitle();
     this.loadAgendaForSelectedDay();
+
+    if (this.isEditPanelOpen) {
+      this.closeEditPanel();
+    }
   }
 
   private updateSelectedDayTitle() {
@@ -210,7 +245,12 @@ export class MainPage implements OnInit {
             desc: a.description,
             color: 'blue' as const,
             tripId: String(this.currentTrip!.id),
-            activityId: String(a.id)
+            activityId: String(a.id),
+
+            date: a.date ?? selectedStr,
+            cost: Number(a.cost ?? 0),
+            startTimeRaw: a.startTime ?? '09:00',
+            endTimeRaw: a.endTime ?? '10:00'
           }));
       },
       error: (e) => console.error(e)
@@ -228,14 +268,17 @@ export class MainPage implements OnInit {
       this.isModalOpen = false;
       this.isCreateOpen = false;
       this.isBlurred = false;
+
+      this.isEditPanelOpen = false;
     }
   }
 
   @HostListener('document:keydown.escape')
   handleEscapeKey() {
-    if (this.isModalOpen || this.isCreateOpen) {
+    if (this.isModalOpen || this.isCreateOpen || this.isEditPanelOpen) {
       this.isModalOpen = false;
       this.isCreateOpen = false;
+      this.isEditPanelOpen = false;
       this.isBlurred = false;
     }
   }
@@ -480,6 +523,104 @@ export class MainPage implements OnInit {
       },
       error: (err: any) => {
         console.error('Error al borrar la actividad del servidor:', err);
+      }
+    });
+  }
+
+  private initEditForm() {
+    this.editForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
+      date: ['', Validators.required],          // 'YYYY-MM-DD'
+      description: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2000)]],
+      cost: [0, [Validators.required, Validators.min(0)]],
+      startTime: ['09:00', Validators.required], // 'HH:mm'
+      endTime: ['10:00', Validators.required],   // 'HH:mm'
+    });
+  }
+
+  /** Abre el panel y precarga datos de la actividad clickeada */
+  openEditPanel(ev: AgendaItem, index: number) {
+    this.editingIndex = index;
+    this.editingActivityId = ev.activityId;
+    this.editingTripId = ev.tripId;
+
+    this.editForm.reset({
+      name: ev.label,
+      date: ev.date,
+      description: ev.desc,
+      cost: ev.cost ?? 0,
+      startTime: ev.startTimeRaw ?? ev.time, // ev.time ya viene 'HH:mm'
+      endTime: ev.endTimeRaw ?? '10:00'
+    });
+
+    // todos los campos arrancan bloqueados; se desbloquean clickeando cada .field
+    this.locks = { name: true, date: true, startTime: true, endTime: true, cost: true, description: true };
+
+    this.msgEditOk = '';
+    this.msgEditError = '';
+
+    this.isEditPanelOpen = true;
+    this.isBlurred = false; // opcional: reaprovechamos blur general
+  }
+
+  /** Cierra panel y limpia estado */
+  closeEditPanel() {
+    this.isEditPanelOpen = false;
+    this.isBlurred = false;
+    this.msgEditOk = '';
+    this.msgEditError = '';
+    this.editingIndex = null;
+    this.editingActivityId = null;
+    this.editingTripId = null;
+  }
+
+  /** Desbloquea un campo y le da foco al input correspondiente */
+  unlock(field: 'name' | 'date' | 'startTime' | 'endTime' | 'cost' | 'description') {
+    if (!this.locks[field]) return;
+    this.locks[field] = false;
+
+    setTimeout(() => {
+      switch (field) {
+        case 'name': this.nameInput?.nativeElement?.focus(); break;
+        case 'date': this.dateInput?.nativeElement?.focus(); break;
+        case 'startTime': this.startInput?.nativeElement?.focus(); break;
+        case 'endTime': this.endInput?.nativeElement?.focus(); break;
+        case 'cost': this.costInput?.nativeElement?.focus(); break;
+        case 'description': this.descInput?.nativeElement?.focus(); break;
+      }
+    });
+  }
+
+  /** Envía actualización al backend y refresca la agenda */
+  submitEditActivity() {
+    if (this.editForm.invalid || !this.editingActivityId || !this.editingTripId) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    const v = this.editForm.value;
+    const payload = {
+      id: this.editingActivityId,
+      tripId: this.editingTripId,
+      name: v.name,
+      date: v.date,
+      description: v.description,
+      cost: Number(v.cost),
+      startTime: v.startTime,
+      endTime: v.endTime
+    };
+
+    this.activityApi.updateActivity(this.editingTripId, this.editingActivityId, payload).subscribe({
+      next: () => {
+        this.loadAgendaForSelectedDay(); // recarga el día actual
+        this.msgEditOk = 'Actividad actualizada con éxito.';
+        this.msgEditError = '';
+        this.closeEditPanel();
+      },
+      error: (e) => {
+        console.error(e);
+        this.msgEditOk = '';
+        this.msgEditError = e.error?.error ?? 'Error al actualizar la actividad.';
       }
     });
   }
