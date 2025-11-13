@@ -23,7 +23,7 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, Test],
   templateUrl: './new-travel.html',
-  styleUrls: ['./new-travel.css'],
+  styleUrls: ['./new-travel.scss'],
 })
 export class NewTravel {
 
@@ -61,7 +61,7 @@ export class NewTravel {
 
   get tripTypeClass(): string {
     const typeControl = this.form.get('type');
-    
+
     if (!typeControl || !typeControl.value) {
       return '';
     }
@@ -75,7 +75,7 @@ export class NewTravel {
     this.currentStep = 1;
   }
 
-  
+
   /**
    * Permite volver al paso de selección de tipo (Paso 0).
    */
@@ -144,10 +144,10 @@ export class NewTravel {
                 this.loading = false;
                 console.log('Viaje creado:', response);
                 this.msgOk = 'Viaje creado con éxito.';
-                
+
                 // Resetea el formulario y vuelve al Paso 0
-                this.form.reset({ type: '' }); 
-                this.goToStep(0); 
+                this.form.reset({ type: '' });
+                this.goToStep(0);
                 this.submitted = false;
                 this.router.navigate(['tripList'])
             },

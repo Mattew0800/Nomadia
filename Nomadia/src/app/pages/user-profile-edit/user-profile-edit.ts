@@ -17,7 +17,7 @@ import {AuthErrorResponse} from '../../models/AuthErrorResponse';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NgClass, Test],
   templateUrl: './user-profile-edit.html',
-  styleUrl: './user-profile-edit.css'
+  styleUrl: './user-profile-edit.scss'
 })
 export class UserProfileEdit {
 

@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Titan+One&display=swap");
 
 * {
   margin: 0;
@@ -7,11 +8,46 @@
   box-sizing: border-box;
   border: none;
   outline: none;
-  
+
 }
-
-
 
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+:host {
+  --bg-outer: #0B0F1A;
+  --bg: #0F1524;
+  --panel: #151B2C;
+  --panel-2: #1A2134;
+  --text: #E8EDF6;
+  --muted: #8B93A7;
+  --brand: #C9FF6A;
+  --brand-dark: #79C956;
+  --accent: #FF6A00;
+  --yellow: #FFC043;
+  --purple: #8B5CF6;
+  --blue: #4DB5FF;
+  --dark-primary: #141627;
+  --dark-secondary: #1c1f37;
+  --text-muted: #5f647e;
+  --text-light: #d7dbee;
+  --accent-lime: #d1f366;
+  --accent-orange: #ec502c;
+  --accent-red: #eb3f3a;
+
+  --shadow: 0 10px 24px rgba(0, 0, 0, .35);
+
+  --font-sans: "Poppins", "Helvetica Neue", sans-serif;
+  --font-display: "Titan One", sans-serif;
+
+  display: block;
+  min-height: 100dvh;
+  color: var(--text);
+  background: radial-gradient(1200px 600px at -200px -200px, #131B2E 0%, transparent 60%),
+  radial-gradient(800px 600px at 120% -100px, #10172A 0%, transparent 60%),
+  var(--bg-outer);
+
+  --page-pad-x: 0;
+  --right-col-w: 23rem;
 }

@@ -8,7 +8,7 @@ import { AuthService } from '../../services/auth-service';
   selector: 'app-register-page',
   imports: [RouterLink, ReactiveFormsModule, NgClass],
   templateUrl: './register-page.html',
-  styleUrl: './register-page.css',
+  styleUrl: './register-page.scss',
 })
 export class RegisterPage {
 

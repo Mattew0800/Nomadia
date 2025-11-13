@@ -1,0 +1,127 @@
+
+#form__grid-aboutme {
+  grid-column: 1/3;
+}
+
+
+.profile-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.profile-user-profile .user-image.large img {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+}
+
+.profile-user-profile .user-info.large {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-user-profile .user-info.large .user-name {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #d7dbee;
+}
+
+.profile-user-profile .user-info.large .user-status {
+  font-size: 1.5rem;
+  color: #5f647e;
+}
+
+.profile-card {
+  margin: 3rem 3rem;
+  background: linear-gradient(180deg, #1c1f37 0%, #15172c 100%);
+  border-radius: 1rem;
+  padding: 2rem;
+  width: 85%;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 2rem;
+  margin-bottom: -2rem;
+}
+
+label {
+  font-weight: 500;
+  color: #9aa0b5;
+  letter-spacing: 0.3px;
+}
+
+input,
+textarea {
+  width: 100%;
+  background-color: #11141b;
+  border: 1px solid #232730;
+  border-radius: 8px;
+  color: #e2e2e2;
+  font-size: 0.95rem;
+  padding: 10px;
+}
+
+input[disabled],
+textarea[disabled] {
+  background-color: transparent;
+  border: none;
+  color: #e2e2e2;
+  cursor: default;
+}
+
+textarea {
+  grid-column: 1 / 3;
+  resize: none;
+  min-height: 80px;
+}
+
+.hidden {
+  display: none;
+}
+
+.input-invalid {
+  border-color: #eb3f3a !important;
+  box-shadow: 0 0 0 2px rgba(235, 63, 58, 0.15);
+}
+
+.formError {
+  color: #eb3f3a;
+  font-size: 0.85rem;
+}
+
+button[disabled] {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+form .form-grid > div:last-child {
+  margin-bottom: 2rem;
+}

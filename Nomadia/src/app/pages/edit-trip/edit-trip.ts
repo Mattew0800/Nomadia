@@ -17,7 +17,7 @@ type TripDetails = TripResponse & {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, Test],
   templateUrl: './edit-trip.html',
-  styleUrls: ['./edit-trip.css']
+  styleUrls: ['./edit-trip.scss']
 })
 export class TripEdit implements OnInit {
 

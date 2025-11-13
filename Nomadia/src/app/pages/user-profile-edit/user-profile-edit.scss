@@ -1,0 +1,23 @@
+@import '../../styles/buttons';
+@import '../../styles/profile-shared';
+
+body {
+  background-color: #141627;
+  color: #d7dbee;
+  font-family: 'Poppins', 'Helvetica Neue', sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background-color: #141627;
+  overflow: hidden;
+}
+

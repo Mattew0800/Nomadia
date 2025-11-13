@@ -11,7 +11,7 @@ import {Test} from '../test/test';
   standalone: true,
   imports: [CommonModule, FormsModule, Test],
   templateUrl: './activity-list.html',
-  styleUrls: ['./activity-list.css']
+  styleUrls: ['./activity-list.scss']
 })
 export class ActivityListComponent implements OnInit {
 

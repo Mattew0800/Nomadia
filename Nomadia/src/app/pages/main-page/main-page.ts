@@ -31,7 +31,7 @@ type AgendaItem = {
   standalone: true,
   imports: [CommonModule, Test, ReactiveFormsModule, FormsModule],
   templateUrl: './main-page.html',
-  styleUrls: ['./main-page.css'],
+  styleUrls: ['./main-page.scss'],
 })
 
 export class MainPage implements OnInit {

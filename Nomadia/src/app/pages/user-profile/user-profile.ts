@@ -10,13 +10,13 @@ import { Test } from '../test/test';
   selector: 'app-user-profile',
   imports: [RouterLink, DatePipe, Test],
   templateUrl: './user-profile.html',
-  styleUrl: './user-profile.css',
+  styleUrl: './user-profile.scss',
 })
 export class UserProfile implements OnInit{
 
   user?: User
 
-  constructor(public authService: AuthService, private router: Router, public userService: UserService) { 
+  constructor(public authService: AuthService, private router: Router, public userService: UserService) {
 
   }
 

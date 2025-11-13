@@ -13,7 +13,7 @@ type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './test.html',
-  styleUrls: ['./test.css'],
+  styleUrls: ['./test.scss'],
 })
 export class Test implements OnInit{
 

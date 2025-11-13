@@ -8,7 +8,7 @@ import { NgClass } from '@angular/common';
   selector: 'app-login-page',
   imports: [RouterLink, ReactiveFormsModule, NgClass],
   templateUrl: './login-page.html',
-  styleUrl: './login-page.css',
+  styleUrl: './login-page.scss',
 })
 export class LoginPage{
 
@@ -38,7 +38,7 @@ export class LoginPage{
           password: ''
         }];
         this.invalidCredentials = false;
-        this.loginError = null; 
+        this.loginError = null;
         this.router.navigate(['/profile']);
       },
       error: (e) => {

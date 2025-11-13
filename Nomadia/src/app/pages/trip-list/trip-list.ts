@@ -8,7 +8,7 @@ import {TripService} from '../../services/trip-service';
   standalone: true,
   imports: [Test, RouterLink],
   templateUrl: './trip-list.html',
-  styleUrl: './trip-list.css',
+  styleUrl: './trip-list.scss',
 })
 export class TripList implements OnInit {
 
