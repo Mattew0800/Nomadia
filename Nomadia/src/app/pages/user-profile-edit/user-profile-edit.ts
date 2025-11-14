@@ -1,6 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../services/auth-service';
@@ -40,7 +48,7 @@ export class UserProfileEdit {
     this.form = new FormGroup({
       name: new FormControl('', [
         Validators.required,
-        Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'.-]{2,}$/)
+        Validators.pattern(/^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$/i)
       ]),
       nick: new FormControl(''),
       email: new FormControl({ value: '', disabled: false }, [
@@ -48,7 +56,7 @@ export class UserProfileEdit {
         Validators.email
       ]),
       phone: new FormControl(''),
-      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/)]),
+      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.ageValidator(15)]),
       age: new FormControl(''),
       about: new FormControl(''),
 
@@ -100,11 +108,44 @@ export class UserProfileEdit {
   }
 
 
+  public ageValidator = (minAge: number): ValidatorFn => {
+    return (control: AbstractControl): ValidationErrors | null => {
 
+      const birthDateString = control.value;
+
+      // 1. Si no hay valor, no validar (deja que Validators.required se encargue)
+      if (!birthDateString) {
+        return null;
+      }
+
+      // 2. Reutilizamos tu función para calcular la edad
+      const age = this.calcAge(birthDateString);
+
+      // 3. Si la edad es nula (formato inválido) o menor, devolvemos error
+      if (age === null) {
+        return null; // El pattern validator se encargará del formato
+      }
+
+      if (age < minAge) {
+        // Inválido: es menor de edad
+        return { isUnderage: true };
+      }
+
+      // Válido: es mayor de edad
+      return null;
+    };
+  }
 
 
   get f() {
     return this.form.controls;
+  }
+  public get emailControl() {
+    return this.form.get('email');
+  }
+
+  public get newPassControl() {
+    return this.form.get('newPass');
   }
 
   calcAge(birth: string): number | null {

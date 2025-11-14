@@ -27,6 +27,14 @@
                     <label>Nombre completo</label>
                     <input type="text" formControlName="name"
                         [ngClass]="{'input-invalid': form.get('name')?.invalid && form.get('name')?.touched}">
+
+                  <div *ngIf="f['name'].touched && f['name'].hasError('required')" class="text-danger">
+                    <p class="formError">El nombre completo es obligatorio.</p>
+                  </div>
+                  <div *ngIf="f['name'].touched && f['name'].hasError('pattern')" class="text-danger">
+                    <p class="formError">Debes ingresar un nombre y apellido válidos (ej: Juan Pérez).</p>
+                  </div>
+
                 </div>
 
                 <div>
@@ -37,6 +45,12 @@
                 <div>
                     <label>Email</label>
                     <input type="email" formControlName="email">
+                  <div *ngIf="emailControl?.touched && emailControl?.hasError('required')" class="text-danger">
+                    <p class="formError">El email es obligatorio.</p>
+                  </div>
+                  <div *ngIf="emailControl?.touched && emailControl?.hasError('email')" class="text-danger">
+                    <p class="formError">El formato del email es inválido (ej: usuario&#64;dominio.com).</p>
+                  </div>
                 </div>
 
                 <div>
@@ -50,6 +64,11 @@
                     <div *ngIf="f['birth'].errors?.['pattern'] && f['birth'].touched" class="text-danger">
                         <p class="formError">La fecha debe tener formato YYYY-MM-DD con año de 4 dígitos.</p>
                     </div>
+
+                  <div *ngIf="f['birth'].touched && f['birth'].hasError('isUnderage')" class="text-danger">
+                    <!-- El validador usa 15, así que el mensaje es sobre 15 -->
+                    <p class="formError">Debes tener al menos 15 años.</p>
+                  </div>
                 </div>
 
 
@@ -89,6 +108,9 @@
                             <label>Nueva contraseña</label>
                             <input type="password" formControlName="newPass"
                                 [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
+                          <div *ngIf="newPassControl?.touched && newPassControl?.hasError('minlength')" class="text-danger">
+                            <p class="formError">La contraseña debe tener al menos 6 caracteres.</p>
+                          </div>
                         </div>
 
                         <div style="grid-column:1/3;">
