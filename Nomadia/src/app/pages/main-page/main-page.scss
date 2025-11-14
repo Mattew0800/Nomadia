@@ -1,3 +1,7 @@
+@use '../../styles/buttons';
+@use '../../styles/auth-layout';
+@use '../../styles/modals';
+
 .grid.blurred {
   filter: blur(5px);
   pointer-events: none;
@@ -7,14 +11,12 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 22rem;
   grid-auto-rows: min-content;
   gap: 22px;
   align-items: start;
   padding: 1rem 3rem;
   grid-template-columns: 1fr var(--right-col-w);
 }
-
 
 .right-col {
   grid-column: 2;
@@ -25,12 +27,7 @@
   margin-left: 1rem;
 }
 
-.calendar {
-  grid-column: 2;
-  grid-row: 1;
 
-
-}
 
 .agenda-card {
   grid-column: 2;
@@ -249,101 +246,21 @@
 
 .edit-btn {
   width: 100%;
-  padding: 1rem 2rem;
   background: linear-gradient(135deg, #ec502c 0%, #d64a2c 100%);
-  border: none;
-  border-radius: 0.75rem;
   color: #ffffff;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(214, 74, 44, 0.4);
-  margin-bottom: -0.5rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.edit-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-}
-
-.edit-btn:hover::before {
-  left: 100%;
 }
 
 .edit-btn:hover {
-  transform: translateY(-2px);
   background: linear-gradient(135deg, #f06a4a 0%, #ec502c 100%);
   box-shadow: 0 8px 20px rgba(236, 80, 44, 0.6);
 }
 
 .edit-btn:active {
-  transform: translateY(0);
   background: #a83318;
   box-shadow: 0 2px 8px rgba(236, 80, 44, 0.3);
 }
 
-/* --- ESTILOS DEL MODAL --- */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.75); /* Fondo más oscuro para el contraste */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999; /* Alto z-index para asegurar que esté encima de todo */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-}
-
-.modal-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.modal-content {
-  background-color: var(--panel-2);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  width: 90%;
-  max-width: 480px;
-  transform: translateY(-50px);
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  opacity: 0;
-}
-
-.modal-overlay.active .modal-content {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--panel);
-  color: var(--text-light);
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
 
 .close-button {
   background: none;
@@ -358,20 +275,6 @@
   color: var(--text);
 }
 
-.modal-body {
-  padding: 1.5rem;
-}
-
-.modal-body h3 {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  margin-top: 1.5rem;
-  margin-bottom: 0.8rem;
-  border-top: 1px solid var(--panel);
-  padding-top: 1rem;
-}
 
 .input-group {
   display: flex;
@@ -504,23 +407,19 @@
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 12px 12px;
+  min-width: 9.5rem;
 }
 
 .calendar .year-select {
   position: relative;
   z-index: 50;
+  min-width: 5.5rem;
 }
 
 .calendar {
   overflow: visible;
-}
-
-.calendar .month-select {
-  min-width: 9.5rem;
-}
-
-.calendar .year-select {
-  min-width: 5.5rem;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .calendar .month-select:active,
@@ -614,19 +513,6 @@
   margin-bottom: 8px;
 }
 
-.add-event-btn {
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-}
-
-.modal-content {
-  position: relative;
-  z-index: 10000;
-}
 
 .grid.blurred {
   filter: blur(5px);
@@ -714,7 +600,6 @@
   padding: 1rem 1.25rem;
   transition: all 0.35s ease;
   overflow: hidden;
-
   opacity: 0;
   pointer-events: none;
 }
@@ -744,7 +629,6 @@
   }
 }
 
-
 .beach-text {
   position: absolute;
   bottom: 100px;
@@ -758,9 +642,6 @@
 }
 
 .mascot-container {
-  flex-shrink: 0;
-  position: relative;
-  margin-bottom: -10px;
   right: 4rem;
 }
 
@@ -771,59 +652,23 @@
 }
 
 .dialog-bubble {
-  position: relative;
-  background: #fff;
   bottom: 10rem;
   left: -8rem;
-  padding: 24px 28px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  max-width: 30rem;
-  max-height: 30rem;
-  animation: bubbleFloat 3s ease-in-out infinite;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-@keyframes bubbleFloat {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
 
 .dialog-bubble::before {
-  content: '';
-  position: absolute;
   bottom: -12px;
   left: 20px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 12px 12px 0 12px;
-  border-color: #fff transparent transparent transparent;
-  filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .dialog-bubble p {
-  font-family: 'Inter', sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  color: #1a2332;
-  line-height: 1.5;
-  margin: 0;
   text-align: center;
-
 }
 
-.dialog-bubble .highlight {
-  color: #84cc16;
-  font-weight: 700;
-}
 
 .dialog-bubble .edit-btn {
   margin-left: 0;
@@ -844,4 +689,3 @@
   margin-top: 0.6rem;
   margin-left: 0.6rem;
 }
-

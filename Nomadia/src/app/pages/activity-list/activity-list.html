@@ -1,7 +1,6 @@
 <app-test>
   <div class="activity-list">
 
-    <!-- Filtros -->
     <section *ngIf="showFilters" class="filters">
       <div class="row">
 
@@ -31,14 +30,12 @@
       </div>
     </section>
 
-    <!-- Estados -->
     <div *ngIf="loading()" class="empty">Cargando actividades...</div>
     <div *ngIf="!loading() && errorMsg()" class="empty">{{ errorMsg() }}</div>
     <div *ngIf="!loading() && !errorMsg() && !activities?.length" class="empty">
       No hay actividades registradas.
     </div>
 
-    <!-- Ítems -->
     <article class="activity-card" *ngFor="let a of activities" (click)="onSelect(a)">
       <div class="content">
         <div class="row between">

@@ -89,14 +89,15 @@
 }
 
 .nav-item.active {
-  background-color: rgba(209, 243, 102, 0.15);
-  color: #d1f366;
+  background-color: #d1f366;
+  color: #141627;
 }
 
 .nav-icon {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
+  fill: currentColor;
 }
 
 .logout-item {

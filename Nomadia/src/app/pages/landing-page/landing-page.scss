@@ -1,4 +1,3 @@
-
 .background-image,
 .background-blur {
   position: absolute;
@@ -163,43 +162,81 @@
 }
 
 
-.hex-1 { left: 28%; top: 28%; z-index: 3; animation: floatHex 4s ease-in-out infinite; }
-.hex-2 { left: 72%; top: 28%; z-index: 2; animation: floatHex 4s ease-in-out infinite; }
-.hex-3 { left: 50%; top: 60%; z-index: 1; animation: floatHex 4s ease-in-out infinite; }
+.hex-1 {
+  left: 28%;
+  top: 28%;
+  z-index: 3;
+  animation: floatHex 4s ease-in-out infinite;
+}
 
-.image-hexagon:nth-child(1) { z-index: 3; }
-.image-hexagon:nth-child(2) { z-index: 2; }
-.image-hexagon:nth-child(3) { z-index: 1; }
+.hex-2 {
+  left: 72%;
+  top: 28%;
+  z-index: 2;
+  animation: floatHex 4s ease-in-out infinite;
+}
+
+.hex-3 {
+  left: 50%;
+  top: 60%;
+  z-index: 1;
+  animation: floatHex 4s ease-in-out infinite;
+}
+
+.image-hexagon:nth-child(1) {
+  z-index: 3;
+}
+
+.image-hexagon:nth-child(2) {
+  z-index: 2;
+}
+
+.image-hexagon:nth-child(3) {
+  z-index: 1;
+}
 
 
 @keyframes floatHex {
-  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
-  50% { transform: translate(-50%, -50%) translateY(-0.8rem); }
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-0.8rem);
+  }
 }
 
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.logo{
+.logo {
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
 
-
-@media (min-width: 1800px){
+@media (min-width: 1800px) {
 
 
   .logo img {
 
-    width: 40%; 
+    width: 40%;
     height: auto;
   }
 
@@ -229,39 +266,50 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    min-height: 800px; 
+    min-height: 800px;
   }
 
   .image-hexagon img {
-    width: clamp(500px, 45vw, 600px); 
+    width: clamp(500px, 45vw, 600px);
   }
 
-  .hex-1 { left: 25%; top: 33%; }
-  .hex-2 { left: 75%; top: 33%; }
-  .hex-3 { left: 50%; top: 68%; }
+  .hex-1 {
+    left: 25%;
+    top: 33%;
+  }
+  .hex-2 {
+    left: 75%;
+    top: 33%;
+  }
+  .hex-3 {
+    left: 50%;
+    top: 68%;
+  }
 
- 
-  .hero-content { 
-    max-width: 700px; 
+
+  .hero-content {
+    max-width: 700px;
     margin-left: 5rem;
   }
 
-  .hero-title {     
-    font-size: clamp(3rem, 2.5vw, 4rem); 
+  .hero-title {
+    font-size: clamp(3rem, 2.5vw, 4rem);
     max-width: 100%;
   }
-  .hero-subtitle{
+  .hero-subtitle {
     font-size: clamp(1.5rem, 2.1vw, 1.8rem)
   }
-  .hero-description { 
-    font-size: clamp(1.2rem, 1.8vw, 1.5rem); 
+  .hero-description {
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
     max-width: 100%;
     text-align: justify;
   }
-  .hero-actions { gap: 2.5rem; }
+  .hero-actions {
+    gap: 2.5rem;
+  }
 
   .cta-button {
-    transform: scale(1.3); 
+    transform: scale(1.3);
     padding: 1.2rem 2.5rem;
     margin-bottom: 1rem;
   }
@@ -275,13 +323,13 @@
 
   .background-image img,
   .background-blur img {
-    height: 102%; 
+    height: 102%;
   }
 }
 
 
 @media (max-width: 1799px) and (min-width: 1601px) {
-  
+
 
   .logo img {
 
@@ -321,22 +369,33 @@
     width: clamp(480px, 43vw, 530px);
   }
 
-  .hex-1 { left: 25%; top: 33%; }
-  .hex-2 { left: 75%; top: 33%; }
-  .hex-3 { left: 50%; top: 68%; }
+  .hex-1 {
+    left: 25%;
+    top: 33%;
+  }
+  .hex-2 {
+    left: 75%;
+    top: 33%;
+  }
+  .hex-3 {
+    left: 50%;
+    top: 68%;
+  }
 
-  .hero-content { 
+  .hero-content {
     max-width: 700px;
     margin-left: 5rem;
   }
 
-  .hero-title { 
-    font-size: clamp(2.3rem, 3.3vw, 3.3rem); 
+  .hero-title {
+    font-size: clamp(2.3rem, 3.3vw, 3.3rem);
     max-width: 100%;
   }
-  .hero-subtitle { font-size: clamp(1.2rem, 1.8vw, 1.5rem); }
-  .hero-description { 
-    font-size: clamp(0.9rem, 1.5vw, 1.2rem); 
+  .hero-subtitle {
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+  }
+  .hero-description {
+    font-size: clamp(0.9rem, 1.5vw, 1.2rem);
     max-width: 90%;
     text-align: justify;
   }
@@ -359,7 +418,7 @@
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
-    justify-content: flex-start; 
+    justify-content: flex-start;
     margin: 0;
     margin-top: 3rem;
     transform: none;
@@ -371,7 +430,6 @@
     height: 102%;
   }
 }
-
 
 
 @media (max-width: 1600px) and (min-width: 1501px) {
@@ -411,22 +469,33 @@
     width: clamp(440px, 38vw, 490px);
   }
 
-  .hex-1 { left: 23%; top: 33%; }
-  .hex-2 { left: 77%; top: 33%; }
-  .hex-3 { left: 50%; top: 68%; }
+  .hex-1 {
+    left: 23%;
+    top: 33%;
+  }
+  .hex-2 {
+    left: 77%;
+    top: 33%;
+  }
+  .hex-3 {
+    left: 50%;
+    top: 68%;
+  }
 
   .hero-content {
     max-width: 650px;
     margin-left: 4rem;
   }
 
-  .hero-title { 
-    font-size: clamp(2.5rem, 3vw, 3.3rem); 
+  .hero-title {
+    font-size: clamp(2.5rem, 3vw, 3.3rem);
     max-width: 100%;
   }
-  .hero-subtitle { font-size: clamp(1.2rem, 1.9vw, 1.5rem); }
-  .hero-description { 
-    font-size: clamp(0.8rem, 1.3vw, 1.1rem); 
+  .hero-subtitle {
+    font-size: clamp(1.2rem, 1.9vw, 1.5rem);
+  }
+  .hero-description {
+    font-size: clamp(0.8rem, 1.3vw, 1.1rem);
     max-width: 90%;
     text-align: justify;
   }
@@ -436,14 +505,14 @@
     gap: 1rem;
     flex-wrap: wrap;
     align-items: center;
-    
+
   }
 
   .cta-button {
     padding: 1rem 2.3rem;
     font-size: 0.95rem;
     margin-top: -5rem;
-    
+
   }
 
   .social-links {
@@ -462,10 +531,9 @@
 }
 
 
-
 @media (max-width: 1400px) and (min-width: 1025px) {
 
-  .logo img{
+  .logo img {
 
     width: 30%;
     height: auto;
@@ -501,24 +569,45 @@
     width: clamp(290px, 28vw, 390px);
   }
 
-  .hex-1 { left: 30%; top: 35%; }
-  .hex-2 { left: 70%; top: 35%; }
-  .hex-3 { left: 50%; top: 65%; }
+  .hex-1 {
+    left: 30%;
+    top: 35%;
+  }
+  .hex-2 {
+    left: 70%;
+    top: 35%;
+  }
+  .hex-3 {
+    left: 50%;
+    top: 65%;
+  }
 
-  .hero-content { 
-    max-width: 540px; 
+  .hero-content {
+    max-width: 540px;
     margin-left: 3rem;
   }
-  .hero-title { font-size: clamp(2rem, 3vw, 2.8rem); }
-  .hero-subtitle { font-size: clamp(1.1rem, 2vw, 1.4rem); }
-  .hero-description { 
-    font-size: clamp(0.9rem, 1.2vw, 1rem); 
+  .hero-title {
+    font-size: clamp(2rem, 3vw, 2.8rem);
+  }
+  .hero-subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+  }
+  .hero-description {
+    font-size: clamp(0.9rem, 1.2vw, 1rem);
     text-align: justify;
   }
 
-  .hero-actions { gap: 1.5rem; }
-  .cta-button { transform: none !important; margin-bottom: 0.5rem; }
-  .social-links { margin-top: 0.5rem; transform: none !important; }
+  .hero-actions {
+    gap: 1.5rem;
+  }
+  .cta-button {
+    transform: none !important;
+    margin-bottom: 0.5rem;
+  }
+  .social-links {
+    margin-top: 0.5rem;
+    transform: none !important;
+  }
 
   .background-image img,
   .background-blur img {
@@ -648,7 +737,7 @@
     display: block;
     margin: 0 auto;
     position: relative;
-    top: -2rem; 
+    top: -2rem;
   }
 
   .social-links {
@@ -664,10 +753,9 @@
 }
 
 
-
 /* celulares chicos*/
 @media (max-width: 550px) {
-  
+
 
   .logo img {
     width: 20%;
@@ -713,7 +801,7 @@
   }
 
   .cta-button {
-    width: 30%;   
+    width: 30%;
     padding: 0.3rem 0.05rem;
     font-size: 0.3rem;
   }

@@ -118,41 +118,6 @@
   font-weight: 400;
 }
 
-.input-group {
-  margin-bottom: 24px;
-}
-
-.input-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #cbd5e1;
-}
-
-
-.input-group input {
-  width: 100%;
-  padding: 14px 16px;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1.5px solid rgba(148, 163, 184, 0.2);
-  border-radius: 12px;
-  color: #fff;
-  font-size: 15px;
-  transition: all 0.3s ease;
-}
-
-.input-group input:focus {
-  outline: none;
-  border-color: #bef264;
-  background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 0 0 3px rgba(190, 242, 100, 0.15);
-}
-
-.input-group input::placeholder {
-  color: #64748b;
-}
-
 .divider {
   display: flex;
   align-items: center;

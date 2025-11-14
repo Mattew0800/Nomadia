@@ -8,17 +8,15 @@
               Editar nombre del viaje
             </h2>
             <p class="user-status" style="font-size:1.25rem;color:#5f647e">
-              Solo se edita el nombre. El resto queda en solo lectura.
+              Campos en modo lectura
             </p>
           </div>
         </div>
       </section>
     </div>
 
-    <!-- IMPORTANTE: el form debe existir con este nombre -->
     <form [formGroup]="form" (ngSubmit)="save()" novalidate>
       <div class="form-grid">
-        <!-- ÚNICO campo editable -->
         <div>
           <label for="nombreViaje">Nombre de Viaje</label>
           <input id="nombreViaje"
@@ -28,7 +26,6 @@
                  [class.input-invalid]="submitted && f['name']?.invalid"/>
         </div>
 
-        <!-- Solo lectura (fuera del form o con readonly/disabled) -->
         <div>
           <label for="tipoDeViaje">Tipo de viaje</label>
           <input id="tipoDeViaje" type="text" [value]="trip?.type || ''" readonly disabled />

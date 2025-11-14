@@ -3,7 +3,7 @@
     <section class="grid" [class.blurred]="isBlurred">
         <div class="hero">
           @if(currentTrip.type){
-            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.jpg'" alt="" [ngClass]="{ 'deportivo-img-pos': currentTrip?.type === 'DEPORTIVO' }"/>
+            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.jpg'" alt="" [ngClass]="{ 'deportivo-img-pos': currentTrip.type === 'DEPORTIVO' }"/>
           }
           @if(currentTrip.name){
             <h2 class="trip-title">{{ currentTrip.name }}</h2>
@@ -21,7 +21,6 @@
           </div>
         }
 
-      <!-- 🧩 Panel de edición (ahora dentro del grid, no dentro del hero) -->
       <section class="edit-panel" [class.open]="isEditPanelOpen">
         <form [formGroup]="editForm" (ngSubmit)="submitEditActivity()">
 
@@ -57,7 +56,6 @@
       </section>
 
 
-      <!-- Columna derecha: calendario + tareas -->
         <div class="right-col">
             <aside class="calendar card">
                 <div class="cal-head">
@@ -78,8 +76,9 @@
                       <option *ngFor="let y of years" [value]="y">{{ y }}</option>
                     </select>
                   </div>
-
+                  <!--
                   <button class="more"><i class="fa-solid fa-ellipsis"></i></button>
+                  -->
                 </div>
 
               <div class="weekdays">
