@@ -514,7 +514,9 @@ export class MainPage implements OnInit {
           }
         }
 
-
+        if (this.editingIndex === index) {
+          this.closeEditPanel();
+        }
 
 
 
@@ -600,7 +602,7 @@ export class MainPage implements OnInit {
 
     const v = this.editForm.value;
     const payload = {
-      id: this.editingActivityId,
+      activityId: this.editingActivityId,
       tripId: this.editingTripId,
       name: v.name,
       date: v.date,

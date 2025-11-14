@@ -70,10 +70,14 @@ export class ActivityService {
   }
 
   updateActivity(tripId: string, activityId: string, dto: ActivityUpdateDTO): Observable<ActivityResponseDTO> {
-    // Por coherencia, aseguramos que id y tripId viajen completos:
-    const payload: ActivityUpdateDTO = { ...dto, id: activityId, tripId };
+    const payload: ActivityUpdateDTO = {
+      ...dto,
+      activityId: activityId,
+      tripId: tripId
+    };
+
     return this.http.put<ActivityResponseDTO>(
-      `${this.API_URL}/update`,   // ajustá si tu backend usa otra ruta
+      `${this.API_URL}/update`,
       payload,
       { headers: this.authService.authHeaders() }
     );

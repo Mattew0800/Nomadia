@@ -3,7 +3,7 @@
     <section class="grid" [class.blurred]="isBlurred">
         <div class="hero">
           @if(currentTrip.type){
-            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.jpg'" alt="" />
+            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.jpg'" alt="" [ngClass]="{ 'deportivo-img-pos': currentTrip?.type === 'DEPORTIVO' }"/>
           }
           @if(currentTrip.name){
             <h2 class="trip-title">{{ currentTrip.name }}</h2>
@@ -47,6 +47,9 @@
           </div>
 
           <button class="share-btn" type="submit">Guardar cambios</button>
+
+          <button type="button" class="close-btn" (click)="closeEditPanel()">Cerrar</button>
+
 
           <p *ngIf="msgEditOk" style="margin-top:1rem; color:#d1f366;">{{ msgEditOk }}</p>
           <p *ngIf="msgEditError" style="margin-top:1rem; color:#eb3f3a;">{{ msgEditError }}</p>

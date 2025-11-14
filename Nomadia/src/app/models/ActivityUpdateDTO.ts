@@ -1,5 +1,5 @@
 export interface ActivityUpdateDTO{
-  id: string;        // activityId
+  activityId: string;        // activityId
   tripId: string;    // tripId al que pertenece
   name: string;
   date: string;      // 'YYYY-MM-DD'

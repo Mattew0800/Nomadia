@@ -74,6 +74,11 @@
   display: block;
 }
 
+.hero img.deportivo-img-pos {
+  object-position: center 60%;
+  object-fit: cover;
+}
+
 /* ===== TARJETAS ===== */
 .card {
   background: #1A2134;
@@ -825,3 +830,18 @@
   margin-bottom: 0;
   align-self: center;
 }
+
+.close-btn {
+  background-color: #0F1628;
+  color: white;
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+  margin-top: 0.6rem;
+  margin-left: 0.6rem;
+}
+
