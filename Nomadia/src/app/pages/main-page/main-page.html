@@ -211,10 +211,12 @@
             <p class="error">Descripcion invalida</p>
           }
 
+          <p *ngIf="msgCreateOk" class="error">{{ msgCreateOk }}</p>
+          <p *ngIf="msgCreateError" class="error">{{ msgCreateError }}</p>
+
           <button class="share-btn" type="submit">Guardar</button>
 
-          <p *ngIf="msgCreateOk" style="margin-top:1rem; color:#d1f366;">{{ msgCreateOk }}</p>
-          <p *ngIf="msgCreateError" style="margin-top:1rem; color:#eb3f3a;">{{ msgCreateError }}</p>
+
         </form>
       </div>
     </div>

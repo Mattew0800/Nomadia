@@ -65,6 +65,10 @@
                             <p class="formError">El email es invalido.</p>
                         }
                     }
+                  @if(errorMsg){
+                    <p class="formError">{{errorMsg}}</p>
+
+                  }
                 </div>
 
                 <div class="input-group">
@@ -93,6 +97,7 @@
                 </div>
 
                 <p id="registerMsg">{{registerMsg}}</p>
+
 
                 <button type="submit" class="btn-login">Registrarme</button>
             </form>

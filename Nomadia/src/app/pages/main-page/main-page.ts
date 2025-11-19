@@ -358,7 +358,7 @@ export class MainPage implements OnInit {
       error: (e) => {
         console.error(e);
         this.msgCreateOk = '';
-        this.msgCreateError = e.error.error;
+        this.msgCreateError = e.error;
 
       }
 

@@ -15,6 +15,7 @@ export class RegisterPage {
   registerForm: FormGroup;
   submitted = false;
   registerMsg?:string;
+  errorMsg?:string
 
   constructor(public authService: AuthService, private router: Router) {
       this.registerForm = new FormGroup({
@@ -69,6 +70,11 @@ export class RegisterPage {
       },
       error: (e) => {
         console.log(e);
+        if (e.status === 409) {
+          this.errorMsg = "El usuario ya existe.";
+        } else {
+          this.errorMsg = "Ocurrió un error inesperado.";
+        }
       }
       });
 

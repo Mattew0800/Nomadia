@@ -14,6 +14,7 @@ export class TripList implements OnInit {
 
 
   showingActiveTrips: boolean = true;
+  msgError?: string;
 
   constructor(public tService: TripService, private router: Router) {
 
@@ -36,7 +37,6 @@ export class TripList implements OnInit {
   }
 
   selectTrip(tripId: string) {
-    // se guarda el id en local storage para mantenerlo oculto
     localStorage.setItem('selectedTripId', tripId.toString());
 
     this.router.navigate(['/mainPage']);
@@ -53,7 +53,7 @@ export class TripList implements OnInit {
   }
 
   deleteTrip(id: string, event: Event) {
-    event.stopPropagation(); // evita que haga clic sobre la card
+    event.stopPropagation();
     if (confirm('¿Seguro que querés eliminar este viaje?')) {
       this.tService.deleteTrip(id).subscribe({
         next: () => {
@@ -62,6 +62,7 @@ export class TripList implements OnInit {
         },
         error: (err) => {
           console.error('Error al eliminar viaje', err);
+          alert(err.error);
         }
       });
     }
