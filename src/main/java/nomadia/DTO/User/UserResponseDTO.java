@@ -28,7 +28,6 @@ public class UserResponseDTO {
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
-        dto.setRole(user.getRole());
         dto.setPhone(user.getPhone());
         dto.setPhotoUrl(user.getPhotoUrl());
         dto.setNick(user.getNick());
