@@ -1,8 +1,8 @@
 # Nomadia
 
-Plataforma compuesta por un **backend en Java/Spring Boot** y un **frontend en Angular 20 con SCSS**, apoyados en tooling Node (Husky + commitlint) para la gestión de git hooks y la integración con CI/CD.
+Plataforma web compuesta por un **backend en Java/Spring Boot** y un **frontend en Angular 20 con SCSS**. En la raíz del repositorio se centraliza el tooling Node para **Husky** y **commitlint**, que gestionan los git hooks y se integran con el pipeline de **CI/CD**.
 
-> Importante: después de clonar el repositorio, ejecuta siempre `npm install` en la **raíz del proyecto** antes de empezar a trabajar. Esto instala dependencias de tooling y configura los git hooks (Husky + commitlint).
+> ⚠️ **Muy importante**: después de clonar el repositorio, ejecuta siempre `npm install` en la **raíz del proyecto** antes de empezar a codear (frontend, backend, para todo). Esto instala las dependencias de tooling y configura los git hooks (Husky + commitlint).
 
 ---
 
@@ -10,13 +10,12 @@ Plataforma compuesta por un **backend en Java/Spring Boot** y un **frontend en A
 
 - [Arquitectura general](#arquitectura-general)
 - [Requisitos previos](#requisitos-previos)
+- [Estructura del repositorio](#estructura-del-repositorio)
 - [Instalación y configuración inicial](#instalación-y-configuración-inicial)
-- [Scripts de npm](#scripts-de-npm)
-- [Estructura de carpetas](#estructura-de-carpetas)
-- [Uso en desarrollo](#uso-en-desarrollo)
+- [Ejecución en desarrollo](#ejecución-en-desarrollo)
+- [Scripts disponibles](#scripts-disponibles)
 - [Variables de entorno](#variables-de-entorno)
 - [Tests](#tests)
-- [Estilo de código, linting y formateo](#estilo-de-código-linting-y-formateo)
 - [Git hooks: Husky y commitlint](#git-hooks-husky-y-commitlint)
 - [CI/CD con GitHub Actions](#cicd-con-github-actions)
 - [Guía rápida de contribución](#guía-rápida-de-contribución)
@@ -26,182 +25,94 @@ Plataforma compuesta por un **backend en Java/Spring Boot** y un **frontend en A
 
 ## Arquitectura general
 
-Nomadia está compuesta por dos grandes bloques:
+Nomadia se divide en dos partes principales:
 
-- **Backend**: servicio REST construido con **Java 21 (JDK 21)** y **Spring Boot**, gestionado con **Maven**.
-- **Frontend**: aplicación web en **Angular 20** con **SCSS** como preprocesador de estilos.
+- **Backend**
+    - Implementado en **Java 21 (JDK 21)** con **Spring Boot** y **Maven**.
+    - Expone los servicios REST que consumirá el frontend (gestión de usuarios, viajes, actividades, etc.).
 
-En la raíz del repositorio se centralizan las herramientas de integración y calidad:
+- **Frontend**
+    - Implementado en **Angular 20** con **SCSS**.
+    - Se encuentra en la carpeta `Nomadia/` del repositorio.
+    - Utiliza Angular standalone components y organización por páginas, servicios, modelos y estilos.
 
-- Tooling Node para **Husky** y **commitlint** (git hooks y validación de mensajes de commit).
-- Configuración base para integrarse con pipelines de **CI/CD** en GitHub Actions.
+En la **raíz del repo** (donde está este `README.md`) se encuentran:
 
-El detalle de endpoints de API, módulos de Angular y estructura interna de cada capa debe documentarse sobre esta base a medida que la implementación avance.
+- `package.json` con el tooling Node (Husky + commitlint).
+- `.husky/` con los hooks de Git.
+- `commitlint.config.js` con la configuración del formato de los mensajes de commit.
+
+El backend Java/Spring Boot reside fuera de la carpeta `Nomadia/` (en su propia estructura Maven), mientras que el frontend Angular 20 está contenido dentro de `Nomadia/`.
 
 ---
 
 ## Requisitos previos
 
-Para trabajar con este proyecto necesitas tener instalado:
+### Comunes
 
-### Backend (Spring Boot)
+- [Git](https://git-scm.com/)
+- Sistema operativo: Windows, macOS o Linux
 
-- **Java Development Kit (JDK) 21**.
-- **Maven** (o el wrapper de Maven incluido en el proyecto cuando esté disponible, por ejemplo `mvnw`).
+### Backend (Java / Spring Boot)
+
+- **Java Development Kit (JDK) 21**
+- **Maven** (o el wrapper `mvnw` que se suela incluir en el proyecto backend)
 
 ### Frontend (Angular 20)
 
-- **Node.js** (versión recomendada: LTS reciente, por ejemplo 20.x).
-- **npm** (incluido con Node.js).
+- **Node.js** (recomendado LTS reciente, por ejemplo 20.x)
+- **npm** (incluido con Node.js)
 
-### Tooling común
+### Tooling raíz
 
-- **Node.js + npm** también se utilizan en la raíz del proyecto para:
-  - Instalar devDependencies de tooling (`husky`, `@commitlint/*`).
-  - Ejecutar scripts relacionados con git hooks y validación.
-- [Git](https://git-scm.com/).
+- **Node.js + npm** también se usan en la raíz del proyecto para:
+    - Instalar `husky` y `@commitlint/*`.
+    - Configurar y ejecutar los git hooks.
 
-Recomendado:
+> Recuerda: antes de trabajar en cualquier parte del proyecto, ejecuta `npm install` en la raíz para asegurar que los hooks de Git están activos.
 
-- Un editor con buen soporte para Java y TypeScript/Angular, por ejemplo:
-  - IntelliJ IDEA / WebStorm.
-  - Visual Studio Code (con extensiones para Java, Angular, ESLint/Prettier cuando se añadan).
+---
 
-Sistema operativo soportado:
+## Estructura del repositorio
 
-- Windows, macOS o Linux.
+A grandes rasgos, la estructura relevante es:
 
-> Recuerda: siempre ejecuta `npm install` en la **raíz** del proyecto después de clonar, para que Husky pueda instalar los hooks de Git y se preparen las herramientas de commitlint.
+- `README.md` – este archivo.
+- `package.json` – tooling Node (husky, commitlint) en la raíz.
+- `commitlint.config.js` – reglas de commitlint.
+- `.husky/` – scripts de git hooks gestionados por Husky.
+- `Nomadia/` – **proyecto frontend Angular 20**.
+    - `angular.json` – configuración del workspace de Angular.
+    - `package.json` – dependencias y scripts del frontend.
+    - `tsconfig*.json` – configuración de TypeScript.
+    - `public/` – recursos estáticos (imágenes, favicon, etc.).
+    - `src/` – código fuente del frontend:
+        - `index.html`
+        - `main.ts` – punto de entrada de la app Angular.
+        - `styles.scss` – estilos globales.
+        - `app/` – módulo principal de la aplicación:
+            - `app.ts`, `app.html`, `app.config.ts`, `app.routes.ts`, `app.css`
+            - `core/` – funcionalidad central (por ejemplo, interceptores HTTP de autenticación).
+            - `guards/` – guards de routing (`auth.guard.ts`, `public.guard.ts`, etc.).
+            - `models/` – modelos y DTOs usados por el frontend (por ejemplo `ActivityCreate.ts`, `ActivityResponse.ts`, `LoginResponse.ts`, etc.).
+            - `pages/` – componentes de páginas (listado de viajes, login, registro, etc.).
+            - `services/` – servicios Angular para comunicación con el backend.
+            - `styles/` – estilos SCSS específicos de la app.
+
+El proyecto de **backend** (Spring Boot) se estructura de forma estándar Maven (`pom.xml`, `src/main/java`, `src/main/resources`, etc.) en su propia carpeta de backend, y se integra con este repositorio a nivel de control de versiones y CI/CD.
 
 ---
 
 ## Instalación y configuración inicial
 
-1. **Clonar el repositorio**
+### 1. Clonar el repositorio
 
-   ```bash
-   git clone https://github.com/Mattew0800/Nomadia.git
-   cd Nomadia
-   ```
+```bash
+git clone https://github.com/Mattew0800/Nomadia.git
+cd Nomadia
+```
 
-2. **Instalar dependencias de tooling en la raíz (Node)**
-
-   ```bash
-   npm install
-   ```
-
-   Esto hará dos cosas:
-
-   - Instalar las dependencias de desarrollo (`husky`, `@commitlint/*`, etc.).
-   - Ejecutar automáticamente el script `prepare`, que instala los hooks de Husky en la carpeta `.husky/`.
-
-3. **Instalar dependencias del backend (Java / Spring Boot)**
-
-   Desde la carpeta del backend (ajusta el nombre de la carpeta según tu estructura real, por ejemplo `backend/`):
-
-   ```bash
-   cd <carpeta-backend>
-   mvn clean install
-   ```
-
-   O usando el wrapper de Maven si el proyecto lo incluye:
-
-   ```bash
-   cd <carpeta-backend>
-   ./mvnw clean install   # Linux / macOS
-   .\mvnw clean install   # Windows
-   ```
-
-4. **Instalar dependencias del frontend (Angular 20)**
-
-   Desde la carpeta del frontend (por ejemplo `frontend/`):
-
-   ```bash
-   cd <carpeta-frontend>
-   npm install
-   ```
-
-   Esto instalará las dependencias de Angular 20 y el tooling necesario (Angular CLI, etc.).
-
-Ajusta las rutas `<carpeta-backend>` y `<carpeta-frontend>` a la estructura efectiva de tu proyecto.
-
----
-
-## Scripts de npm
-
-En la **raíz del proyecto** (`package.json`) están definidos actualmente los siguientes scripts relacionados con el tooling:
-
-- `npm test`
-  - Actualmente muestra el mensaje `"Error: no test specified"` y finaliza con error.
-  - Está reservado para integrar, en el futuro, una suite de tests de tooling (por ejemplo, validaciones adicionales antes de commits o integraciones de CI).
-
-- `npm run prepare`
-  - Ejecuta `husky install` y configura los git hooks en la carpeta `.husky/`.
-  - Se ejecuta automáticamente después de `npm install` gracias al campo `"prepare"` en `scripts`.
-  - Normalmente no es necesario llamarlo manualmente, salvo para reinstalar hooks si fuese necesario.
-
-### Scripts habituales del backend (Spring Boot)
-
-En el proyecto de backend (Java/Spring Boot con Maven) es común disponer de scripts/comandos como:
-
-- `mvn spring-boot:run`
-  - Levanta la aplicación Spring Boot en modo desarrollo.
-- `mvn test`
-  - Ejecuta los tests unitarios e integrados del backend.
-- `mvn clean package`
-  - Compila el proyecto y genera el artefacto ejecutable (por ejemplo, un `jar`).
-
-Si el proyecto usa `mvnw` (wrapper de Maven), los mismos comandos se ejecutan como `./mvnw ...` o `.\mvnw ...` según el sistema operativo.
-
-### Scripts habituales del frontend (Angular 20)
-
-En el proyecto de frontend (Angular 20) suelen definirse scripts en su `package.json`, como por ejemplo:
-
-- `npm start` o `npm run start`
-  - Suele ejecutar `ng serve` y levanta la aplicación Angular en modo desarrollo.
-- `npm run build`
-  - Genera el build de producción de la aplicación (`ng build`).
-- `npm test`
-  - Ejecuta los tests del frontend (Karma/Jasmine o el framework que se configure).
-- `npm run lint`
-  - Ejecuta el linter sobre el código Angular.
-
-Consulta el `package.json` del frontend para ver los scripts exactos disponibles y actualiza esta sección si es necesario.
-
----
-
-## Estructura de carpetas
-
-### Estructura actual (simplificada en la raíz)
-
-A grandes rasgos, la raíz del proyecto se organiza así:
-
-- `.git/` – metadatos internos de Git.
-- `.gitignore` – archivos y carpetas ignorados por Git.
-- `.husky/` – configuración de los git hooks gestionados por Husky.
-- `commitlint.config.js` – configuración de commitlint para validar mensajes de commit.
-- `node_modules/` – dependencias de tooling instaladas mediante npm en la raíz.
-- `package.json` – metadatos del proyecto, scripts y dependencias de tooling.
-- `README.md` – documentación principal del proyecto.
-
-### Estructura objetivo (frontend + backend)
-
-A nivel de arquitectura lógica, el proyecto incluye (o incluirá) al menos estas partes:
-
-- `<carpeta-backend>/` – proyecto de backend Java/Spring Boot (con su `pom.xml` y estructura típica `src/main/java`, `src/main/resources`, etc.).
-- `<carpeta-frontend>/` – proyecto Angular 20 (con su `angular.json`, `src/app`, etc.).
-- `config/` – configuraciones compartidas (por ejemplo, archivos de configuración de CI, plantillas de entornos, etc.).
-- `docs/` – documentación adicional (diagramas, decisiones de arquitectura).
-
-Sustituye `<carpeta-backend>` y `<carpeta-frontend>` por los nombres reales de las carpetas cuando actualices la estructura final, y mantén esta sección alineada con el proyecto.
-
----
-
-## Uso en desarrollo
-
-El flujo de trabajo típico en desarrollo es levantar backend y frontend en paralelo.
-
-### 1. Preparación común
+### 2. Instalar tooling raíz (Husky + commitlint)
 
 Desde la raíz del repositorio:
 
@@ -209,126 +120,195 @@ Desde la raíz del repositorio:
 npm install
 ```
 
-Esto asegura que los hooks de Husky y commitlint están correctamente instalados.
+Esto:
 
-### 2. Levantar el backend (Java / Spring Boot)
+- Instala `husky` y `@commitlint/*`.
+- Ejecuta automáticamente el script `prepare` que instala los hooks en `.husky/`.
+
+### 3. Instalar dependencias del frontend (Angular 20)
+
+Desde la carpeta `Nomadia/`:
+
+```bash
+cd Nomadia
+npm install
+```
+
+Esto instala todas las dependencias del proyecto Angular 20 (Angular CLI, dependencias de la app, etc.).
+
+### 4. Instalar dependencias del backend (Java / Spring Boot)
+
+Desde la carpeta del backend (ajusta la ruta a la ubicación real de tu proyecto Spring Boot):
+
+```bash
+cd <carpeta-backend>
+mvn clean install
+```
+
+O usando el wrapper (`mvnw`) si está disponible:
+
+```bash
+./mvnw clean install   # Linux / macOS
+.\mvnw clean install   # Windows
+```
+
+---
+
+## Ejecución en desarrollo
+
+### 1. Preparar el entorno común
+
+En la raíz del repositorio:
+
+```bash
+npm install
+```
+
+Con esto te aseguras de que los hooks de Git funcionan correctamente.
+
+### 2. Levantar el backend (Spring Boot)
 
 Desde la carpeta del backend:
 
 ```bash
 cd <carpeta-backend>
 
-# Opción 1: Maven instalado en el sistema
+# Si tienes Maven instalado en el sistema
 mvn spring-boot:run
 
-# Opción 2: usando el wrapper de Maven
+# O usando el wrapper
 ./mvnw spring-boot:run   # Linux / macOS
 .\mvnw spring-boot:run   # Windows
 ```
 
-Por defecto, una aplicación Spring Boot suele exponerse en `http://localhost:8080` (ajusta esta URL si tu configuración utiliza otro puerto).
+Por defecto, Spring Boot suele levantar la API en `http://localhost:8080` (ajusta si tu configuración usa otro puerto).
 
 ### 3. Levantar el frontend (Angular 20)
 
-En otra terminal, desde la carpeta del frontend:
+En otra terminal, desde la carpeta `Nomadia/` del frontend:
 
 ```bash
-cd <carpeta-frontend>
-
-# Dependiendo de cómo esté configurado el package.json del frontend
+cd Nomadia
 npm start
-# o
+# o, según el package.json del front
 npm run start
-# o directamente
+# o
 ng serve
 ```
 
-Angular suele levantar la aplicación en `http://localhost:4200` por defecto (ajusta este valor según tu configuración real).
+Angular suele levantar la app en `http://localhost:4200` (ajusta según tu configuración). El frontend se conectará al backend usando la URL que tengas configurada (por ejemplo, `http://localhost:8080`).
 
-El frontend se comunicará con el backend usando la URL configurada (por ejemplo, a través de una variable de entorno o configuración en Angular environment).
+---
+
+## Scripts disponibles
+
+### Raíz del repositorio (`package.json` raíz)
+
+- `npm test`
+    - Actualmente muestra el mensaje `"Error: no test specified"` y finaliza con error.
+    - Reservado para futuras tareas de tooling o validaciones adicionales.
+
+- `npm run prepare`
+    - Ejecuta `husky install`, instalando los hooks en `.husky/`.
+    - Se ejecuta automáticamente después de `npm install`.
+
+### Frontend (carpeta `Nomadia/`)
+
+En el `package.json` del frontend (dentro de `Nomadia/`) encontrarás scripts típicos de Angular 20, como por ejemplo:
+
+- `npm start` / `npm run start`
+    - Suele ejecutar `ng serve` para desarrollo.
+- `npm run build`
+    - Genera el build de producción mediante `ng build`.
+- `npm test`
+    - Ejecuta los tests del frontend (`ng test`).
+- `npm run lint`
+    - Ejecuta el linter configurado para el proyecto.
+
+Consulta el `package.json` de `Nomadia/` para ver los scripts exactos y mantenlos documentados aquí si cambian.
+
+### Backend
+
+En el backend (Maven + Spring Boot) los comandos típicos son:
+
+- `mvn spring-boot:run` – levanta el servidor en desarrollo.
+- `mvn test` – ejecuta los tests.
+- `mvn clean package` – construye el artefacto ejecutable (`jar`).
+
+O sus equivalentes con `mvnw` si usas el wrapper.
 
 ---
 
 ## Variables de entorno
 
-El proyecto puede utilizar variables de entorno tanto para el backend (Spring Boot) como para el frontend (Angular). La convención recomendada es:
+El proyecto puede usar variables de entorno tanto en backend como en frontend.
 
-- Backend (Spring Boot):
-  - Archivos como `application.properties` o `application.yml`, y variables externas (`SPRING_PROFILES_ACTIVE`, etc.).
-- Frontend (Angular):
-  - Ficheros de entorno (`environment.ts`, `environment.prod.ts`) y, opcionalmente, variables inyectadas en tiempo de build.
-- Compartido:
-  - Archivos `.env`, `.env.development`, `.env.production` si se usan en scripts o tooling.
+### Backend (Spring Boot)
 
-Ejemplo de tabla de variables de entorno que se puede ir completando:
+- Configuración en `application.properties` o `application.yml`.
+- Variables habituales:
+    - `SPRING_PROFILES_ACTIVE` – perfil activo (`dev`, `prod`, etc.).
+    - `SERVER_PORT` – puerto de la API (por defecto 8080).
 
-| Variable              | Capa       | Obligatoria | Descripción                                           | Ejemplo                    |
-|-----------------------|-----------|------------|-------------------------------------------------------|----------------------------|
-| `SPRING_PROFILES_ACTIVE` | Backend   | No         | Perfil de Spring Boot activo (`dev`, `prod`, etc.).   | `dev`                      |
-| `SERVER_PORT`         | Backend    | No         | Puerto en el que corre la API Spring Boot.           | `8080`                     |
-| `API_BASE_URL`        | Frontend   | Sí         | URL base del backend consumida por el frontend.      | `http://localhost:8080`    |
+### Frontend (Angular 20)
 
-Amplía y adapta esta tabla conforme se definan las variables reales del proyecto.
+- Configuración en `environment.ts`, `environment.prod.ts`, etc.
+- Una variable común sería:
+    - `API_BASE_URL` – URL base del backend que consume el frontend.
+
+Ejemplo de tabla que puedes ir completando:
+
+| Variable                | Capa       | Obligatoria | Descripción                                      | Ejemplo                    |
+|-------------------------|-----------|------------|--------------------------------------------------|----------------------------|
+| `SPRING_PROFILES_ACTIVE`| Backend   | No         | Perfil activo de Spring Boot                     | `dev`                      |
+| `SERVER_PORT`           | Backend   | No         | Puerto en el que corre la API                    | `8080`                     |
+| `API_BASE_URL`          | Frontend  | Sí         | URL base de la API usada por Angular             | `http://localhost:8080`    |
 
 ---
 
 ## Tests
 
-La estrategia de testing puede organizarse en varios niveles:
+### Backend
 
-- **Backend (Spring Boot)**
-  - Tests unitarios y de integración con JUnit, Spring Test, etc.
-  - Comando típico: `mvn test` o `./mvnw test`.
-- **Frontend (Angular 20)**
-  - Tests unitarios de componentes/servicios (Karma/Jasmine u otra herramienta configurada).
-  - Comando típico: `npm test` o `ng test` desde la carpeta del frontend.
-- **End-to-end (E2E)**
-  - Tests que validan flujos completos a través de frontend y backend (por ejemplo, con Cypress, Playwright, etc.).
+- Framework típico: JUnit/Spring Test.
+- Comando estándar:
 
-En la raíz del repositorio, el comando `npm test` actualmente solo muestra un mensaje de error estándar y no ejecuta tests reales; su propósito es reservar el nombre del script para tooling futuro.
+  ```bash
+  mvn test
+  # o
+  ./mvnw test   # según configuración
+  ```
 
-Cuando se añada la suite de tests concreta en backend y frontend, este README deberá actualizarse para describir:
+### Frontend
 
-- Qué frameworks de test se usan.
-- Cómo ejecutar los distintos tipos de tests.
-- Cómo generar y consultar informes de cobertura.
+- Angular 20 utiliza `ng test` (normalmente envuelto en `npm test`).
 
----
+  ```bash
+  cd Nomadia
+  npm test
+  # o
+  ng test
+  ```
 
-## Estilo de código, linting y formateo
+### Raíz del repo
 
-Aunque todavía no se han añadido todas las configuraciones de linters o formateadores al repositorio raíz, se recomienda adoptar de forma progresiva herramientas como:
+- `npm test` en la raíz actualmente es solo un placeholder de tooling y no ejecuta una suite de tests real.
 
-- **Backend (Java)**
-  - Checkstyle, SpotBugs, SonarLint u otras herramientas de análisis estático.
-- **Frontend (Angular / TypeScript)**
-  - ESLint para asegurar un estilo de código consistente.
-  - Prettier para estandarizar el formateo.
-
-Una vez integradas estas herramientas, es buena práctica añadir scripts como:
-
-- `npm run lint` – ejecuta el linter sobre el código Angular.
-- `npm run lint:fix` – intenta corregir automáticamente los problemas detectados (en el frontend).
-- Tareas de Maven específicas para análisis estático en el backend.
-
-Esta sección debe ampliarse cuando se definan las reglas concretas (por ejemplo, guías de estilo de Java y TypeScript, convenciones de SCSS, etc.).
+Cuando tengas definida la estrategia completa de testing (unit, integración, e2e) para backend y frontend, amplía esta sección con detalles de frameworks, reports de cobertura, etc.
 
 ---
 
 ## Git hooks: Husky y commitlint
 
-El proyecto utiliza **Husky** y **commitlint** para mantener una calidad mínima de código y mensajes de commit.
+El proyecto utiliza **Husky** y **commitlint** para garantizar calidad en los commits.
 
 ### Husky
 
-[Husky](https://typicode.github.io/husky) permite gestionar los hooks de Git desde el proyecto.
+- Tras `npm install` en la raíz, se ejecuta `npm run prepare`, que a su vez lanza `husky install`.
+- Esto crea/configura la carpeta `.husky/` y habilita los hooks definidos (por ejemplo, `pre-commit`, `commit-msg`).
+- Un hook típico `pre-commit` puede ejecutar linters o tests rápidos antes de permitir el commit.
 
-- Tras ejecutar `npm install` en la raíz, se lanza automáticamente el script `prepare`, que ejecuta:
-  - `husky install`
-- Esto crea/configura la carpeta `.husky/` y habilita los hooks definidos en ella.
-- En este repositorio ya existe, por ejemplo, un hook `pre-commit` en `.husky/pre-commit` (puede ejecutar linters, tests u otras tareas antes de permitir el commit).
-
-Si en algún momento los hooks dejan de funcionar (por ejemplo, después de borrar `node_modules`), puedes reinstalarlos manualmente con:
+Si los hooks dejan de funcionar (por ejemplo, tras borrar `node_modules`), puedes reinstalarlos manualmente con:
 
 ```bash
 npm run prepare
@@ -336,73 +316,65 @@ npm run prepare
 
 ### commitlint
 
-[commitlint](https://commitlint.js.org/) valida que los mensajes de commit sigan un formato coherente (por ejemplo, **Conventional Commits**).
+- La configuración está en `commitlint.config.js` y se basa en `@commitlint/config-conventional`.
+- Se integra con el hook `commit-msg` de Husky para validar el mensaje de cada commit.
 
-- La configuración se encuentra en `commitlint.config.js`.
-- El proyecto usa `@commitlint/config-conventional` como base para las reglas.
-- Normalmente se integra con un hook `commit-msg` gestionado por Husky, que ejecuta `commitlint` cada vez que haces `git commit`.
-
-Formato básico esperado para los mensajes de commit (estilo Conventional Commits):
+Formato esperado (Conventional Commits):
 
 ```text
 <tipo>(<scope opcional>): <descripción breve>
 ```
 
-Ejemplos de tipos habituales:
+Ejemplos de tipos:
 
-- `feat`: nueva funcionalidad.
-- `fix`: corrección de bug.
-- `chore`: tareas de mantenimiento (configs, dependencias, etc.).
-- `docs`: cambios en documentación.
-- `refactor`: cambios internos sin alterar el comportamiento externo.
-- `test`: añadir o modificar tests.
+- `feat`: nueva funcionalidad
+- `fix`: corrección de bug
+- `chore`: mantenimiento/configuración
+- `docs`: documentación
+- `refactor`: cambios internos sin alterar comportamiento externo
+- `test`: cambios en tests
 
-Ejemplos de mensajes válidos:
+Ejemplos válidos:
 
 - `feat(trip): agrega creación de viajes`
 - `fix(auth): corrige validación de tokens`
 - `chore(ci): actualiza pipeline de GitHub Actions`
 
-Si el mensaje de commit no respeta las reglas, el hook `commit-msg` fallará y el commit no se creará; deberás corregir el mensaje y volver a ejecutar `git commit`.
+Si el mensaje no cumple las reglas, el hook `commit-msg` fallará y el commit no se creará; deberás corregir el mensaje y volver a ejecutar `git commit`.
 
 ---
 
 ## CI/CD con GitHub Actions
 
-El proyecto está preparado para trabajar con pipelines de **CI/CD** usando **GitHub Actions**. La configuración concreta de los workflows se define en archivos YAML dentro de la ruta estándar:
+El proyecto cuenta con un pipeline de **CI/CD** basado en **GitHub Actions** (workflows definidos en `.github/workflows/*.yml`).
 
-- `.github/workflows/*.yml`
+Un flujo típico de CI para este proyecto puede incluir:
 
-Un pipeline típico de CI para este proyecto puede incluir pasos como:
+1. Checkout del código.
+2. Configuración de JDK 21 y Node.js.
+3. Instalación de tooling raíz:
+    - `npm install` en la raíz (husky, commitlint, etc.).
+4. Backend:
+    - Instalación de dependencias y ejecución de tests con Maven (`mvn test`).
+5. Frontend:
+    - `cd Nomadia && npm install`.
+    - `npm test` / `ng test`.
+    - `npm run build` / `ng build`.
 
-1. **Checkout** del código fuente.
-2. Configuración de la versión de Node.js y JDK 21.
-3. Instalación de dependencias:
-   - `npm install` en la raíz (tooling, hooks).
-   - Dependencias del backend (por ejemplo `mvn clean install`).
-   - Dependencias del frontend (por ejemplo `npm install` en la carpeta del frontend).
-4. Ejecución de:
-   - Tests del backend (`mvn test`).
-   - Tests del frontend (`npm test`/`ng test`).
-   - Build del frontend (`npm run build`/`ng build`).
+Para la parte de **CD** (despliegue), los workflows pueden encargarse de:
 
-Cuando se configuren los workflows concretos, es recomendable documentar aquí:
+- Desplegar el frontend (por ejemplo, a un hosting estático o servicio de frontend).
+- Desplegar el backend Spring Boot (por ejemplo, a un servidor, contenedor Docker, Kubernetes, etc.).
+- Usar secretos configurados en *GitHub Secrets* (tokens, URLs, credenciales).
 
-- Nombres de los workflows (por ejemplo, `ci.yml`, `deploy.yml`).
-- En qué eventos se ejecutan (push, pull_request, tags, etc.).
-- Reglas de protección de la rama principal (por ejemplo, requerir que la CI pase antes de poder hacer merge).
-
-Para la parte de **CD** (despliegue), también se puede documentar:
-
-- Dónde se despliega el frontend (Vercel, Netlify, servidor propio, etc.).
-- Dónde se despliega el backend (servidor Spring Boot dedicado, contenedores, Kubernetes, etc.).
-- Qué secretos se configuran en *GitHub Secrets* (tokens de despliegue, URLs, credenciales, etc.).
+Consulta los archivos de `.github/workflows/` para ver los jobs concretos configurados y mantén esta sección alineada con ellos.
 
 ---
 
 ## Guía rápida de contribución
 
-1. Crea una rama a partir de la rama de desarrollo principal (por ejemplo, `develop`):
+1. Actualiza tu rama de trabajo desde la rama principal de desarrollo (por ejemplo, `develop`).
+2. Crea una rama nueva para tu cambio:
 
    ```bash
    git checkout develop
@@ -410,26 +382,16 @@ Para la parte de **CD** (despliegue), también se puede documentar:
    git checkout -b feature/mi-feature
    ```
 
-2. Asegúrate de tener las dependencias instaladas y los hooks activos:
-
-   ```bash
-   npm install
-   ```
-
-3. Realiza tus cambios y, antes de commitear, ejecuta los comandos de lint/test correspondientes (cuando estén definidos).
-
-4. Usa mensajes de commit que sigan las reglas de commitlint (estilo Conventional Commits).
-
-5. Abre un Pull Request describiendo claramente:
-   - Qué problema resuelve o qué funcionalidad agrega.
-   - Cómo probar los cambios.
-
-6. Espera la revisión y realiza los ajustes necesarios hasta que la rama esté lista para ser mergeada.
+3. Ejecuta `npm install` en la raíz para asegurarte de que los hooks están activos.
+4. Trabaja en backend y/o frontend según corresponda.
+5. Antes de commitear, ejecuta los tests/lints relevantes (Maven para backend, npm/Angular para frontend).
+6. Escribe mensajes de commit válidos según las reglas de commitlint.
+7. Abre un Pull Request explicando claramente los cambios y cómo probarlos.
 
 ---
 
 ## Licencia
 
-Este proyecto está licenciado bajo la licencia **ISC**.
+Este proyecto está licenciado bajo la licencia **ISC** (según el campo `license` de `package.json`).
 
-Para más detalles, consulta el archivo de licencia correspondiente si se añade al repositorio o revisa el campo `"license"` en `package.json`.
+Si se añade un archivo de licencia específico al repositorio, consulta ese archivo para más detalles.
