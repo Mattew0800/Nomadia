@@ -1,8 +1,8 @@
 # Nomadia
 
-Plataforma web compuesta por un **backend en Java/Spring Boot** y un **frontend en Angular 20 con SCSS**. En la raíz del repositorio se centraliza el tooling Node para **Husky** y **commitlint**, que gestionan los git hooks y se integran con el pipeline de **CI/CD**.
+Plataforma web compuesta por un **backend desarrollado en Java/Spring Boot** y un **frontend en Angular 20 con SCSS**. Doble capa de validaciones con **Husky** y **commitlint**, que gestionan los git hooks y se integran con el pipeline de **CI/CD**.
 
-> ⚠️ **Muy importante**: después de clonar el repositorio, ejecuta siempre `npm install` en la **raíz del proyecto** antes de empezar a codear (frontend, backend, para todo). Esto instala las dependencias de tooling y configura los git hooks (Husky + commitlint).
+> ⚠️ **Muy importante**: luego de clonar el repositorio, ejecuta siempre `npm install` en la **raíz del proyecto** antes de empezar a desarrollar (frontend, backend, para todo). Esto instala las dependencias y configura los git hooks (Husky + commitlint).
 
 ---
 
@@ -33,16 +33,13 @@ Nomadia se divide en dos partes principales:
 
 - **Frontend**
     - Implementado en **Angular 20** con **SCSS**.
-    - Se encuentra en la carpeta `Nomadia/` del repositorio.
     - Utiliza Angular standalone components y organización por páginas, servicios, modelos y estilos.
 
-En la **raíz del repo** (donde está este `README.md`) se encuentran:
+En la **raíz del repositorio** se encuentran:
 
 - `package.json` con el tooling Node (Husky + commitlint).
 - `.husky/` con los hooks de Git.
 - `commitlint.config.js` con la configuración del formato de los mensajes de commit.
-
-El backend Java/Spring Boot reside fuera de la carpeta `Nomadia/` (en su propia estructura Maven), mientras que el frontend Angular 20 está contenido dentro de `Nomadia/`.
 
 ---
 
@@ -181,7 +178,7 @@ mvn spring-boot:run
 .\mvnw spring-boot:run   # Windows
 ```
 
-Por defecto, Spring Boot suele levantar la API en `http://localhost:8080` (ajusta si tu configuración usa otro puerto).
+Puerto disponible `http://localhost:8080`
 
 ### 3. Levantar el frontend (Angular 20)
 
@@ -196,7 +193,7 @@ npm run start
 ng serve
 ```
 
-Angular suele levantar la app en `http://localhost:4200` (ajusta según tu configuración). El frontend se conectará al backend usando la URL que tengas configurada (por ejemplo, `http://localhost:8080`).
+Puerto disponible `http://localhost:4200`
 
 ---
 
@@ -236,65 +233,6 @@ En el backend (Maven + Spring Boot) los comandos típicos son:
 - `mvn clean package` – construye el artefacto ejecutable (`jar`).
 
 O sus equivalentes con `mvnw` si usas el wrapper.
-
----
-
-## Variables de entorno
-
-El proyecto puede usar variables de entorno tanto en backend como en frontend.
-
-### Backend (Spring Boot)
-
-- Configuración en `application.properties` o `application.yml`.
-- Variables habituales:
-    - `SPRING_PROFILES_ACTIVE` – perfil activo (`dev`, `prod`, etc.).
-    - `SERVER_PORT` – puerto de la API (por defecto 8080).
-
-### Frontend (Angular 20)
-
-- Configuración en `environment.ts`, `environment.prod.ts`, etc.
-- Una variable común sería:
-    - `API_BASE_URL` – URL base del backend que consume el frontend.
-
-Ejemplo de tabla que puedes ir completando:
-
-| Variable                | Capa       | Obligatoria | Descripción                                      | Ejemplo                    |
-|-------------------------|-----------|------------|--------------------------------------------------|----------------------------|
-| `SPRING_PROFILES_ACTIVE`| Backend   | No         | Perfil activo de Spring Boot                     | `dev`                      |
-| `SERVER_PORT`           | Backend   | No         | Puerto en el que corre la API                    | `8080`                     |
-| `API_BASE_URL`          | Frontend  | Sí         | URL base de la API usada por Angular             | `http://localhost:8080`    |
-
----
-
-## Tests
-
-### Backend
-
-- Framework típico: JUnit/Spring Test.
-- Comando estándar:
-
-  ```bash
-  mvn test
-  # o
-  ./mvnw test   # según configuración
-  ```
-
-### Frontend
-
-- Angular 20 utiliza `ng test` (normalmente envuelto en `npm test`).
-
-  ```bash
-  cd Nomadia
-  npm test
-  # o
-  ng test
-  ```
-
-### Raíz del repo
-
-- `npm test` en la raíz actualmente es solo un placeholder de tooling y no ejecuta una suite de tests real.
-
-Cuando tengas definida la estrategia completa de testing (unit, integración, e2e) para backend y frontend, amplía esta sección con detalles de frameworks, reports de cobertura, etc.
 
 ---
 
@@ -348,26 +286,7 @@ Si el mensaje no cumple las reglas, el hook `commit-msg` fallará y el commit no
 
 El proyecto cuenta con un pipeline de **CI/CD** basado en **GitHub Actions** (workflows definidos en `.github/workflows/*.yml`).
 
-Un flujo típico de CI para este proyecto puede incluir:
-
-1. Checkout del código.
-2. Configuración de JDK 21 y Node.js.
-3. Instalación de tooling raíz:
-    - `npm install` en la raíz (husky, commitlint, etc.).
-4. Backend:
-    - Instalación de dependencias y ejecución de tests con Maven (`mvn test`).
-5. Frontend:
-    - `cd Nomadia && npm install`.
-    - `npm test` / `ng test`.
-    - `npm run build` / `ng build`.
-
-Para la parte de **CD** (despliegue), los workflows pueden encargarse de:
-
-- Desplegar el frontend (por ejemplo, a un hosting estático o servicio de frontend).
-- Desplegar el backend Spring Boot (por ejemplo, a un servidor, contenedor Docker, Kubernetes, etc.).
-- Usar secretos configurados en *GitHub Secrets* (tokens, URLs, credenciales).
-
-Consulta los archivos de `.github/workflows/` para ver los jobs concretos configurados y mantén esta sección alineada con ellos.
+Consulta los archivos de `.github/workflows/` para ver los jobs concretos configurados.
 
 ---
 
@@ -392,6 +311,6 @@ Consulta los archivos de `.github/workflows/` para ver los jobs concretos config
 
 ## Licencia
 
-Este proyecto está licenciado bajo la licencia **ISC** (según el campo `license` de `package.json`).
+Este proyecto está licenciado bajo la licencia **ISC**.
 
 Si se añade un archivo de licencia específico al repositorio, consulta ese archivo para más detalles.
