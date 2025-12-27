@@ -1,14 +1,11 @@
 package nomadia.DTO.User;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import nomadia.Enum.Role;
 import nomadia.Model.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 public class UserUpdateDTO {
@@ -23,27 +20,27 @@ public class UserUpdateDTO {
     private String password;
 
     @Pattern(
-            regexp = "^$|^\\+?[0-9\\s-]{7,20}$",
-            message = "El teléfono debe contener solo números, espacios, guiones y opcionalmente un '+' inicial"
+            regexp = "^$|^\\+?[0-9\\s-]{10,13}$",
+            message = "El teléfono debe tener entre 10 y 13 dígitos"
     )
     private String phone;
+
 
     private String photoUrl;
 
     @Pattern(
             regexp = "^$|^[\\S\\s]{3,10}$",
-            message = "El apodo debe tener entre 3 y 10 caracteres si se proporciona"
+            message = "Debe tener entre 3 y 10 caracteres"
     )
     private String nick;
 
     @Pattern(
-            regexp = "^$|^[\\S\\s]{3,10}$",
-            message = "El sobre mi debe tener entre 3 y 10 caracteres si se proporciona"
+            regexp = "^$|^[\\S\\s]{3,100}$",
+            message = "El sobre mí debe tener entre 3 y 100 caracteres"
     )
-    @Column(nullable = true)
     private String about;
 
-    @Past(message = "La fecha no puede ser futura")
+    @PastOrPresent(message = "La fecha no puede ser futura")
     private LocalDate birth;
 
     @Size(min = 6, message = "La contraseña debe tener 6 caracteres como mínimo")
