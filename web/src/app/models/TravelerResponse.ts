@@ -6,7 +6,7 @@ export class TravelerResponse {
   photoUrl: string
   nick: string
   about: string
-  birth: Date
+  birth: string
   age: number
 
   constructor(  id: string,
@@ -16,7 +16,7 @@ export class TravelerResponse {
   photoUrl: string,
   nick: string,
   about: string,
-  birth: Date,
+  birth: string,
   age: number){
     this.id = id;
     this.name=name;

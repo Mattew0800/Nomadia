@@ -5,7 +5,7 @@ export interface putResponse {
   photoUrl?: string | null;
   nick?: string;
   about?: string;
-  birth?: Date | null;
+  birth?: string | null;
   age?: number;
 
   oldPassword?: string | null;
