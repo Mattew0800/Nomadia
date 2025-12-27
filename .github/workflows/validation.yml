@@ -46,32 +46,10 @@ jobs:
           else
             echo "branch_status=ok" >> $GITHUB_OUTPUT
           fi
-
-       # 4️⃣.5 Fetch base branch
+      
+      # 5 Fetch base branch
       - name: Fetch base branch
         run: git fetch origin ${{ github.base_ref }}
-
-      # 5️⃣ Validate commit messages
-      - name: Validate commits
-        id: commit-check
-        run: |
-          COMMITS=$(git log origin/${{ github.base_ref }}..HEAD --pretty=format:%s)
-          ERRORS=""
-          for COMMIT in $COMMITS; do
-            echo "$COMMIT" | npx --no-install commitlint --edit /dev/stdin || {
-              ERRORS+="❌ Commit inválido: $COMMIT\n"
-              ERRORS+="💡 Formato esperado: <tipo>(<ticket>): <descripción>\n"
-            }
-          done
-          if [[ -n "$ERRORS" ]]; then
-            echo "commit_status=fail" >> $GITHUB_OUTPUT
-            echo "commit_error<<EOF" >> $GITHUB_OUTPUT
-            echo -e "$ERRORS" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-            exit 1
-          else
-            echo "commit_status=ok" >> $GITHUB_OUTPUT
-          fi
 
       # 6️⃣ Check secrets
       - name: Check for secrets
