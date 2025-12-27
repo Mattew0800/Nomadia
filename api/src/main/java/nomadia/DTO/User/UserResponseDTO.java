@@ -5,6 +5,7 @@ import lombok.Data;
 import nomadia.Enum.Role;
 import nomadia.Model.User;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -18,7 +19,7 @@ public class UserResponseDTO {
     private String photoUrl;
     private String nick;
     private String about;
-    private Date birth;
+    private LocalDate birth;
     private Integer age;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String token;

@@ -7,6 +7,7 @@ import nomadia.Enum.Role;
 import nomadia.Model.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -42,8 +43,8 @@ public class UserUpdateDTO {
     @Column(nullable = true)
     private String about;
 
-    @Past(message = "La fecha de nacimiento debe ser en el pasado")
-    private Date birth;
+    @Past(message = "La fecha no puede ser futura")
+    private LocalDate birth;
 
     @Size(min = 6, message = "La contraseña debe tener 6 caracteres como mínimo")
     private String oldPassword;
