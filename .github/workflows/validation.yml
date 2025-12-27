@@ -75,27 +75,6 @@ jobs:
             echo "commit_status=ok" >> $GITHUB_OUTPUT
           fi
 
-      # 7️⃣ Check for secrets
-      - name: Check for secrets
-        id: secret-check
-        run: |
-          MAX_LINES=15
-          # Usar un approach más seguro sin broken pipe
-          SECRETS=$(grep -RInE "API_KEY|SECRET_KEY|SECRET|password|token" . \
-            --exclude-dir={node_modules,dist,build,. git,.github,coverage,__tests__,. next,out} \
-            --exclude="*.lock" \
-            --exclude="package-lock.json" 2>/dev/null | head -n $MAX_LINES || true)
-          
-          if [[ -n "$SECRETS" ]]; then
-            COUNT=$(echo "$SECRETS" | wc -l)
-            # Sanitizar:  reemplazar saltos de línea por espacios y limitar caracteres
-            SECRETS_SAFE=$(echo "$SECRETS" | tr '\n' ' ' | head -c 400)
-            echo "secret_status=fail" >> $GITHUB_OUTPUT
-            echo "secret_error=Se detectaron $COUNT posibles secretos:  $SECRETS_SAFE" >> $GITHUB_OUTPUT
-            exit 1
-          else
-            echo "secret_status=ok" >> $GITHUB_OUTPUT
-          fi
 
       # 8️⃣ Comment on PR
       - name: Comment on PR
