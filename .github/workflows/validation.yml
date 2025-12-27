@@ -42,7 +42,7 @@ jobs:
 
           PATTERN="^(feature|fix|chore|docs|refactor|test|style|perf)/(frontend|backend)/[A-Z]+-[0-9]+-[a-z0-9-]+$"
           if [[ !  "$BRANCH_NAME" =~ $PATTERN ]]; then
-            ERROR_MSG="Branch invalido:  $BRANCH_NAME.  Formato esperado: <tipo>/<stack>/<TICKET>-<descripcion>. Ejemplo: feature/frontend/NOM-4-login-form"
+            ERROR_MSG="Branch invalido:  $BRANCH_NAME.  Formato esperado: tipo/stack/TICKET-descripcion. Ejemplo: feature/frontend/NOM-4-login-form"
             echo "branch_status=fail" >> $GITHUB_OUTPUT
             echo "branch_error=$ERROR_MSG" >> $GITHUB_OUTPUT
             exit 1
@@ -52,9 +52,9 @@ jobs:
 
       # 6️⃣ Validate commit messages (SOLO ADVERTENCIA)
       - name: Validate commits
-        id: commit-check
+        id:  commit-check
         continue-on-error: true
-        run: |
+        run:  |
           COMMITS=$(git log origin/${{ github.base_ref }}..HEAD --pretty=format:%s)
           ERRORS=""
           
@@ -63,55 +63,60 @@ jobs:
               continue
             fi
             echo "$COMMIT" | npx --no-install commitlint --edit /dev/stdin || {
-              ERRORS+="Commit invalido:  $COMMIT. "
+              ERRORS+="Commit invalido: $COMMIT. "
             }
           done <<< "$COMMITS"
           
           if [[ -n "$ERRORS" ]]; then
-            # Limitar a 500 caracteres para no romper el output
-            ERRORS_TRUNCATED="${ERRORS:0:500}"
+            ERRORS_TRUNCATED="${ERRORS:0:400}"
             echo "commit_status=warn" >> $GITHUB_OUTPUT
             echo "commit_error=$ERRORS_TRUNCATED" >> $GITHUB_OUTPUT
-            # NO hacemos exit 1, solo advertencia
           else
             echo "commit_status=ok" >> $GITHUB_OUTPUT
           fi
 
       # 7️⃣ Check for secrets
       - name: Check for secrets
-        id:  secret-check
+        id: secret-check
         run: |
-          MAX_LINES=20
+          MAX_LINES=15
+          # Usar un approach más seguro sin broken pipe
           SECRETS=$(grep -RInE "API_KEY|SECRET_KEY|SECRET|password|token" . \
             --exclude-dir={node_modules,dist,build,. git,.github,coverage,__tests__,. next,out} \
             --exclude="*.lock" \
-            --exclude="package-lock.json" | head -n $MAX_LINES || true)
+            --exclude="package-lock.json" 2>/dev/null | head -n $MAX_LINES || true)
           
           if [[ -n "$SECRETS" ]]; then
-            # Contar líneas
             COUNT=$(echo "$SECRETS" | wc -l)
-            # Limitar a 800 caracteres
-            SECRETS_TRUNCATED="${SECRETS:0:800}"
+            # Sanitizar:  reemplazar saltos de línea por espacios y limitar caracteres
+            SECRETS_SAFE=$(echo "$SECRETS" | tr '\n' ' ' | head -c 400)
             echo "secret_status=fail" >> $GITHUB_OUTPUT
-            echo "secret_error=Se detectaron $COUNT posibles secretos (mostrando max $MAX_LINES lineas): $SECRETS_TRUNCATED" >> $GITHUB_OUTPUT
+            echo "secret_error=Se detectaron $COUNT posibles secretos:  $SECRETS_SAFE" >> $GITHUB_OUTPUT
             exit 1
           else
             echo "secret_status=ok" >> $GITHUB_OUTPUT
           fi
 
-      # 8️⃣ Comment on PR if any validation fails
+      # 8️⃣ Comment on PR
       - name: Comment on PR
         if: always()
         uses: actions/github-script@v7
+        env:
+          BRANCH_STATUS: ${{ steps.branch-check.outputs.branch_status }}
+          BRANCH_ERROR: ${{ steps. branch-check.outputs.branch_error }}
+          COMMIT_STATUS: ${{ steps.commit-check.outputs.commit_status }}
+          COMMIT_ERROR: ${{ steps.commit-check.outputs. commit_error }}
+          SECRET_STATUS: ${{ steps.secret-check.outputs.secret_status }}
+          SECRET_ERROR: ${{ steps.secret-check.outputs.secret_error }}
         with:
-          github-token: ${{ secrets. GITHUB_TOKEN }}
-          script:  |
-            const branchStatus = "${{ steps.branch-check. outputs.branch_status }}"
-            const branchError = "${{ steps.branch-check.outputs. branch_error }}"
-            const commitStatus = "${{ steps.commit-check.outputs.commit_status }}"
-            const commitError = "${{ steps.commit-check. outputs.commit_error }}"
-            const secretStatus = "${{ steps.secret-check.outputs.secret_status }}"
-            const secretError = "${{ steps.secret-check.outputs.secret_error }}"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branchStatus = process.env.BRANCH_STATUS
+            const branchError = process. env.BRANCH_ERROR || ''
+            const commitStatus = process. env.COMMIT_STATUS
+            const commitError = process.env. COMMIT_ERROR || ''
+            const secretStatus = process.env. SECRET_STATUS
+            const secretError = process.env.SECRET_ERROR || ''
 
             let commentBody = "## 🔍 Resultado de validaciones\n\n"
             let hasFails = false
@@ -139,8 +144,8 @@ jobs:
               commentBody += "✅ Todas las validaciones pasaron correctamente"
             }
 
-            github.rest.issues. createComment({
-              issue_number: context. issue.number,
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: commentBody
