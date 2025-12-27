@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,11 +52,8 @@ public class UserService {
     public UserResponseDTO updateSelf(Long userId, UserUpdateDTO dto) {
         User me = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
         validateRoleChange(me, dto);
-
         validateAndProcessPasswordChange(me, dto);
-
         String oldEmail = me.getEmail();
         User updated = updateUser(me.getId(), dto, false);
 

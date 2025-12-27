@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nomadia.Enum.Role;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -57,7 +58,7 @@ public class User {
     private String nick;
 
     @Column(nullable = true)
-    private Date birth;
+    private LocalDate birth;
 
     @Column(nullable = true)
     private Integer age;
