@@ -1,0 +1,23 @@
+@use '../../styles/buttons';
+@use "../../styles/trip-setup";
+
+.type-input-container{
+  position: relative;
+
+    width: 100%;
+}
+
+.type-input-container input{
+  width: 100%;
+  padding-right: 110px;
+  box-sizing: border-box;
+}
+
+.filters-btn.is-cancel-btn {
+
+    border-color: #5f647e;
+    color: #5f647e;
+    background: transparent;
+    padding: 10px 15px;
+}
+

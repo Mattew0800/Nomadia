@@ -1,0 +1,124 @@
+<app-test>
+    <div class="profile-card">
+        <div class="profile-header">
+            <section class="profile-main">
+
+                <div class="profile-user-profile">
+                  @if(user){
+                    <div class="user-image large">
+                      @if(user){
+                        @if(user.photoUrl){
+                          <img src="{{user.photoUrl}}" alt="Foto de Usuario">
+                        }@else{
+                          <img src="default-user-img.jpg" alt="Foto de Usuario">
+                        }
+                      }
+                    </div>
+                    <div class="user-info large">
+                        @if(user){
+                        <h2 class="user-name">{{user.name}}</h2>
+                        <p class="user-status">Traveler Pro</p>
+                        }@else{
+                        <h2 class="user-name">Yo</h2>
+                        <p class="user-status">Traveler Pro</p>                        }
+
+                    </div>
+                  }
+                </div>
+            </section>
+
+
+        </div>
+
+        <form id="userForm">
+            <div class="form-grid">
+                @if(user?.name){
+                <div>
+                    <label>Nombre completo</label>
+                    <input type="text" value={{user?.name}} disabled>
+                </div>
+                }@else{
+                <div>
+                    <label>Nombre completo</label>
+                    <input type="text" value="Sin asignar" disabled>
+                </div>
+                }
+
+                @if(user?.nick){
+                  <div>
+                      <label>Apodo</label>
+                      <input type="text" value="{{user?.nick}}" disabled>
+                  </div>
+                }@else{
+                  <div>
+                      <label>Apodo</label>
+                      <input type="text" value="Sin asignar" disabled>
+                  </div>
+                }
+
+                @if(user?.email){
+                <div>
+                    <label>Email</label>
+                    <input type="email" value="{{user?.email}}" disabled>
+                </div>
+                }@else{
+                <div>
+                    <label>Email</label>
+                    <input type="email" value="Sin asignar" disabled>
+                </div>
+                }
+
+                @if(user?.phone){
+                <div>
+                    <label>Teléfono</label>
+                    <input type="tel" value="{{user?.phone}}" disabled>
+                </div>
+                }@else{
+                <div>
+                    <label>Teléfono</label>
+                    <input type="tel" value="Sin asignar" disabled>
+                </div>
+                }
+
+                @if(user?.birth){
+                <div>
+                    <label>Fecha de nacimiento</label>
+                    <input type="text" value="{{ user?.birth | date:'dd/MM/yyyy' }}" disabled>
+                </div>
+                }@else{
+                <div>
+                    <label>Fecha de nacimiento</label>
+                    <input type="text" value="Sin asignar" disabled>
+                </div>
+                }
+
+
+                @if(user?.age){
+                  <div>
+                      <label>Edad</label>
+                      <input type="number" value="{{user?.age}}" disabled>
+                  </div>
+                }@else{
+                  <div>
+                      <label>Edad</label>
+                      <input type="text" value="Sin asignar" disabled>
+                  </div>
+                }
+
+                @if(user?.about){
+                <div id="form__grid-aboutme">
+                    <label>Sobre mi</label>
+                    <textarea disabled>{{user?.about}}</textarea>
+                </div>
+                }@else{
+                  <div id="form__grid-aboutme">
+                      <label>Sobre mi</label>
+                      <textarea disabled>Sin asignar</textarea>
+                  </div>
+                }
+            </div>
+
+            <button class="edit-btn" id="toggleEdit" routerLink="/editProfile">Editar perfil</button>
+        </form>
+    </div>
+</app-test>
