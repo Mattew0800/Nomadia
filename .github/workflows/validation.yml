@@ -47,6 +47,10 @@ jobs:
             echo "branch_status=ok" >> $GITHUB_OUTPUT
           fi
 
+       # 4️⃣.5 Fetch base branch
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.base_ref }}
+
       # 5️⃣ Validate commit messages
       - name: Validate commits
         id: commit-check
