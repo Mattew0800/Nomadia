@@ -1,0 +1,80 @@
+<app-test>
+  <div class="profile-card" *ngIf="currentStep === 0">
+    <div class="profile-header">
+        <section class="profile-main">
+            <div class="profile-user-profile step-0-header">
+                <div class="user-info large">
+                    <h2 class="user-name step-0-title">Seleccionar Tipo de Viaje</h2>
+                    <p class="user-status step-0-subtitle">¿Cuál es el foco principal de tu viaje?</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="selection-grid">
+        
+        <button 
+            *ngFor="let type of tripTypes" 
+            (click)="selectTripType(type)"
+            class="type-selection-btn"
+        >
+            {{ type }}
+        </button>
+    </div>
+</div>
+
+  <div class="profile-card" *ngIf="currentStep === 1" [ngClass]="tripTypeClass">
+    <div class="profile-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <section class="profile-main">
+        <div class="profile-user-profile" style="gap:1.5rem; align-items:center;">
+          <div class="user-info large" style="gap:0.25rem;">
+            <h2 class="user-name" style="font-size: 2.5rem; font-weight: 700; color: #d7dbee;">Crear Nuevo Viaje</h2>
+            <p class="user-status" style="font-size: 1.25rem; color: #5f647e;">Ingresá los detalles de tu próxima aventura</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="form-grid">
+
+        <div>
+          <label for="nombreViaje">Nombre de Viaje</label>
+          <input id="nombreViaje" type="text" formControlName="name" placeholder="Nombre del viaje" />
+        </div>
+
+        <div>
+          <label for="tipoDeViaje">Tipo de viaje</label>
+          <div class="type-input-container">
+          <input id="tipoDeViaje" class="tipoDeViaje" type="text" formControlName="type" readonly/>
+          <button type="button" class="type-btn" style="width: auto;" (click)="goToStep(0)">Modificar Tipo</button>
+          </div>
+        </div>
+
+        <div>
+          <label for="desde">Desde</label>
+          <input id="desde" type="date" formControlName="startDate" />
+        </div>
+
+        <div>
+          <label for="hasta">Hasta</label>
+          <input id="hasta" type="date" formControlName="endDate" />
+        </div>
+
+        <div id="form__grid-aboutme">
+          <label for="about">Descripción de viaje</label>
+          <textarea id="about" formControlName="description" rows="4" placeholder="Contanos detalles del viaje..."></textarea>
+        </div>
+
+        <div style="grid-column: 1/3; margin-top:1rem;">
+          <button type="submit" class="edit-btn" style="width: auto;">Cargar Viaje</button>
+        </div>
+
+      </div>
+    </form>
+
+    <div *ngIf="submitted && msgError" class="alert error">{{ msgError }}</div>
+    <div *ngIf="submitted && msgOk" class="alert ok">{{ msgOk }}</div>
+
+  </div>
+</app-test>

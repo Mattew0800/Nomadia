@@ -1,0 +1,15 @@
+@use '../../styles/buttons';
+@use "../../styles/trip-setup";
+
+.filters-btn {
+  display: inline;
+  text-decoration: none;
+}
+
+input[readonly],
+textarea[readonly],
+input:disabled,
+textarea:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+}

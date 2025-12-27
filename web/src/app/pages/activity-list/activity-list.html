@@ -1,0 +1,69 @@
+<app-test>
+  <div class="activity-list">
+
+    <section *ngIf="showFilters" class="filters">
+      <div class="row">
+
+        <label>
+          Desde fecha
+          <input type="date" [(ngModel)]="fromDate">
+        </label>
+
+        <label>
+          Hasta fecha
+          <input type="date" [(ngModel)]="toDate">
+        </label>
+
+        <label>
+          Desde hora
+          <input type="time" [(ngModel)]="fromTime">
+        </label>
+        <label>
+          Hasta hora
+          <input type="time" [(ngModel)]="toTime">
+        </label>
+
+        <div class="actions">
+          <button type="button" (click)="fetch()">Aplicar</button>
+          <button type="button" class="ghost" (click)="clearFilters()">Limpiar</button>
+        </div>
+      </div>
+    </section>
+
+    <div *ngIf="loading()" class="empty">Cargando actividades...</div>
+    <div *ngIf="!loading() && errorMsg()" class="empty">{{ errorMsg() }}</div>
+    <div *ngIf="!loading() && !errorMsg() && !activities?.length" class="empty">
+      No hay actividades registradas.
+    </div>
+
+    <article class="activity-card" *ngFor="let a of activities" (click)="onSelect(a)">
+      <div class="content">
+        <div class="row between">
+          <h3 class="title">{{ a.name }}</h3>
+          <div class="side">
+          <div class="price" *ngIf="a.cost != null">
+            {{ a.cost | currency:'ARS':'symbol':'1.0-0' }}
+          </div>
+          <div class="actions">
+            <button class="btn-delete"
+                    title="Eliminar"
+                    (click)="$event.stopPropagation(); onDelete(a)">
+              ✕
+            </button>
+          </div>
+        </div>
+        </div>
+
+        <div class="meta">
+        <span class="meta-item">
+          <i class="fa-regular fa-calendar"></i>
+          {{ a.date | date:'dd/MM/yyyy' }}
+        </span>
+        </div>
+
+        <p class="desc" *ngIf="a.description">{{ a.description }}</p>
+      </div>
+    </article>
+  </div>
+
+</app-test>
