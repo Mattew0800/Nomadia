@@ -80,8 +80,8 @@ public class User {
     @Column(nullable = true)
     private Set<Trip> trips = new HashSet<>();
 
-    @OneToMany(mappedBy = "user")
-    private Set<Calification> califications = new HashSet<>();
+//    @OneToMany(mappedBy = "user")
+//    private Set<Calification> califications = new HashSet<>();
 
 
     public User toEntity() {

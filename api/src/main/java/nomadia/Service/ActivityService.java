@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -67,36 +68,43 @@ public class ActivityService{
                 .stream().map(ActivityResponseDTO::fromEntity).toList();
     }
 
-    public float getAllCostByTrip(Long tripId,Long userId){
+    public BigDecimal getAllCostByTrip(Long tripId, Long userId) { //PROVISORIO
+
         Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
-        if(!tripService.isMember(tripId,userId)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Viaje no encontrado"));
+
+        if (!tripService.isMember(tripId, userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "No tenés permiso para ver este viaje");
         }
-        float sum=0;
-        List<Activity>allActivities=activityRepository.findByTripId(tripId);
-        for(Activity act:allActivities){
-            sum+=act.getCost();
+        BigDecimal sum = BigDecimal.ZERO;
+        List<Activity> allActivities = activityRepository.findByTripId(tripId);
+        for (Activity act : allActivities) {
+            if (act.getCost() != null) {
+                sum = sum.add(act.getCost());
+            }
         }
         return sum;
     }
 
-    public float getDailyCostByTrip(Long tripId,Long userId,LocalDate localdate){//PROVISORIO
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
-        if(!tripService.isMember(tripId,userId)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
-        }
-        if(localdate==null){
-            localdate=LocalDate.now();
-        }
-        List<Activity> activityDay=activityRepository.findByTripIdAndDate(tripId,localdate);
-        float sum=0;
-        for(Activity act:activityDay){
-            sum+=act.getCost();
-        }
-        return sum;
-    }
+
+//    public BigDecimal getDailyCostByTrip(Long tripId,Long userId,LocalDate localdate){//PROVISORIO
+//        Trip trip = tripRepository.findById(tripId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
+//        if(!tripService.isMember(tripId,userId)){
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
+//        }
+//        if(localdate==null){
+//            localdate=LocalDate.now();
+//        }
+//        List<Activity> activityDay=activityRepository.findByTripIdAndDate(tripId,localdate);
+//        float sum=0;
+//        for(Activity act:activityDay){
+//            sum+=act.getCost();
+//        }
+//        return sum;
+//    }
 
     @Transactional(readOnly = true)
     public List<ActivityResponseDTO> getActivitiesForUserAndTrip(// PROVISORIO

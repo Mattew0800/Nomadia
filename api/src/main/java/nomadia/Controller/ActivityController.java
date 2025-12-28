@@ -86,9 +86,9 @@ public class ActivityController {
     public ResponseEntity<?> getAllCosts(@RequestBody TripIdRequestDTO request , @AuthenticationPrincipal UserDetailsImpl me){
         return ResponseEntity.ok(activityService.getAllCostByTrip(request.getTripId(), me.getId()));
     }
-    @GetMapping("/get-cost-by-day")//PROVISORIO
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getCostByDay(@RequestBody TripIdRequestDTO request,@AuthenticationPrincipal UserDetailsImpl me){
-        return ResponseEntity.ok(activityService.getDailyCostByTrip(request.getTripId(), me.getId(), LocalDate.now()));
-    }
+//    @GetMapping("/get-cost-by-day")//PROVISORIO
+//    @PreAuthorize("hasRole('USER')")
+//    public ResponseEntity<?> getCostByDay(@RequestBody TripIdRequestDTO request,@AuthenticationPrincipal UserDetailsImpl me){
+//        return ResponseEntity.ok(activityService.getDailyCostByTrip(request.getTripId(), me.getId(), LocalDate.now()));
+//    }
 }

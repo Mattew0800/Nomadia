@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nomadia.Model.Activity;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -30,7 +32,7 @@ public class ActivityUpdateRequestDTO {
 
     @NotNull(message = "El costo es obligatorio")
     @PositiveOrZero(message = "El costo no puede ser negativo")
-    private Double cost;
+    private BigDecimal cost;
 
     @NotNull(message = "La hora de inicio es obligatoria")
     private LocalTime startTime;
