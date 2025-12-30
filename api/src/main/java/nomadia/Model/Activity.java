@@ -3,6 +3,8 @@ package nomadia.Model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -26,8 +28,8 @@ public class Activity {
     @Column(name = "description", length = 2000)
     private String description;
 
-    @Column(name = "cost")
-    private Double cost;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal cost;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id", nullable = false)

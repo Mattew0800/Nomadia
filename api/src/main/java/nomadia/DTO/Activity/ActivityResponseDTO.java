@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nomadia.Model.Activity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -19,7 +20,7 @@ public class ActivityResponseDTO {
     private String name;
     private LocalDate date;
     private String description;
-    private Double cost;
+    private BigDecimal cost;
     private Long tripId;
     private LocalTime startTime;
     private LocalTime endTime;

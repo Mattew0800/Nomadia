@@ -3,14 +3,17 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Activity.*;
+import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.Service.ActivityService;
 import nomadia.Service.TripService;
+import org.springframework.boot.reactor.ReactorEnvironmentPostProcessor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -78,4 +81,14 @@ public class ActivityController {
         activityService.delete(request.getTripId(), request.getActivityId(),me.getId());
         return ResponseEntity.ok(Map.of("message", "Actividad eliminada correctamente"));
     }
+    @GetMapping("/get-cost")//PROVISORIO
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getAllCosts(@RequestBody TripIdRequestDTO request , @AuthenticationPrincipal UserDetailsImpl me){
+        return ResponseEntity.ok(activityService.getAllCostByTrip(request.getTripId(), me.getId()));
+    }
+//    @GetMapping("/get-cost-by-day")//PROVISORIO
+//    @PreAuthorize("hasRole('USER')")
+//    public ResponseEntity<?> getCostByDay(@RequestBody TripIdRequestDTO request,@AuthenticationPrincipal UserDetailsImpl me){
+//        return ResponseEntity.ok(activityService.getDailyCostByTrip(request.getTripId(), me.getId(), LocalDate.now()));
+//    }
 }
