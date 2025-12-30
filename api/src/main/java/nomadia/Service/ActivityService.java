@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -32,17 +33,16 @@ public class ActivityService{
 
     private boolean overlaps(LocalTime aStart, LocalTime aEnd,
                              LocalTime bStart, LocalTime bEnd) {
-        // [aStart, aEnd) vs [bStart, bEnd)
         return aStart.isBefore(bEnd) && bStart.isBefore(aEnd);
     }
 
     @Transactional
     public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto,Long userId) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
         if(!tripService.isMember(tripId,userId)){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
         }
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
         if (dto.getDate().isBefore(trip.getStartDate()) || dto.getDate().isAfter(trip.getEndDate())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de la actividad debe estar dentro del rango del viaje");
         }
@@ -68,8 +68,46 @@ public class ActivityService{
                 .stream().map(ActivityResponseDTO::fromEntity).toList();
     }
 
+    public BigDecimal getAllCostByTrip(Long tripId, Long userId) { //PROVISORIO
+
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Viaje no encontrado"));
+
+        if (!tripService.isMember(tripId, userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "No tenés permiso para ver este viaje");
+        }
+        BigDecimal sum = BigDecimal.ZERO;
+        List<Activity> allActivities = activityRepository.findByTripId(tripId);
+        for (Activity act : allActivities) {
+            if (act.getCost() != null) {
+                sum = sum.add(act.getCost());
+            }
+        }
+        return sum;
+    }
+
+
+//    public BigDecimal getDailyCostByTrip(Long tripId,Long userId,LocalDate localdate){//PROVISORIO
+//        Trip trip = tripRepository.findById(tripId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
+//        if(!tripService.isMember(tripId,userId)){
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
+//        }
+//        if(localdate==null){
+//            localdate=LocalDate.now();
+//        }
+//        List<Activity> activityDay=activityRepository.findByTripIdAndDate(tripId,localdate);
+//        float sum=0;
+//        for(Activity act:activityDay){
+//            sum+=act.getCost();
+//        }
+//        return sum;
+//    }
+
     @Transactional(readOnly = true)
-    public List<ActivityResponseDTO> getActivitiesForUserAndTrip(
+    public List<ActivityResponseDTO> getActivitiesForUserAndTrip(// PROVISORIO
             Long userId,
             LocalDate fromDate, LocalDate toDate,
             LocalTime fromTime, LocalTime toTime,Long tripId) {

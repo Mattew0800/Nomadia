@@ -1,6 +1,7 @@
 package nomadia.Repository;
 
 import jakarta.transaction.Transactional;
+import nomadia.Enum.State;
 import nomadia.Model.Trip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +35,7 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             @Param("userId") Long userId
     );
 
+    List<Trip> findByEndDateBeforeAndStateNot(LocalDate date, State state);
 
     @Modifying
     @Transactional

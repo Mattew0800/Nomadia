@@ -39,16 +39,13 @@ public class UserController {
 
     @PutMapping("/me/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,
-                                        @Valid @RequestBody UserUpdateDTO dto) {
-        try {
-            UserResponseDTO response = userService.updateSelf(principal.getId(), dto);
-            return ResponseEntity.ok(response);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode())
-                    .body(Map.of("error", e.getReason()));
-        }
+    public ResponseEntity<UserResponseDTO> updateSelf(
+            @AuthenticationPrincipal UserDetailsImpl principal,
+            @Valid @RequestBody UserUpdateDTO dto) {
+        UserResponseDTO response = userService.updateSelf(principal.getId(), dto);
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/create") // esto dsps se va, solo para prueba
     @PreAuthorize("hasRole('ADMIN')")
