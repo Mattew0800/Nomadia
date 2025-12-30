@@ -50,7 +50,7 @@ export class UserProfileEdit {
         Validators.required,
         Validators.pattern(/^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$/i)
       ]),
-      nick: new FormControl(''),
+      nick: new FormControl('', Validators.maxLength(10)),
       email: new FormControl({ value: '', disabled: false }, [
         Validators.required,
         Validators.email
@@ -60,7 +60,7 @@ export class UserProfileEdit {
         Validators.maxLength(13),
         Validators.pattern(/^[0-9]+$/)
       ]),
-      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.futureDateValidator(), this.ageValidator(15)]),
+      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.futureDateValidator(), this.ageValidator(8, 100)]),
       age: new FormControl(''),
       about: new FormControl('', [Validators.minLength(3), Validators.maxLength(100)]),
 
@@ -111,7 +111,7 @@ export class UserProfileEdit {
   }
 
 
-  public ageValidator = (minAge: number): ValidatorFn => {
+  public ageValidator = (minAge: number, maxAge: number): ValidatorFn => {
     return (control: AbstractControl): ValidationErrors | null => {
 
       const birthDateString = control.value;
@@ -128,6 +128,10 @@ export class UserProfileEdit {
 
       if (age < minAge) {
         return { isUnderage: true };
+      }
+
+      if (age > maxAge) {
+        return { isTooOld: true };
       }
 
       return null;
@@ -178,6 +182,10 @@ export class UserProfileEdit {
     return this.form.get('about');
   }
 
+  public get nickControl(){
+    return this.form.get('nick');
+  }
+
   calcAge(birth: string | Date): number | null {
     if (!birth) return null;
     const d = new Date(birth);
@@ -187,6 +195,20 @@ export class UserProfileEdit {
     const m = t.getMonth() - d.getMonth();
     if (m < 0 || (m === 0 && t.getDate() < d.getDate())) age--;
     return age >= 0 ? age : null;
+  }
+
+  getMinDate(): string {
+    // Fecha mínima: hace 100 años desde hoy
+    const today = new Date();
+    const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+    return minDate.toISOString().split('T')[0];
+  }
+
+  getMaxDate(): string {
+    // Fecha máxima: hace 8 años desde hoy (edad mínima)
+    const today = new Date();
+    const maxDate = new Date(today.getFullYear() - 8, today.getMonth(), today.getDate());
+    return maxDate.toISOString().split('T')[0];
   }
 
 onSelectPhoto(event: any) {
@@ -219,6 +241,9 @@ removePhoto() {
     this.submitted = true;
     this.msgError = undefined;
     this.msgOk = undefined;
+
+    // Marcar todos los campos como tocados para mostrar los errores
+    this.form.markAllAsTouched();
 
     if (!this.form.valid || !this.passwordsMatch()) {
       console.log('Formulario inválido');
