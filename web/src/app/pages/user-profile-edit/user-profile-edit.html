@@ -55,7 +55,29 @@
 
                 <div>
                     <label>Teléfono</label>
-                    <input type="tel" formControlName="phone">
+                  <input type="text"
+                         formControlName="phone"
+                         maxlength="13"
+                         pattern="[0-9]*"
+                         title="Solo números">
+
+
+                @if(phoneControl?.touched){
+                  @if(phoneControl?.hasError("required")){
+
+                      <p class="formError">El teléfono es obligatorio.</p>
+
+                  }
+                  @if(phoneControl?.hasError("minlength")){
+                      <p class="formError">El teléfono debe tener al menos 10 dígitos.</p>
+                  }
+                  @if(phoneControl?.hasError("maxlength")){
+                      <p class="formError">El teléfono no puede tener más de 13 dígitos.</p>
+                  }
+                  @if(phoneControl?.hasError("pattern")){
+                    <p class="formError">El teléfono solo puede contener números.</p>
+                  }
+                }
                 </div>
 
                 <div>
@@ -64,6 +86,10 @@
                     <div *ngIf="f['birth'].errors?.['pattern'] && f['birth'].touched" class="text-danger">
                         <p class="formError">La fecha debe tener formato YYYY-MM-DD con año de 4 dígitos.</p>
                     </div>
+
+                  <div *ngIf="f['birth'].touched && f['birth'].hasError('futureDate')" class="text-danger">
+                    <p class="formError">La fecha de nacimiento no puede ser futura.</p>
+                  </div>
 
                   <div *ngIf="f['birth'].touched && f['birth'].hasError('isUnderage')" class="text-danger">
                     <!-- El validador usa 15, así que el mensaje es sobre 15 -->
@@ -79,7 +105,16 @@
 
                 <div id="form__grid-aboutme">
                     <label>Sobre mí</label>
-                    <textarea formControlName="about" rows="4"></textarea>
+                    <textarea formControlName="about" rows="4" maxlength="100"></textarea>
+
+                    @if(aboutControl?.touched){
+                      @if(aboutControl?.hasError("maxlength")){
+                          <p class="formError">La descripción no puede exceder los 100 caracteres.</p>
+                      }
+                      @if(aboutControl?.hasError("minlength")){
+                        <p class="formError">La descripción debe tener 3 caracteres como minimo.</p>
+                      }
+                    }
                 </div>
 
                 <div>

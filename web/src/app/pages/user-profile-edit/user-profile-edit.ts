@@ -36,7 +36,7 @@ export class UserProfileEdit {
   msgOk?: string;
   msgError?: string;
   loading = true;
-  errorMessages: { [key: string]: string } = {};
+  errorMessages: string = "";
   user?: User;
   DEFAULT_PHOTO = 'default-user-img.jpg';
 
@@ -55,10 +55,14 @@ export class UserProfileEdit {
         Validators.required,
         Validators.email
       ]),
-      phone: new FormControl(''),
-      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.ageValidator(15)]),
+      phone: new FormControl('', [
+        Validators.minLength(10),
+        Validators.maxLength(13),
+        Validators.pattern(/^[0-9]+$/)
+      ]),
+      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.futureDateValidator(), this.ageValidator(15)]),
       age: new FormControl(''),
-      about: new FormControl(''),
+      about: new FormControl('', [Validators.minLength(3), Validators.maxLength(100)]),
 
       currentPass: new FormControl(''),
       newPass: new FormControl('', [Validators.minLength(6)]),
@@ -71,12 +75,13 @@ export class UserProfileEdit {
       next: (user) => {
         this.user = user;
 
-        // Convertir birth a YYYY-MM-DD si existe
-        const birthStr = user.birth
-          ? new Date(user.birth).toISOString().substring(0, 10)
-          : '';
+        let birthStr = '';
+        if (user.birth) {
+          birthStr = user.birth.includes('T')
+            ? user.birth.substring(0, 10)
+            : user.birth;
+        }
 
-        // Patch del formulario con datos del usuario
         this.form.patchValue({
           name: user.name || '',
           nick: user.nick || '',
@@ -87,7 +92,6 @@ export class UserProfileEdit {
           age: birthStr ? this.calcAge(birthStr) : null
         });
 
-        // Cargar la foto de perfil actual
         this.photoPreview = user.photoUrl || '';
 
         this.loading = false;
@@ -98,11 +102,10 @@ export class UserProfileEdit {
       }
     });
 
-    // Suscribirse a cambios de la fecha de nacimiento para recalcular la edad
     this.form.get('birth')?.valueChanges.subscribe((birth: string) => {
       this.form.patchValue(
         { age: this.calcAge(birth) },
-        { emitEvent: false } // evita loop de eventos
+        { emitEvent: false }
       );
     });
   }
@@ -113,25 +116,44 @@ export class UserProfileEdit {
 
       const birthDateString = control.value;
 
-      // 1. Si no hay valor, no validar (deja que Validators.required se encargue)
       if (!birthDateString) {
         return null;
       }
 
-      // 2. Reutilizamos tu función para calcular la edad
       const age = this.calcAge(birthDateString);
 
-      // 3. Si la edad es nula (formato inválido) o menor, devolvemos error
       if (age === null) {
-        return null; // El pattern validator se encargará del formato
+        return null;
       }
 
       if (age < minAge) {
-        // Inválido: es menor de edad
         return { isUnderage: true };
       }
 
-      // Válido: es mayor de edad
+      return null;
+    };
+  }
+
+  public futureDateValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const dateValue = control.value;
+
+      if (!dateValue) {
+        return null;
+      }
+
+      const inputDate = new Date(dateValue);
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+      inputDate.setHours(0, 0, 0, 0);
+
+
+
+      if (inputDate > today) {
+        return { futureDate: true };
+      }
+
       return null;
     };
   }
@@ -144,11 +166,19 @@ export class UserProfileEdit {
     return this.form.get('email');
   }
 
+  public get phoneControl() {
+    return this.form.get('phone');
+  }
+
   public get newPassControl() {
     return this.form.get('newPass');
   }
 
-  calcAge(birth: string): number | null {
+  public get aboutControl() {
+    return this.form.get('about');
+  }
+
+  calcAge(birth: string | Date): number | null {
     if (!birth) return null;
     const d = new Date(birth);
     if (isNaN(d.getTime())) return null;
@@ -195,8 +225,24 @@ removePhoto() {
       return;
     }
 
-    // Convertimos birth a Date
-    const birthDate = this.form.value.birth ? new Date(this.form.value.birth) : null;
+    // Asegurar que birth sea string en formato YYYY-MM-DD
+    let birthValue = this.form.value.birth;
+    let birthStr: string | null = null;
+
+    if (birthValue) {
+      if (typeof birthValue === 'string') {
+        // Si es string, verificar si tiene timestamp
+        if (birthValue.includes('T')) {
+          // Extraer solo YYYY-MM-DD
+          birthStr = birthValue.substring(0, 10);
+        } else {
+          birthStr = birthValue;
+        }
+      } else if (birthValue instanceof Date) {
+        // Si es Date, convertir a YYYY-MM-DD
+        birthStr = birthValue.toISOString().substring(0, 10);
+      }
+    }
 
     // Armar payload según UserUpdateDTO
     const payload: putResponse = {
@@ -206,7 +252,7 @@ removePhoto() {
       phone: this.form.value.phone,
       about: this.form.value.about,
       photoUrl: this.photoPreview || null,
-      birth: birthDate,
+      birth: birthStr,
       age: this.form.value.age,
       oldPassword: this.form.value.currentPass || null,
       newPassword: this.form.value.newPass || null,
@@ -220,33 +266,23 @@ removePhoto() {
         next: (res: UpdateUserResponse) => {
           this.msgOk = 'Perfil actualizado con éxito.';
 
-          this.errorMessages = {};
+          this.errorMessages = "";
 
           if (res.newToken) {
             this.authService.setToken(res.newToken);
           }
         },
         error: (err) => {
-          // CasTEA al nuevo tipo que incluye 'newToken'
-          const backendError = err.error as AuthErrorResponse;
 
-          // 1. Almacenar el nuevo token si se recibe
+          const backendError = err.error;
+
           if (backendError?.newToken) {
             this.authService.setToken(backendError.newToken);
           }
 
-          // 2. Manejo de mensajes de error (el resto de la lógica sigue igual)
-          if (backendError?.errors) {
-            this.errorMessages = backendError.errors;
-          } else {
-            this.msgError =
-              backendError?.message ||
-              (err.status === 401
-                ? 'Sesión expirada.'
-                : 'Error al actualizar el perfil.');
-          }
+          this.msgError = backendError?.message ||
+            (err.status === 401 ? 'Sesión expirada.' : 'Error al actualizar el perfil.');
         }
-
       });
   }
 

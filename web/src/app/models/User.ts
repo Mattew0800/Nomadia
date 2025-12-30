@@ -4,19 +4,19 @@ export class User{
     password: string
     email: string
     nick?: string
-    birth?: Date
+    birth?: string
     age?: number
     photoUrl?: string
-    phone?: string 
+    phone?: string
     about?: string
 
-    constructor(    
+    constructor(
     id: string,
     name: string,
     password: string,
     email: string,
     nick: string,
-    birth: Date,
+    birth: string,
     age: number,
     photoUrl: string,
     phone: string,
