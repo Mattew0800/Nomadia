@@ -3,4 +3,6 @@ export interface TripResponse{
     name: string;
     state: string;
     type: string;
+    startDate: string;
+    endDate: string;
 }
