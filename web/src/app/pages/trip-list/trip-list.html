@@ -1,0 +1,87 @@
+<app-test>
+
+    <div class="travel-tabs-container">
+        <button class="tab-button" [class.active]="showingActiveTrips === true" (click)="setFilter(true)">
+            Viajes Activos
+        </button>
+
+        <button class="tab-button" [class.active]="showingActiveTrips === false" (click)="setFilter(false)">
+            Viajes Finalizados
+        </button>
+    </div>
+
+        @if(filteredViajes.length > 0){
+            <section class="grid-container">
+            @for (trip of filteredViajes; track trip.id) {
+
+            <div class="activity-card" (click)="selectTrip(String(trip.id))">
+                <div class="card-image-wrapper">
+
+                    <img class="card-image" [src]="'tripTypes/' + trip.type + '.jpg'" alt="" srcset="">
+
+                    <div class="image-overlay-gradient"></div>
+
+                    <div class="card-info-overlay">
+                        <h3 class="activity-title">{{ trip.name }}</h3>
+                        <p class="activity-location">{{ trip.type }}</p>
+
+                      <button (click)="deleteTrip(trip.id, $event)"><i class="fa-solid fa-trash delete-btn"></i></button>
+
+                      <button [routerLink]="['/editTrip', trip.id]"><i class="fa-solid fa-pen trip-edit-btn"></i></button>
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+
+            }
+            </section>
+            @if(showingActiveTrips){
+                <button class="edit-btn" id="toggleEdit" routerLink="/newTrip">Crear nuevo viaje</button>
+
+            }
+
+        }@else if(showingActiveTrips){
+            <section class="grid-container">
+
+            <div class="beach-text">
+                <div class="mascot-container">
+                    <img src="nomadia-penguin.png" alt="Nomadia Penguin" class="mascot">
+                </div>
+                <div class="dialog-bubble">
+                    <p>Parece que aún no tienes viajes planeados.</p>
+                    <button class="edit-btn newTrip-btn" id="toggleEdit" routerLink="/newTrip">¡Crear viaje!</button>
+                </div>
+            </div>
+
+            <img id="centerImg" src="noTrips.png" alt="">
+            </section>
+        }@else if(!showingActiveTrips){
+          <section class="grid-container">
+
+            <div class="beach-text">
+              <div class="mascot-container">
+                <img src="nomadia-penguin.png" alt="Nomadia Penguin" class="mascot">
+              </div>
+              <div class="dialog-bubble">
+                <p>Parece que aún no tienes <span class="highlight">viajes finalizados.</span> </p>
+              </div>
+            </div>
+
+            <img id="centerImg" src="noTrips.png" alt="">
+          </section>
+        }
+
+
+
+
+
+
+
+
+
+
+</app-test>

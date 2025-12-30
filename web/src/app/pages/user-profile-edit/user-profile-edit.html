@@ -1,0 +1,178 @@
+<app-test>
+
+    <div class="profile-card">
+        <div class="profile-header">
+            <section class="profile-main">
+                <div class="profile-user-profile">
+                  @if(user){
+                    <div class="user-image large">
+                        <img [src]="photoPreview || 'default-user-img.jpg'" alt="Foto de Usuario">
+                    </div>
+                    <div class="user-info large">
+                        @if(user.name){
+                        <h2 class="user-name">{{user.name}}</h2>
+                        }@else{
+                        <h2 class="user-name">Yo</h2>
+                        }
+                        <p class="user-status">Traveler Pro</p>
+                    </div>
+                  }
+                </div>
+            </section>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+            <div class="form-grid">
+                <div>
+                    <label>Nombre completo</label>
+                    <input type="text" formControlName="name"
+                        [ngClass]="{'input-invalid': form.get('name')?.invalid && form.get('name')?.touched}">
+
+                  <div *ngIf="f['name'].touched && f['name'].hasError('required')" class="text-danger">
+                    <p class="formError">El nombre completo es obligatorio.</p>
+                  </div>
+                  <div *ngIf="f['name'].touched && f['name'].hasError('pattern')" class="text-danger">
+                    <p class="formError">Debes ingresar un nombre y apellido válidos (ej: Juan Pérez).</p>
+                  </div>
+
+                </div>
+
+                <div>
+                    <label>Apodo</label>
+                    <input type="text" formControlName="nick">
+                </div>
+
+                <div>
+                    <label>Email</label>
+                    <input type="email" formControlName="email">
+                  <div *ngIf="emailControl?.touched && emailControl?.hasError('required')" class="text-danger">
+                    <p class="formError">El email es obligatorio.</p>
+                  </div>
+                  <div *ngIf="emailControl?.touched && emailControl?.hasError('email')" class="text-danger">
+                    <p class="formError">El formato del email es inválido (ej: usuario&#64;dominio.com).</p>
+                  </div>
+                </div>
+
+                <div>
+                    <label>Teléfono</label>
+                  <input type="text"
+                         formControlName="phone"
+                         maxlength="13"
+                         pattern="[0-9]*"
+                         title="Solo números">
+
+
+                @if(phoneControl?.touched){
+                  @if(phoneControl?.hasError("required")){
+
+                      <p class="formError">El teléfono es obligatorio.</p>
+
+                  }
+                  @if(phoneControl?.hasError("minlength")){
+                      <p class="formError">El teléfono debe tener al menos 10 dígitos.</p>
+                  }
+                  @if(phoneControl?.hasError("maxlength")){
+                      <p class="formError">El teléfono no puede tener más de 13 dígitos.</p>
+                  }
+                  @if(phoneControl?.hasError("pattern")){
+                    <p class="formError">El teléfono solo puede contener números.</p>
+                  }
+                }
+                </div>
+
+                <div>
+                    <label>Fecha de nacimiento</label>
+                    <input type="date" formControlName="birth">
+                    <div *ngIf="f['birth'].errors?.['pattern'] && f['birth'].touched" class="text-danger">
+                        <p class="formError">La fecha debe tener formato YYYY-MM-DD con año de 4 dígitos.</p>
+                    </div>
+
+                  <div *ngIf="f['birth'].touched && f['birth'].hasError('futureDate')" class="text-danger">
+                    <p class="formError">La fecha de nacimiento no puede ser futura.</p>
+                  </div>
+
+                  <div *ngIf="f['birth'].touched && f['birth'].hasError('isUnderage')" class="text-danger">
+                    <!-- El validador usa 15, así que el mensaje es sobre 15 -->
+                    <p class="formError">Debes tener al menos 15 años.</p>
+                  </div>
+                </div>
+
+
+                <div>
+                    <label>Edad</label>
+                    <input type="number" formControlName="age" readonly>
+                </div>
+
+                <div id="form__grid-aboutme">
+                    <label>Sobre mí</label>
+                    <textarea formControlName="about" rows="4" maxlength="100"></textarea>
+
+                    @if(aboutControl?.touched){
+                      @if(aboutControl?.hasError("maxlength")){
+                          <p class="formError">La descripción no puede exceder los 100 caracteres.</p>
+                      }
+                      @if(aboutControl?.hasError("minlength")){
+                        <p class="formError">La descripción debe tener 3 caracteres como minimo.</p>
+                      }
+                    }
+                </div>
+
+                <div>
+                    <label>Foto de perfil</label>
+                    <input type="file" #fileInput accept="image/*" (change)="onSelectPhoto($event)">
+                    <div style="margin-top:.5rem; display:flex; gap:.75rem; align-items:center;">
+                        <ng-container *ngIf="photoPreview">
+                            <img [src]="photoPreview" alt="preview"
+                                style="width:64px;height:64px;border-radius:12px;object-fit:cover;">
+                            <button type="button" class="filters-btn" (click)="removePhoto()">
+                                Quitar foto
+                            </button>
+                        </ng-container>
+                    </div>
+                </div>
+
+                <div style="grid-column:1/3;">
+                    <label style="display:block;margin-bottom:.5rem;">Cambiar contraseña (opcional)</label>
+                    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+                        <div>
+                            <label>Contraseña actual</label>
+                            <input type="password" formControlName="currentPass">
+                        </div>
+
+                        <div>
+                            <label>Nueva contraseña</label>
+                            <input type="password" formControlName="newPass"
+                                [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
+                          <div *ngIf="newPassControl?.touched && newPassControl?.hasError('minlength')" class="text-danger">
+                            <p class="formError">La contraseña debe tener al menos 6 caracteres.</p>
+                          </div>
+                        </div>
+
+                        <div style="grid-column:1/3;">
+                            <label>Confirmar nueva contraseña</label>
+                            <input type="password" formControlName="confirmPass"
+                                [ngClass]="{'input-invalid': !passwordsMatch() && form.get('confirmPass')?.touched}">
+                            <p *ngIf="!passwordsMatch()" class="formError" style="margin-top:.25rem;">
+                                Las contraseñas no coinciden.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:1rem; margin-top:2rem;">
+                <button class="edit-btn" type="submit">Guardar cambios</button>
+                <button class="filters-btn" type="button" (click)="cancel()">Volver</button>
+            </div>
+
+            <div *ngFor="let key of (errorMessages | keyvalue)" class="formError" id="profileEditError">
+                <strong>{{ key.key }}:</strong> {{ key.value }}
+            </div>
+
+
+            <p *ngIf="msgOk" style="margin-top:1rem; color:#d1f366;">{{ msgOk }}</p>
+            <p *ngIf="msgError" style="margin-top:1rem; color:#eb3f3a;">{{ msgError }}</p>
+        </form>
+
+    </div>
+</app-test>
