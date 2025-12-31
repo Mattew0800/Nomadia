@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth-service';
+import { AuthService } from '../../services/Auth/auth-service';
 import { User } from '../../models/User';
-import { UserService } from '../../services/user-service';
+import { UserService } from '../../services/User/user-service';
 import { DatePipe } from '@angular/common';
 import { Test } from '../test/test';
 

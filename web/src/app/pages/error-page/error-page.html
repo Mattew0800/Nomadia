@@ -10,14 +10,23 @@
     <div class="hero">
         <div class="hero-content">
             <div class="logo">
-                <img src="nomadia-logo.png" alt="" srcset="">
+                <img src="nomadia-logo.png" alt="Nomadia Logo">
             </div>
-            <h1 class="hero-title">404</h1>
-            <p class="hero-subtitle">Esta no es la pagina que estas buscando...</p>
+            <h1 class="hero-title">{{ errorTitle }}</h1>
+            <p class="hero-subtitle">{{ errorMessage }}</p>
+
+            <div class="action-buttons">
+                <button *ngIf="showRetryButton" class="retry-btn" (click)="retry()">
+                    Reintentar conexión
+                </button>
+                <button class="home-btn" (click)="goHome()">
+                    Volver al inicio
+                </button>
+            </div>
         </div>
     </div>
 
     <div class="hero-images">
-        <img src="nomadia-penguin.png" alt="" srcset="">
+        <img src="nomadia-penguin.png" alt="Nomadia Penguin">
     </div>
 </div>

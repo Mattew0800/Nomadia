@@ -2,7 +2,7 @@
 import { Component, EventEmitter, Output, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {ActivityService} from '../../services/activity-service';
+import {ActivityService} from '../../services/Activity/activity-service';
 import { ActivityResponseDTO } from '../../models/ActivityResponse';
 import {Test} from '../test/test';
 

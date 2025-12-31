@@ -1,3 +1,221 @@
 @use '../../styles/buttons';
 @use '../../styles/profile-shared';
 @use "../../styles/base";
+
+// 🎨 Mejoras visuales para inputs del formulario
+
+.form-grid {
+  label {
+    font-weight: 600;
+    color: #cbd5e1;
+    letter-spacing: 0.3px;
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    transition: color 0.2s ease;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(17, 20, 27, 0.95) 0%, rgba(28, 31, 55, 0.85) 100%);
+    border: 1.5px solid rgba(148, 163, 184, 0.25);
+    border-radius: 12px;
+    color: #e2e8f0;
+    font-size: 15px;
+    padding: 14px 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      border-color: rgba(190, 242, 100, 0.4);
+      background: linear-gradient(135deg, rgba(17, 20, 27, 1) 0%, rgba(28, 31, 55, 0.95) 100%);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #bef264;
+      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 0 0 3px rgba(190, 242, 100, 0.15),
+                  0 4px 12px rgba(190, 242, 100, 0.2);
+      transform: translateY(-1px);
+    }
+
+    &::placeholder {
+      color: #64748b;
+      opacity: 0.7;
+    }
+
+    &:disabled,
+    &[readonly] {
+      background: rgba(30, 33, 45, 0.5);
+      border-color: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  // Input de tipo file mejorado
+  input[type="file"] {
+    padding: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    background: linear-gradient(135deg, rgba(28, 31, 55, 0.9) 0%, rgba(17, 20, 27, 0.95) 100%);
+
+    &::file-selector-button {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #bef264 0%, #a3e635 100%);
+      border: none;
+      border-radius: 8px;
+      color: #0f1419;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-right: 12px;
+      box-shadow: 0 2px 8px rgba(190, 242, 100, 0.3);
+
+      &:hover {
+        box-shadow: 0 4px 12px rgba(190, 242, 100, 0.5);
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  // Inputs con error
+  .input-invalid {
+    border-color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.08);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+    animation: shake 0.4s ease;
+
+    &:focus {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2),
+                  0 4px 12px rgba(239, 68, 68, 0.25);
+    }
+  }
+
+  // Mensajes de error mejorados
+  .formError {
+    color: #fca5a5;
+    font-size: 13px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: slideDown 0.3s ease;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-left: 3px solid #ef4444;
+    font-weight: 500;
+
+    &::before {
+      content: "⚠";
+      font-size: 14px;
+    }
+  }
+}
+
+// Animación de sacudida para inputs con error
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+// Animación de deslizamiento para mensajes de error
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Mejoras para los inputs de contraseña
+input[type="password"] {
+  letter-spacing: 2px;
+  font-family: monospace;
+
+  &::placeholder {
+    letter-spacing: normal;
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+// Estilo para el input de fecha
+input[type="date"] {
+  &::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      filter: invert(1);
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Contenedor de botones mejorado
+div[style*="display:flex"][style*="gap:1rem"] {
+  button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+}
+
+// Mensaje de error general del perfil
+#profileEditError {
+  margin-top: 1.5rem;
+  padding: 14px 18px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  border-left: 4px solid #ef4444;
+  animation: slideDown 0.4s ease;
+}
+
+// Sección de vista previa de foto mejorada
+div[style*="margin-top:.5rem"] {
+  img {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid rgba(190, 242, 100, 0.2);
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      border-color: rgba(190, 242, 100, 0.4);
+    }
+  }
+}
+
+// Mejoras responsivas
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+
+    div[style*="grid-column"] {
+      grid-column: 1 !important;
+    }
+  }
+}
+

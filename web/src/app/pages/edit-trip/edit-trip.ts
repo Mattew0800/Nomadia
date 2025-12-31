@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Test } from '../test/test';
-import { TripService } from '../../services/trip-service';
+import { TripService } from '../../services/Trip/trip-service';
 import { TripResponse } from '../../models/TripResponse';
 
 type TripDetails = TripResponse & {
