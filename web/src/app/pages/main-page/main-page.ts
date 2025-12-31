@@ -2,10 +2,10 @@ import {Component, HostListener, ElementRef, ViewChild, HostBinding, OnInit} fro
 import {CommonModule} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
 import {Test} from '../test/test';
-import {TripService} from '../../services/trip-service';
+import {TripService} from '../../services/Trip/trip-service';
 import {TripResponse} from '../../models/TripResponse';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ActivityService} from '../../services/activity-service';
+import {ActivityService} from '../../services/Activity/activity-service';
 import {User} from '../../models/User';
 import {TravelerResponse} from '../../models/TravelerResponse';
 import {ActivityResponseDTO} from '../../models/ActivityResponse';

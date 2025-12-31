@@ -24,8 +24,14 @@
     <form [formGroup]="form" (ngSubmit)="save()" novalidate>
       <div class="form-grid">
         <div>
-          <label>Nombre completo</label>
-          <input type="text" formControlName="name"
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Nombre completo
+          </label>
+          <input type="text" formControlName="name" placeholder="Ej: Juan Pérez"
                  [ngClass]="{'input-invalid': form.get('name')?.invalid && form.get('name')?.touched}">
 
           <div>
@@ -35,16 +41,22 @@
           </div>
           <div>
             @if(f['name'].touched && f['name'].hasError('pattern')){
-              <p class="formError">Debes ingresar un nombre y apellido válidos (ej: Juan Pérez).</p>
+              <p class="formError">Debes ingresar un nombre y apellido válidos.</p>
             }
           </div>
 
         </div>
 
         <div>
-          <label>Apodo</label>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#bef264"/>
+            </svg>
+            Apodo
+          </label>
           <input type="text"
                  formControlName="nick"
+                 placeholder="Ej: Juancho"
                  alt="Apodo"
                  maxlength="10"
                  [ngClass]="{'input-invalid': nickControl?.invalid && nickControl?.touched}">
@@ -55,9 +67,16 @@
         </div>
 
         <div>
-          <label>Email</label>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 6l-10 7L2 6" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Email
+          </label>
           <input type="email"
                  formControlName="email"
+                 placeholder="ejemplo@correo.com"
                  maxlength="50"
                  [ngClass]="{'input-invalid': emailControl?.invalid && emailControl?.touched}">
 
@@ -65,16 +84,22 @@
             <p class="formError">El email es obligatorio.</p>
           }
           @if(emailControl?.touched && emailControl?.hasError('email')){
-            <p class="formError">El formato del email es inválido (ej: usuario&#64;dominio.com).</p>
+            <p class="formError">El formato del email es inválido.</p>
           }
 
 
         </div>
 
         <div>
-          <label>Teléfono</label>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Teléfono
+          </label>
           <input type="text"
                  formControlName="phone"
+                 placeholder="1234567890"
                  maxlength="13"
                  pattern="[0-9]*"
                  title="Solo números"
@@ -100,7 +125,15 @@
         </div>
 
         <div>
-          <label>Fecha de nacimiento</label>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="2" x2="16" y2="6" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="8" y1="2" x2="8" y2="6" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="3" y1="10" x2="21" y2="10" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Fecha de nacimiento
+          </label>
           <input type="date" formControlName="birth" [min]="getMinDate()" [max]="getMaxDate()" [ngClass]="{'input-invalid': f['birth'].invalid && f['birth'].touched}">
 
           @if(f['birth'].errors?.['pattern'] && f['birth'].touched){
@@ -117,13 +150,27 @@
 
 
         <div>
-          <label>Edad</label>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <circle cx="12" cy="12" r="10" stroke="#94a3b8" stroke-width="2"/>
+              <path d="M12 6v6l4 2" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Edad
+          </label>
           <input type="number" formControlName="age" readonly>
         </div>
 
         <div id="form__grid-aboutme">
-          <label>Sobre mí</label>
-          <textarea formControlName="about" rows="4" maxlength="100" [ngClass]="{'input-invalid':f['about'].invalid && f['about'].touched}"></textarea>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="14,2 14,8 20,8" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="13" x2="8" y2="13" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="17" x2="8" y2="17" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Sobre mí
+          </label>
+          <textarea formControlName="about" rows="4" maxlength="100" placeholder="Cuéntanos algo sobre ti..." [ngClass]="{'input-invalid':f['about'].invalid && f['about'].touched}"></textarea>
 
           @if(aboutControl?.touched){
             @if(aboutControl?.hasError("maxlength")){
@@ -136,7 +183,14 @@
         </div>
 
         <div>
-          <label>Foto de perfil</label>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="8.5" cy="8.5" r="1.5" fill="#bef264"/>
+              <polyline points="21,15 16,10 5,21" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Foto de perfil
+          </label>
           <input type="file" #fileInput accept="image/*" (change)="onSelectPhoto($event)">
           <div style="margin-top:.5rem; display:flex; gap:.75rem; align-items:center;">
             <ng-container *ngIf="photoPreview">
@@ -150,16 +204,22 @@
         </div>
 
         <div style="grid-column:1/3;">
-          <label style="display:block;margin-bottom:.5rem;">Cambiar contraseña (opcional)</label>
+          <label style="display:block;margin-bottom:.5rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Cambiar contraseña (opcional)
+          </label>
           <div class="form-grid" style="grid-template-columns:1fr 1fr;">
             <div>
               <label>Contraseña actual</label>
-              <input type="password" formControlName="currentPass">
+              <input type="password" formControlName="currentPass" placeholder="••••••••">
             </div>
 
             <div>
               <label>Nueva contraseña</label>
-              <input type="password" formControlName="newPass"
+              <input type="password" formControlName="newPass" placeholder="••••••••"
                      [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
               <div *ngIf="newPassControl?.touched && newPassControl?.hasError('minlength')">
                 <p class="formError">La contraseña debe tener al menos 6 caracteres.</p>
@@ -168,7 +228,7 @@
 
             <div style="grid-column:1/3;">
               <label>Confirmar nueva contraseña</label>
-              <input type="password" formControlName="confirmPass"
+              <input type="password" formControlName="confirmPass" placeholder="••••••••"
                      [ngClass]="{'input-invalid': !passwordsMatch() && form.get('confirmPass')?.touched}">
               <p *ngIf="!passwordsMatch()" class="formError" style="margin-top:.25rem;">
                 Las contraseñas no coinciden.

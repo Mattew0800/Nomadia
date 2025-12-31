@@ -1,11 +1,11 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {User} from '../models/User';
-import {LoginResponse} from '../models/LoginResponse';
-import {RegisterResponse} from '../models/RegisterResponse';
-import {putResponse} from '../models/putResponse';
-import {UpdateUserResponse} from '../models/UpdateUserResponse';
-import {AuthService} from './auth-service';
+import {User} from '../../models/User';
+import {LoginResponse} from '../../models/LoginResponse';
+import {RegisterResponse} from '../../models/RegisterResponse';
+import {putResponse} from '../../models/putResponse';
+import {UpdateUserResponse} from '../../models/UpdateUserResponse';
+import {AuthService} from '../Auth/auth-service';
 
 @Injectable({
   providedIn: 'root'

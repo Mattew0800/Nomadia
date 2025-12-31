@@ -11,9 +11,9 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { AuthService } from '../../services/auth-service';
+import { AuthService } from '../../services/Auth/auth-service';
 import { UpdateUserResponse } from '../../models/UpdateUserResponse';
-import { UserService } from '../../services/user-service';
+import { UserService } from '../../services/User/user-service';
 import { putResponse } from '../../models/putResponse';
 import { ErrorResponse } from '../../models/ErrorResponse';
 import { User } from '../../models/User';

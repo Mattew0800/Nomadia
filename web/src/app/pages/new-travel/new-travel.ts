@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth-service';
+import { AuthService } from '../../services/Auth/auth-service';
 import { HttpClient } from '@angular/common/http';
 import {Test} from '../test/test';
-import { TripService } from '../../services/trip-service';
+import { TripService } from '../../services/Trip/trip-service';
 import { TripCreate } from '../../models/TripCreate';
 
 

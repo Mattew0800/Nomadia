@@ -1,9 +1,9 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth-service';
+import { AuthService } from '../../services/Auth/auth-service';
 import { User } from '../../models/User';
-import { UserService } from '../../services/user-service';
+import { UserService } from '../../services/User/user-service';
 
 type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'purple'|'blue' };
 

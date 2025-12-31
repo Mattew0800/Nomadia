@@ -2,10 +2,10 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {ActivityResponseDTO} from '../models/ActivityResponse';
-import {ActivityCreateDTO} from '../models/ActivityCreate';
-import {ActivityUpdateDTO} from '../models/ActivityUpdateDTO';
-import {AuthService} from './auth-service';
+import {ActivityResponseDTO} from '../../models/ActivityResponse';
+import {ActivityCreateDTO} from '../../models/ActivityCreate';
+import {ActivityUpdateDTO} from '../../models/ActivityUpdateDTO';
+import {AuthService} from '../Auth/auth-service';
 
 @Injectable({ providedIn: 'root' })
 export class ActivityService {

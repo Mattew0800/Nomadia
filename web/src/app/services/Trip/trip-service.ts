@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {AuthService} from './auth-service';
-import {TripResponse} from '../models/TripResponse';
-import {TripCreate} from '../models/TripCreate';
-import {User} from '../models/User';
-import {TravelerResponse} from '../models/TravelerResponse';
+import {AuthService} from '../Auth/auth-service';
+import {TripResponse} from '../../models/TripResponse';
+import {TripCreate} from '../../models/TripCreate';
+import {User} from '../../models/User';
+import {TravelerResponse} from '../../models/TravelerResponse';
 
 
 @Injectable({

@@ -1,9 +1,9 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {User} from '../models/User';
-import {LoginResponse} from '../models/LoginResponse';
-import {RegisterResponse} from '../models/RegisterResponse';
-import {putResponse} from '../models/putResponse';
+import {User} from '../../models/User';
+import {LoginResponse} from '../../models/LoginResponse';
+import {RegisterResponse} from '../../models/RegisterResponse';
+import {putResponse} from '../../models/putResponse';
 
 @Injectable({
   providedIn: 'root'
