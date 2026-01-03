@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import {ActivityService} from '../../services/Activity/activity-service';
 import { ActivityResponseDTO } from '../../models/ActivityResponse';
 import {Test} from '../test/test';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-activity-list',
@@ -29,13 +30,23 @@ export class ActivityListComponent implements OnInit {
   fromTime?: string;               // 'HH:mm'
   toTime?: string;
 
-  constructor(private activityService: ActivityService) {}
+  constructor(private activityService: ActivityService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.fetch(); // arranca sin filtros
+    // Escuchamos los parámetros de la URL
+    this.route.queryParams.subscribe(params => {
+      const searchTerm = params['search'];
+      if (searchTerm) {
+        // Si hay un término de búsqueda, filtramos
+        this.fetch(searchTerm);
+      } else {
+        // Si no, cargamos todo normal como ya hacías
+        this.fetch();
+      }
+    });
   }
 
-  fetch(): void {
+  fetch(searchTerm?: string): void {
     this.loading.set(true);
     this.errorMsg.set(null);
     this.activities = [];
@@ -53,9 +64,24 @@ export class ActivityListComponent implements OnInit {
 
     req$.subscribe({
       next: (list) => {
-        // orden: fecha asc, luego nombre
-        this.activities = [...(list ?? [])]
-          .sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '') || a.name.localeCompare(b.name));
+        let result = list ?? [];
+
+        // --- LÓGICA DE BÚSQUEDA INTEGRADA ---
+        if (searchTerm) {
+          const term = searchTerm.toLowerCase();
+          result = result.filter(a => a.name.toLowerCase().includes(term));
+        }
+
+        // Ordenar: fecha asc, luego nombre
+        this.activities = [...result].sort((a, b) =>
+          (a.date ?? '').localeCompare(b.date ?? '') || a.name.localeCompare(b.name)
+        );
+
+        // Si después de filtrar no hay nada, mostrar mensaje
+        if (this.activities.length === 0) {
+          this.errorMsg.set(searchTerm ? `No se encontró: "${searchTerm}"` : 'No hay actividades.');
+        }
+
         this.loading.set(false);
       },
       error: (e) => {

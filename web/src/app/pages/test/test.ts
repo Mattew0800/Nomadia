@@ -4,6 +4,9 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/Auth/auth-service';
 import { User } from '../../models/User';
 import { UserService } from '../../services/User/user-service';
+import { FormsModule } from '@angular/forms';
+import { ActivityService } from '../../services/Activity/activity-service';
+import { ActivityResponseDTO } from '../../models/ActivityResponse';
 
 type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'purple'|'blue' };
 
@@ -11,13 +14,16 @@ type AgendaItem = { time: string; label: string; desc: string; color: 'yellow'|'
 @Component({
   selector: 'app-test',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './test.html',
   styleUrls: ['./test.scss'],
 })
 export class Test implements OnInit{
 
-  constructor(private router: Router, public userService: UserService, public authService: AuthService){}
+  searchQuery: string = ''; // Texto del buscador
+  allActivities: ActivityResponseDTO[] = []; // Lista completa para comparar
+
+  constructor(private router: Router, public userService: UserService, public authService: AuthService, private activityService: ActivityService ){}
 
     // --- DROPDOWN PERFIL ---
   showMenu = false;
@@ -40,6 +46,37 @@ export class Test implements OnInit{
         console.error('Error al obtener el usuario', err);
       }
     });
+
+    this.loadActivities();
+  }
+
+  loadActivities() {
+    this.activityService.listMine().subscribe({
+      next: (list) => {
+        this.allActivities = list ?? [];
+      },
+      error: (e) => console.error('Error cargando actividades para el buscador', e)
+    });
+  }
+
+  onSearch() {
+    const term = this.searchQuery.trim().toLowerCase();
+
+    if (!term) return; // Si no hay texto, no hace nada
+
+    // Buscamos si hay alguna actividad que coincida con el nombre
+    const found = this.allActivities.find(a =>
+      a.name.toLowerCase().includes(term)
+    );
+
+    if (found) {
+      // Usamos 'activities' porque es el path que tienes en tu routes
+      this.router.navigate(['/activities'], { queryParams: { search: found.name } });
+    } else {
+      this.router.navigate(['/activities'], { queryParams: { search: this.searchQuery } });
+    }
+
+    this.searchQuery = '';
   }
 
   onSelect(action: string) {

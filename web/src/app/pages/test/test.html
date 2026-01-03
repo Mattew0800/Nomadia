@@ -107,7 +107,7 @@
     <main class="main-content">
         <header class="top-header">
             <div class="search-container">
-                <input type="text" placeholder="Muy pronto..." class="search-input">
+                <input type="text" placeholder="buscar actividad" class="search-input" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()">
                 <button class="filters-btn">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                         <path
