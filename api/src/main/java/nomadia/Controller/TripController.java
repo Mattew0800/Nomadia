@@ -67,11 +67,6 @@ public class TripController {
     public ResponseEntity<?> addUser(
             @Valid @RequestBody TripAddUserByEmailDTO dto,
             @AuthenticationPrincipal UserDetailsImpl me) {
-        System.out.println("DTO email = '" + dto.getEmail() + "'");
-        System.out.println("DTO tripId = " + dto.getTripId());
-        System.out.println("ME userId = " + me.getId());
-        System.out.println("tripService class = " + tripService.getClass());
-
         return ResponseEntity.ok(tripService.addUserToTrip(dto.getTripId(), dto.getEmail(),me.getId()));
     }
 

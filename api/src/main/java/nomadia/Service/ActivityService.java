@@ -3,9 +3,15 @@ package nomadia.Service;
 import nomadia.DTO.Activity.ActivityCreateDTO;
 import nomadia.DTO.Activity.ActivityResponseDTO;
 import nomadia.DTO.Activity.ActivityUpdateRequestDTO;
+import nomadia.DTO.UserBalance.ActivitySummaryDTO;
+import nomadia.DTO.UserBalance.DebtDTO;
+import nomadia.DTO.UserBalance.UserBalanceDTO;
+import nomadia.DTO.User.UserResponseDTO;
 import nomadia.Model.Activity;
 import nomadia.Model.Trip;
 import nomadia.Repository.ActivityRepository;
+import nomadia.Repository.ExpenseRepository;
+import nomadia.Repository.ParticipantRepository;
 import nomadia.Repository.TripRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,23 +19,35 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
-public class ActivityService{
+public class ActivityService {
 
     private final ActivityRepository activityRepository;
     private final TripRepository tripRepository;
     private final TripService tripService;
+    private final ParticipantRepository participantRepository;
+    private final ExpenseRepository expenseRepository;
 
-    public ActivityService(ActivityRepository activityRepository, TripRepository tripRepository, TripService tripService) {
+    public ActivityService(ActivityRepository activityRepository, TripRepository tripRepository, TripService tripService, ParticipantRepository participantRepository, ExpenseRepository expenseRepository) {
         this.activityRepository = activityRepository;
         this.tripRepository = tripRepository;
         this.tripService = tripService;
+        this.participantRepository = participantRepository;
+        this.expenseRepository = expenseRepository;
     }
+    //es como un dto solo para el service, piola para evitar duplicacion de codigo :D
+    private record ActivityCostData(
+            Activity activity,
+            BigDecimal totalSpent,
+            int participants,
+            BigDecimal average
+    ) {}
 
     private boolean overlaps(LocalTime aStart, LocalTime aEnd,
                              LocalTime bStart, LocalTime bEnd) {
@@ -37,127 +55,264 @@ public class ActivityService{
     }
 
     @Transactional
-    public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto,Long userId) {
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
-        if(!tripService.isMember(tripId,userId)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
-        }
-        if (dto.getDate().isBefore(trip.getStartDate()) || dto.getDate().isAfter(trip.getEndDate())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de la actividad debe estar dentro del rango del viaje");
-        }
-        List<Activity> sameDay = activityRepository.findByTripIdAndDate(tripId, dto.getDate());
-        boolean conflict = sameDay.stream().anyMatch(a ->
-                overlaps(dto.getStartTime(), dto.getEndTime(), a.getStartTime(), a.getEndTime())
-        );
-        if (conflict) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe otra actividad en ese horario");
-        }
-        Activity activity = dto.toEntity();
-        activity.setTrip(trip);
-        Activity saved = activityRepository.save(activity);
-        return ActivityResponseDTO.fromEntity(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ActivityResponseDTO> listByTrip(Long tripId) {
-        if (!tripRepository.existsById(tripId))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado");
-
-        return activityRepository.findByTripId(tripId)
-                .stream().map(ActivityResponseDTO::fromEntity).toList();
-    }
-
-    public BigDecimal getAllCostByTrip(Long tripId, Long userId) { //PROVISORIO
-
+    public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto, Long userId) {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Viaje no encontrado"));
-
         if (!tripService.isMember(tripId, userId)) {
             throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "No tenés permiso para ver este viaje");
+                    HttpStatus.FORBIDDEN, "No tenés permiso para modificar este viaje");
         }
-        BigDecimal sum = BigDecimal.ZERO;
-        List<Activity> allActivities = activityRepository.findByTripId(tripId);
-        for (Activity act : allActivities) {
-            if (act.getCost() != null) {
-                sum = sum.add(act.getCost());
-            }
+        if (dto.getDate().isBefore(trip.getStartDate())
+                || dto.getDate().isAfter(trip.getEndDate())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La fecha de la actividad debe estar dentro del rango del viaje");
         }
-        return sum;
+        List<Activity> sameDay =
+                activityRepository.findByTripIdAndDate(tripId, dto.getDate());
+        boolean conflict = sameDay.stream().anyMatch(a ->
+                overlaps(dto.getStartTime(), dto.getEndTime(),
+                        a.getStartTime(), a.getEndTime())
+        );
+        if (conflict) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe otra actividad en ese horario");
+        }
+        Activity activity = dto.toEntity();
+        activity.setTrip(trip);
+
+        return ActivityResponseDTO.fromEntity(
+                activityRepository.save(activity)
+        );
     }
 
+    @Transactional
+    public ActivityResponseDTO update(Long tripId,Long activityId,ActivityUpdateRequestDTO dto,Long userId ) {
+        if (!tripService.isMember(tripId, userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tenés permiso para modificar esta actividad");
+        }
+        Activity activity = activityRepository
+                .findByIdAndTripId(activityId, tripId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Actividad no encontrada en este viaje"));
+        dto.applyToEntity(activity);
+        return ActivityResponseDTO.fromEntity(
+                activityRepository.save(activity)
+        );
+    }
 
-//    public BigDecimal getDailyCostByTrip(Long tripId,Long userId,LocalDate localdate){//PROVISORIO
-//        Trip trip = tripRepository.findById(tripId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaje no encontrado"));
-//        if(!tripService.isMember(tripId,userId)){
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
-//        }
-//        if(localdate==null){
-//            localdate=LocalDate.now();
-//        }
-//        List<Activity> activityDay=activityRepository.findByTripIdAndDate(tripId,localdate);
-//        float sum=0;
-//        for(Activity act:activityDay){
-//            sum+=act.getCost();
-//        }
-//        return sum;
-//    }
+    @Transactional
+    public void delete(Long tripId, Long activityId, Long userId) {
+        if (!tripService.isMember(tripId, userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tenés permiso para modificar esta actividad");
+        }
+        Activity activity = activityRepository
+                .findByIdAndTripId(activityId, tripId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Actividad no encontrada en este viaje"));
+        activityRepository.delete(activity);
+    }
+    //NO SE USA
+    public List<ActivityResponseDTO> listByTrip(Long tripId) {
+        if (!tripRepository.existsById(tripId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Viaje no encontrado");
+        }
+        return activityRepository.findByTripId(tripId)
+                .stream()
+                .map(ActivityResponseDTO::fromEntity)
+                .toList();
+    }
 
-    @Transactional(readOnly = true)
-    public List<ActivityResponseDTO> getActivitiesForUserAndTrip(// PROVISORIO
-            Long userId,
-            LocalDate fromDate, LocalDate toDate,
-            LocalTime fromTime, LocalTime toTime,Long tripId) {
-        if (tripId != null && !tripRepository.existsByIdAndUserId(tripId, userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No perteneces a este viaje");
+    public ActivityResponseDTO get(Long tripId, Long activityId, Long userId) {
+        Activity activity = activityRepository
+                .findByIdAndTripId(activityId, tripId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Actividad no encontrada en este viaje"));
+
+        return ActivityResponseDTO.fromEntity(activity);
+    }
+
+    public ActivityResponseDTO findById(Long activityId) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Actividad no encontrada"));
+
+        return ActivityResponseDTO.fromEntity(activity);
+    }
+
+    public List<ActivityResponseDTO> getActivitiesForUserAndTrip(Long userId,LocalDate fromDate,LocalDate toDate,LocalTime fromTime,LocalTime toTime,Long tripId) {
+        if (tripId != null
+                && !tripRepository.existsByIdAndUserId(tripId, userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No perteneces a este viaje");
         }
         if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rango de fechas es inválido");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "El rango de fechas es inválido");
         }
-        return activityRepository.findAllByUserTrips(userId, fromDate, toDate, fromTime, toTime,tripId)
+        return activityRepository
+                .findAllByUserTrips(userId,fromDate,toDate,fromTime,toTime,tripId)
                 .stream()
                 .map(ActivityResponseDTO::fromEntity)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public ActivityResponseDTO get(Long tripId, Long activityId,Long userId) {
-        Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
-        return ActivityResponseDTO.fromEntity(a);
+    public List<UserBalanceDTO> getUserBalancesByTrip(
+            Long tripId,
+            Long requesterId
+    ) {
+        if (!tripService.isMember(tripId, requesterId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tenes permiso para ver esta información");
+        }
+        Map<Long, UserBalanceDTO> balances = new HashMap<>();
+        for (UserResponseDTO user :
+                tripService.getTravelers(tripId, requesterId)) {
+            balances.put(
+                    user.getId(),
+                    new UserBalanceDTO(user.getId(),
+                            user.getEmail(),
+                            BigDecimal.ZERO));
+        }
+        Map<Long, BigDecimal> totalSpentByActivity =
+                expenseRepository.findTotalSpentByActivity(tripId)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                r -> (Long) r[0],
+                                r -> (BigDecimal) r[1]
+                        ));
+        Map<Long, Integer> participantsByActivity =
+                participantRepository
+                        .countParticipantsGroupedByActivity(tripId);
+        for (Object[] row :
+                participantRepository.findPaidByUserAndActivity(tripId)) {
+            Long activityId = (Long) row[0];
+            Long userId = (Long) row[1];
+            BigDecimal paid = (BigDecimal) row[2];
+            BigDecimal total = totalSpentByActivity.get(activityId);
+            if (total == null || total.compareTo(BigDecimal.ZERO) == 0) continue;
+            int participants = participantsByActivity.get(activityId);
+            if (participants == 0) continue;
+            BigDecimal shouldPay = total.divide(
+                    BigDecimal.valueOf(participants),
+                    2,
+                    RoundingMode.HALF_UP);
+            BigDecimal delta = paid.subtract(shouldPay);
+            balances.get(userId).setBalance(balances.get(userId).getBalance().add(delta));
+        }
+        return new ArrayList<>(balances.values());
+    }
+
+    public List<DebtDTO> calculateDebts(List<UserBalanceDTO> balances) {
+        List<UserBalanceDTO> creditors = balances.stream()
+                .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) > 0)
+                .map(b -> new UserBalanceDTO(
+                        b.getUserId(),
+                        b.getEmail(),
+                        b.getBalance()))
+                .toList();
+        List<UserBalanceDTO> debtors = balances.stream()
+                .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) < 0)
+                .map(b -> new UserBalanceDTO(
+                        b.getUserId(),
+                        b.getEmail(),
+                        b.getBalance().abs()))
+                .toList();
+        List<DebtDTO> debts = new ArrayList<>();
+        int i = 0, j = 0;
+        while (i < debtors.size() && j < creditors.size()) {
+            UserBalanceDTO debtor = debtors.get(i);
+            UserBalanceDTO creditor = creditors.get(j);
+            BigDecimal amount =
+                    debtor.getBalance().min(creditor.getBalance());
+            debts.add(new DebtDTO(debtor.getUserId(),debtor.getEmail(),creditor.getUserId(),creditor.getEmail(),
+                    amount
+            ));
+            debtor.setBalance(debtor.getBalance().subtract(amount));
+            creditor.setBalance(creditor.getBalance().subtract(amount));
+            if (debtor.getBalance().compareTo(BigDecimal.ZERO) == 0) i++;
+            if (creditor.getBalance().compareTo(BigDecimal.ZERO) == 0) j++;
+        }
+        return debts;
     }
 
     @Transactional(readOnly = true)
-    public ActivityResponseDTO findById(Long activityId) {
+    public List<DebtDTO> getTripDebts(Long tripId, Long userId) {
+        if (!tripService.isMember(tripId, userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tenés permiso para ver esta información");
+        }
+        return calculateDebts(
+                getUserBalancesByTrip(tripId, userId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getTotalTripCost(Long tripId, Long userId) {
+        if (!tripService.isMember(tripId, userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tenés permiso para ver esta información");
+        }
+        return activityRepository.getTotalActivityCostByTrip(tripId)
+                .add(expenseRepository.getTotalExpensesByTrip(tripId));
+    }
+
+
+    private ActivityCostData getValidatedActivityCostData(Long activityId, Long userId) {
         Activity activity = activityRepository.findById(activityId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada"));
-        return ActivityResponseDTO.fromEntity(activity);
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Actividad no encontrada"));
+        Long tripId = activity.getTrip().getId();
+        if (!tripService.isMember(tripId, userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        BigDecimal totalSpent =
+                expenseRepository.getTotalSpentByActivity(activityId);
+        int participants =
+                participantRepository.countParticipantsByActivity(activityId);
+        BigDecimal average = participants == 0
+                ? BigDecimal.ZERO
+                : totalSpent.divide(
+                BigDecimal.valueOf(participants),
+                2,
+                RoundingMode.HALF_UP);
+        return new ActivityCostData(activity, totalSpent, participants, average);
     }
 
-    @Transactional
-    public ActivityResponseDTO update(Long tripId, Long activityId, ActivityUpdateRequestDTO dto,Long userId) {
-        if(!tripService.isMember(tripId,userId)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar esta actividad");
-        }
-        Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
-        dto.applyToEntity(a);
-        Activity updated = activityRepository.save(a);
-        return ActivityResponseDTO.fromEntity(updated);
+    @Transactional(readOnly = true)
+    public BigDecimal getAverageCostByActivity(Long activityId, Long userId) {
+        return getValidatedActivityCostData(activityId, userId).average();
     }
 
-    @Transactional
-    public void delete(Long tripId, Long activityId,Long userId) {
-        if (!tripService.isMember(tripId,userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar esta actividad");
-        }
-        Activity a = activityRepository.findByIdAndTripId(activityId, tripId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Actividad no encontrada en este viaje"));
-        activityRepository.delete(a);
+    @Transactional(readOnly = true)
+    public ActivitySummaryDTO getActivitySummary(Long activityId, Long userId) {
+        ActivityCostData data =
+                getValidatedActivityCostData(activityId, userId);
+
+        return new ActivitySummaryDTO(
+                data.activity().getId(),
+                data.activity().getName(),
+                data.totalSpent(),
+                data.participants(),
+                data.average()
+        );
     }
 }

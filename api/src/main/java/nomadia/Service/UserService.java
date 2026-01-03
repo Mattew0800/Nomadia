@@ -40,6 +40,7 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    @Transactional
     public User createUser(User user) {
         if(findByEmail(user.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
@@ -103,6 +104,7 @@ public class UserService {
     private boolean notBlank(String value) {
         return value != null && !value.trim().isEmpty();
     }
+
     @Transactional
     public User updateUser(Long id, UserUpdateDTO dto, boolean allowRoleChange) {
         User existing = userRepository.findById(id)
@@ -116,7 +118,7 @@ public class UserService {
         return userRepository.save(existing);
     }
 
-
+    @Transactional
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
