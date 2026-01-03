@@ -62,7 +62,7 @@ export class UserProfileEdit {
       ]),
       birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.futureDateValidator(), this.ageValidator(8, 100)]),
       age: new FormControl(''),
-      about: new FormControl('', [Validators.minLength(3), Validators.maxLength(100)]),
+      about: new FormControl('', [Validators.minLength(3), Validators.maxLength(200)]),
 
       currentPass: new FormControl(''),
       newPass: new FormControl('', [Validators.minLength(6)]),
@@ -161,6 +161,10 @@ export class UserProfileEdit {
       return null;
     };
   }
+
+
+
+
 
 
   get f() {
