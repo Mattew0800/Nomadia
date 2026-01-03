@@ -76,6 +76,15 @@ export class TripService {
       {headers: this.authService.authHeaders()});
   }
 
+  removeUser(tripId: string, email: string) {
+    const body = {tripId: tripId, email: email};
+
+    return this.http.put(
+      `${this.API_URL}/remove-user`,
+      body,
+      {headers: this.authService.authHeaders()});
+  }
+
 
 
 

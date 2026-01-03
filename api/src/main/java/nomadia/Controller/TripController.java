@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("nomadia/trip")
@@ -81,7 +82,7 @@ public class TripController {
             @Valid @RequestBody TripAddUserByEmailDTO dto,
             @AuthenticationPrincipal UserDetailsImpl me) {
         tripService.removeUserFromTrip(dto.getTripId(), dto.getEmail(), me.getId());
-        return ResponseEntity.ok("Usuario removido con exito");
+        return ResponseEntity.ok(Map.of("message", "Usuario removido con exito"));
     }
 
     @DeleteMapping("/delete")
