@@ -159,13 +159,17 @@
 
             <li>
               <div class="avatar" style="background-color: #5C6BC0;">MO</div>
-              <div>
+              <div class="member-info">
                 <p>{{user.name}}</p>
-
                 <span>{{user.email}}</span>
-
               </div>
-              </li>
+
+              @if($index !== 0) {
+                <button class="remove-member-btn" (click)="removeMember(user.email); $event.stopPropagation()" title="Eliminar miembro">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              }
+            </li>
             }
           </ul>
         </div>
