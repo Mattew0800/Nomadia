@@ -138,7 +138,7 @@
 
           @if(f['birth'].errors?.['pattern'] && f['birth'].touched){
             <p class="formError">La fecha debe tener formato YYYY-MM-DD con año de 4 dígitos.</p>
-          }@else if(f['birth'].touched && f['birth'].hasError('futureDate')){
+          }@else if(f['birth'].touched && f['birth'].hasError('pastDate')){
             <p class="formError">La fecha de nacimiento no puede ser futura.</p>
           }@else if(f['birth'].touched && f['birth'].hasError('isUnderage')){
             <p class="formError">Debes tener al menos 8 años.</p>
@@ -170,11 +170,11 @@
             </svg>
             Sobre mí
           </label>
-          <textarea formControlName="about" rows="4" maxlength="100" placeholder="Cuéntanos algo sobre ti..." [ngClass]="{'input-invalid':f['about'].invalid && f['about'].touched}"></textarea>
+          <textarea formControlName="about" rows="4" maxlength="200" placeholder="Cuéntanos algo sobre ti..." [ngClass]="{'input-invalid':f['about'].invalid && f['about'].touched}"></textarea>
 
           @if(aboutControl?.touched){
             @if(aboutControl?.hasError("maxlength")){
-              <p class="formError">La descripción no puede exceder los 100 caracteres.</p>
+              <p class="formError">La descripción no puede exceder los 200 caracteres.</p>
             }
             @if(aboutControl?.hasError("minlength")){
               <p class="formError">La descripción debe tener 3 caracteres como minimo.</p>

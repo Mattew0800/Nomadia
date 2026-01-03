@@ -27,6 +27,6 @@ export const routes: Routes = [
      {path: "activities", component: ActivityListComponent, canActivate: [AuthGuard]},
     {path: 'test', component: Test},
     {path: 'error', component: ErrorPage},
-    {path: '', redirectTo: 'mainPage', pathMatch: 'full'},
+    {path: '', redirectTo: 'landing', pathMatch: 'full'},
     {path: '**', redirectTo: 'error' },
 ];
