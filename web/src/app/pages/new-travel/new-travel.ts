@@ -37,21 +37,21 @@ export class NewTravel {
 
   currentStep: number=0;
 
-  // Tipos de viaje con iconos y nombres mejorados
+  // Tipos de viaje con iconos, nombres mejorados e imágenes de fondo
   tripTypesWithIcons = [
-    { value: 'turismo', label: 'Turismo', icon: '🗺️' },
-    { value: 'aventura', label: 'Aventura', icon: '🏔️' },
-    { value: 'gastronomico', label: 'Gastronómico', icon: '🍽️' },
-    { value: 'educativo', label: 'Educativo', icon: '📚' },
-    { value: 'familiar', label: 'Familiar', icon: '👨‍👩‍👧‍👦' },
-    { value: 'relax', label: 'Relax', icon: '🧘' },
-    { value: 'romantico', label: 'Romántico', icon: '💑' },
-    { value: 'cultural', label: 'Cultural', icon: '🏛️' },
-    { value: 'playa', label: 'Playa', icon: '🏖️' },
-    { value: 'deportivo', label: 'Deportivo', icon: '⚽' },
-    { value: 'voluntariado', label: 'Voluntariado', icon: '🤝' },
-    { value: 'fiesta', label: 'Fiesta', icon: '🎉' },
-    { value: 'profesional', label: 'Profesional', icon: '💼' }
+    { value: 'turismo', label: 'Turismo', icon: '🗺️', image: '/tripTypes/TURISMO.jpg' },
+    { value: 'aventura', label: 'Aventura', icon: '🏔️', image: '/tripTypes/AVENTURA.jpg' },
+    { value: 'gastronomico', label: 'Gastronómico', icon: '🍽️', image: '/tripTypes/GASTRONOMICO.jpg' },
+    { value: 'educativo', label: 'Educativo', icon: '📚', image: '/tripTypes/EDUCATIVO.jpg' },
+    { value: 'familiar', label: 'Familiar', icon: '👨‍👩‍👧‍👦', image: '/tripTypes/FAMILIAR.jpg' },
+    { value: 'relax', label: 'Relax', icon: '🧘', image: '/tripTypes/RELAX.jpg' },
+    { value: 'romantico', label: 'Romántico', icon: '💑', image: '/tripTypes/ROMANTICO.jpg' },
+    { value: 'cultural', label: 'Cultural', icon: '🏛️', image: '/tripTypes/CULTURAL.jpg' },
+    { value: 'playa', label: 'Playa', icon: '🏖️', image: '/tripTypes/PLAYA.jpg' },
+    { value: 'deportivo', label: 'Deportivo', icon: '⚽', image: '/tripTypes/DEPORTIVO.jpg' },
+    { value: 'voluntariado', label: 'Voluntariado', icon: '🤝', image: '/tripTypes/VOLUNTARIADO.jpg' },
+    { value: 'fiesta', label: 'Fiesta', icon: '🎉', image: '/tripTypes/FIESTA.jpg' },
+    { value: 'profesional', label: 'Profesional', icon: '💼', image: '/tripTypes/PROFESIONAL.jpg' }
   ];
 
   // --- FORMULARIO CORREGIDO SIN 'budget' ---

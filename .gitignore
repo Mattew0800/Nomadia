@@ -57,6 +57,8 @@ Thumbs.db
 
 # --- Angular ---
 /.angular/cache
+# --- Angular CLI ---
+web/.angular/
 
 # --- JAVA Tools ---
 .springBeans

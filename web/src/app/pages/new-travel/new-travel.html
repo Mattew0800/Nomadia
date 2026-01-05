@@ -16,6 +16,7 @@
             *ngFor="let tripType of tripTypesWithIcons"
             (click)="selectTripType(tripType.value)"
             class="type-selection-btn"
+            [style.background-image]="'url(' + tripType.image + ')'"
         >
             <span class="trip-icon">{{ tripType.icon }}</span>
             <span class="trip-label">{{ tripType.label }}</span>

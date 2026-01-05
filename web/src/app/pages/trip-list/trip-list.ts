@@ -97,5 +97,12 @@ export class TripList implements OnInit {
     }
   }
 
+  editTrip(id: string, event: Event) {
+    event.stopPropagation();
+    // Guardar el ID en localStorage y también pasarlo como state
+    localStorage.setItem('editTripId', id);
+    this.router.navigate(['/editTrip'], { state: { tripId: id } });
+  }
+
   protected readonly String = String;
 }
