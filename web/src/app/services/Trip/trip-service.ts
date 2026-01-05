@@ -43,7 +43,7 @@ export class TripService {
     return this.http.delete(`${this.API_URL}/delete`, {body: {tripId: id}, headers: this.authService.authHeaders()});
   }
 
-  getTripById(id: string): Observable<TripResponse> {
+  getTripById(id: string){
 
     return this.http.post<TripResponse>(
       `${this.API_URL}/view-trip`,

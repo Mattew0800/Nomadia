@@ -41,14 +41,20 @@ export class TripEdit implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.tripId = String(this.route.snapshot.paramMap.get('id'));
+    const navigation = this.router.getCurrentNavigation();
+    const stateId = navigation?.extras?.state?.['tripId'];
+
+    this.tripId = stateId || localStorage.getItem('editTripId') || '';
+
+    localStorage.removeItem('editTripId');
+
     if (!this.tripId) {
       this.msgError = 'ID de viaje inválido.';
       this.loading = false;
+      this.router.navigate(['/tripList']);
       return;
     }
 
-    // Traemos el viaje (usa tu /view-trip)
     this.trips.getTripById(this.tripId).subscribe({
       next: (t) => {
         this.trip = t as TripDetails;
@@ -84,9 +90,7 @@ export class TripEdit implements OnInit {
     this.trips.updateTripName(this.tripId, newName).subscribe({
       next: () => {
         this.msgOk = 'Nombre actualizado con éxito.';
-        if (this.trip) this.trip.name = newName; // reflejar en pantalla
-        // Si querés volver a la lista:
-        // setTimeout(() => this.router.navigate(['/tripList']), 700);
+        if (this.trip) this.trip.name = newName;
       },
       error: (err) => {
         const backend = err?.error;

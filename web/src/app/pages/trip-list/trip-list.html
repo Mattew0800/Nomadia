@@ -27,10 +27,7 @@
 
                       <button (click)="deleteTrip(trip.id, $event)"><i class="fa-solid fa-trash delete-btn"></i></button>
 
-                      <button [routerLink]="['/editTrip', trip.id]"><i class="fa-solid fa-pen trip-edit-btn"></i></button>
-
-
-
+                      <button (click)="editTrip(trip.id, $event)"><i class="fa-solid fa-pen trip-edit-btn"></i></button>
 
 
                     </div>

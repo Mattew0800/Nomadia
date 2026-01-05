@@ -121,7 +121,7 @@
 }
 
 .logout-item:hover svg path {
-  fill: #fff; /* cambia el color del path del svg */
+  fill: #fff;
 }
 
 .nav-item:hover .hole,
@@ -273,6 +273,11 @@
 .dropdown-btn svg {
   width: 24px;
   height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
 }
 
 .dropdown-menu {
