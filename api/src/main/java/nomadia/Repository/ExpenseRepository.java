@@ -33,5 +33,20 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     WHERE e.activity.trip.id = :tripId
     """)
     BigDecimal getTotalExpensesByTrip(@Param("tripId") Long tripId);
+
+    @Query("""
+SELECT COUNT(e) > 0
+FROM Expense e
+JOIN e.activity a
+JOIN a.trip t
+JOIN e.participants p
+WHERE t.id = :tripId
+AND p.user.id = :userId
+""")
+    boolean existsExpenseByTripAndUser(
+            @Param("tripId") Long tripId,
+            @Param("userId") Long userId
+    );
+
 }
 

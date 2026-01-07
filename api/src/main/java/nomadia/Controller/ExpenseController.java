@@ -3,33 +3,27 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.UserBalance.CreateExpenseDTO;
-import nomadia.Service.ActivityService;
+import nomadia.DTO.UserBalance.ExpenseResponseDTO;
 import nomadia.Service.ExpenseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/nomadia/expense")
 public class ExpenseController {
 
     private final ExpenseService expenseService;
-    private final ActivityService activityService;
 
-    public ExpenseController(ExpenseService expenseService, ActivityService activityService) {
+    public ExpenseController(ExpenseService expenseService) {
         this.expenseService = expenseService;
-        this.activityService = activityService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> createExpense(@Valid @RequestBody CreateExpenseDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
-        expenseService.createExpense(dto, me.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<ExpenseResponseDTO> createExpense(@Valid @RequestBody CreateExpenseDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(expenseService.createExpense(dto, me.getId()));
     }
 }

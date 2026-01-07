@@ -20,7 +20,7 @@ public class CreateExpenseDTO {
     @Size(max = 100, message = "El nombre no puede superar los 100 caracteres")
     private String name;
 
-    @NotBlank(message = "La nota del gasto es obligatoria")
+    @NotEmpty(message = "La nota del gasto no puede ser vacia")
     @Size(max = 255, message = "La nota no puede superar los 255 caracteres")
     private String note;
 

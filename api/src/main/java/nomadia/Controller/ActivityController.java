@@ -3,6 +3,7 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Activity.*;
+import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.DTO.UserBalance.ActivitySummaryDTO;
 import nomadia.DTO.UserBalance.DebtDTO;
 import nomadia.Service.ActivityService;
@@ -82,32 +83,27 @@ public class ActivityController {
         return ResponseEntity.ok(Map.of("message", "Actividad eliminada correctamente"));
     }
 
-    @GetMapping("/debts")
-    public List<DebtDTO> getTripDebts(@RequestParam Long tripId,@AuthenticationPrincipal UserDetailsImpl me){
-        Long userId = me.getId();
-        return activityService.getTripDebts(tripId, userId);
+    @PostMapping("/debts")
+    @PreAuthorize("hasRole('USER')")
+    public List<DebtDTO> getTripDebts(@RequestBody TripIdRequestDTO tripId,@AuthenticationPrincipal UserDetailsImpl me){
+        return activityService.getTripDebts(tripId, me.getId());
     }
 
-    @GetMapping("/total-cost")
-    public BigDecimal getTotalTripCost(@RequestParam Long tripId,@AuthenticationPrincipal UserDetailsImpl me){
-        return activityService.getTotalTripCost(
-                tripId,
-                me.getId());
+    @PostMapping("/total-cost")
+    @PreAuthorize("hasRole('USER')")
+    public BigDecimal getTotalTripCost(@RequestBody TripIdRequestDTO tripId, @AuthenticationPrincipal UserDetailsImpl me){
+        return activityService.getTotalTripCost(tripId,me.getId());
     }
 
-    @GetMapping("/average-cost")
-    public BigDecimal getAverageCostByActivity(@RequestParam Long activityId,@AuthenticationPrincipal UserDetailsImpl me){
-        return activityService.getAverageCostByActivity(
-                activityId,
-                me.getId());
+    @PostMapping("/average-cost")
+    @PreAuthorize("hasRole('USER')")
+    public BigDecimal getAverageCostByActivity(@RequestBody ActivityIdRequestDTO activityId,@AuthenticationPrincipal UserDetailsImpl me){
+        return activityService.getAverageCostByActivity(activityId,me.getId());
     }
 
-    @GetMapping("/summary")
-    public ActivitySummaryDTO getActivitySummary(
-            @RequestParam Long activityId,
-            @AuthenticationPrincipal UserDetailsImpl me){
-        return activityService.getActivitySummary(
-                activityId,
-                me.getId());
+    @PostMapping("/summary")
+    @PreAuthorize("hasRole('USER')")
+    public ActivitySummaryDTO getActivitySummary(@RequestParam ActivityIdRequestDTO activityId, @AuthenticationPrincipal UserDetailsImpl me){
+        return activityService.getActivitySummary(activityId,me.getId());
     }
 }

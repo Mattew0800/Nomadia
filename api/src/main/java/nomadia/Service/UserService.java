@@ -49,6 +49,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
+
     @Transactional
     public UserResponseDTO updateSelf(Long userId, UserUpdateDTO dto) {
         User me = userRepository.findById(userId)

@@ -1,8 +1,10 @@
 package nomadia.Service;
 
 import nomadia.DTO.Activity.ActivityCreateDTO;
+import nomadia.DTO.Activity.ActivityIdRequestDTO;
 import nomadia.DTO.Activity.ActivityResponseDTO;
 import nomadia.DTO.Activity.ActivityUpdateRequestDTO;
+import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.DTO.UserBalance.ActivitySummaryDTO;
 import nomadia.DTO.UserBalance.DebtDTO;
 import nomadia.DTO.UserBalance.UserBalanceDTO;
@@ -252,26 +254,26 @@ public class ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public List<DebtDTO> getTripDebts(Long tripId, Long userId) {
-        if (!tripService.isMember(tripId, userId)) {
+    public List<DebtDTO> getTripDebts(TripIdRequestDTO tripId, Long userId) {
+        if (!tripService.isMember(tripId.getTripId(), userId)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "No tenés permiso para ver esta información");
         }
         return calculateDebts(
-                getUserBalancesByTrip(tripId, userId)
+                getUserBalancesByTrip(tripId.getTripId(), userId)
         );
     }
 
     @Transactional(readOnly = true)
-    public BigDecimal getTotalTripCost(Long tripId, Long userId) {
-        if (!tripService.isMember(tripId, userId)) {
+    public BigDecimal getTotalTripCost(TripIdRequestDTO tripId, Long userId) {
+        if (!tripService.isMember(tripId.getTripId(), userId)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "No tenés permiso para ver esta información");
         }
-        return activityRepository.getTotalActivityCostByTrip(tripId)
-                .add(expenseRepository.getTotalExpensesByTrip(tripId));
+        return activityRepository.getTotalActivityCostByTrip(tripId.getTripId())
+                .add(expenseRepository.getTotalExpensesByTrip(tripId.getTripId()));
     }
 
 
@@ -298,14 +300,14 @@ public class ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public BigDecimal getAverageCostByActivity(Long activityId, Long userId) {
-        return getValidatedActivityCostData(activityId, userId).average();
+    public BigDecimal getAverageCostByActivity(ActivityIdRequestDTO activityId, Long userId) {
+        return getValidatedActivityCostData(activityId.getActivityId(), userId).average();
     }
 
     @Transactional(readOnly = true)
-    public ActivitySummaryDTO getActivitySummary(Long activityId, Long userId) {
+    public ActivitySummaryDTO getActivitySummary(ActivityIdRequestDTO activityId, Long userId) {
         ActivityCostData data =
-                getValidatedActivityCostData(activityId, userId);
+                getValidatedActivityCostData(activityId.getActivityId(), userId);
 
         return new ActivitySummaryDTO(
                 data.activity().getId(),

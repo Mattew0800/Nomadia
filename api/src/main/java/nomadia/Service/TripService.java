@@ -1,5 +1,6 @@
 package nomadia.Service;
 
+import nomadia.Repository.ExpenseRepository;
 import org.springframework.transaction.annotation.Transactional;
 import nomadia.DTO.Trip.TripCreateDTO;
 import nomadia.DTO.Trip.TripListDTO;
@@ -15,6 +16,8 @@ import nomadia.Repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,11 +28,13 @@ public class TripService {
     private final ActivityRepository activityRepository;
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
+    private final ExpenseRepository expenseRepository;
 
-    public TripService(ActivityRepository activityRepository, TripRepository tripRepository, UserRepository userRepository) {
+    public TripService(ActivityRepository activityRepository, TripRepository tripRepository, UserRepository userRepository, ExpenseRepository expenseRepository) {
         this.activityRepository = activityRepository;
         this.tripRepository = tripRepository;
         this.userRepository = userRepository;
+        this.expenseRepository = expenseRepository;
     }
 
     public boolean isMember(Long tripId,Long userId){
@@ -134,10 +139,19 @@ public class TripService {
 
     @Transactional
     public void removeUserFromTrip(Long tripId,String email,Long userId){
+        if (expenseRepository.existsExpenseByTripAndUser(tripId,userId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Los usuarios con gastos asociados no pueden salir del viaje ");
+        }
         validateOwner(tripId,userId);
         Trip trip=tripRepository.findById(tripId)
                 .orElseThrow(()->new ResponseStatusException(
                         HttpStatus.NOT_FOUND,"El viaje no existe"));
+        if (trip.getStartDate().isBefore(LocalDate.now())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Los usuarios no pueden salir de viajes en curso"
+            );
+        }
         User user=userRepository.findByEmail(email)
                 .orElseThrow(()->new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,

@@ -90,11 +90,16 @@ public class TripController {
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> updateTrip(
-            @Valid @RequestBody TripUpdateDTO dto,
-            @AuthenticationPrincipal UserDetailsImpl me) {
+    public ResponseEntity<?> updateTrip(@Valid @RequestBody TripUpdateDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
         return tripService.updateTrip(dto.getTripId(), dto, me.getId())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @PutMapping("/remove-self")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> removeSelf(@Valid @RequestBody TripIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me){
+        tripService.removeUserFromTrip(dto.getTripId(), me.getEmail(), me.getId());
+        return ResponseEntity.ok("Te removiste con exito del viaje ");
     }
 }
