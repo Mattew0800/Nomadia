@@ -15,7 +15,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     FROM Expense e
     WHERE e.activity.id = :activityId
     """)
-    BigDecimal getTotalSpentByActivity(@Param("activityId") Long activityId);
+    BigDecimal getTotalSpentByActivity(@Param("activityId") Long activityId);//agregar join para que sume el costo de la actividad en sí, no solo los gastos asociados a ella
 
     @Query("""
     SELECT a.id, COALESCE(SUM(e.totalAmount), 0)

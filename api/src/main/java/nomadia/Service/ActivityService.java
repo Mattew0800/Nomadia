@@ -1,9 +1,6 @@
 package nomadia.Service;
 
-import nomadia.DTO.Activity.ActivityCreateDTO;
-import nomadia.DTO.Activity.ActivityIdRequestDTO;
-import nomadia.DTO.Activity.ActivityResponseDTO;
-import nomadia.DTO.Activity.ActivityUpdateRequestDTO;
+import nomadia.DTO.Activity.*;
 import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.DTO.UserBalance.ActivitySummaryDTO;
 import nomadia.DTO.UserBalance.DebtDTO;
@@ -137,36 +134,44 @@ public class ActivityService {
     public ActivityResponseDTO get(Long tripId, Long activityId, Long userId) {
         Activity activity = activityRepository
                 .findByIdAndTripId(activityId, tripId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Actividad no encontrada en este viaje"));
-
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Actividad no encontrada en este viaje"));
         return ActivityResponseDTO.fromEntity(activity);
     }
 
     public ActivityResponseDTO findById(Long activityId) {
         Activity activity = activityRepository.findById(activityId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Actividad no encontrada"));
-
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Actividad no encontrada"));
         return ActivityResponseDTO.fromEntity(activity);
     }
 
-    public List<ActivityResponseDTO> getActivitiesForUserAndTrip(Long userId,LocalDate fromDate,LocalDate toDate,LocalTime fromTime,LocalTime toTime,Long tripId) {
-        if (tripId != null
-                && !tripRepository.existsByIdAndUserId(tripId, userId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "No perteneces a este viaje");
+    @Transactional(readOnly = true)
+    public List<ActivityResponseDTO> getActivitiesForUserAndTrip(Long userId,ActivityFilterRequestDTO filter) {
+        List<Long> tripIds = filter.getTripIds();
+        LocalDate fromDate = filter.getFromDate();
+        LocalDate toDate = filter.getToDate();
+        LocalTime fromTime = filter.getFromTime();
+        LocalTime toTime = filter.getToTime();
+        if (tripIds != null && tripIds.isEmpty()) {
+            tripIds = null;
+        }
+        if (tripIds != null) {
+            long validTrips = tripRepository.countUserTrips(userId, tripIds);
+            if (validTrips != tripIds.size()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No perteneces a uno o más viajes seleccionados");
+            }
         }
         if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "El rango de fechas es inválido");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"El rango de fechas es inválido");
         }
         return activityRepository
-                .findAllByUserTrips(userId,fromDate,toDate,fromTime,toTime,tripId)
+                .findAllByUserTrips(
+                        userId,
+                        fromDate,
+                        toDate,
+                        fromTime,
+                        toTime,
+                        tripIds
+                )
                 .stream()
                 .map(ActivityResponseDTO::fromEntity)
                 .toList();
@@ -284,13 +289,11 @@ public class ActivityService {
                         "Actividad no encontrada"));
         Long tripId = activity.getTrip().getId();
         if (!tripService.isMember(tripId, userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No perteneces a este viaje");
         }
-        BigDecimal totalSpent =
-                expenseRepository.getTotalSpentByActivity(activityId);
-        int participants =
-                participantRepository.countParticipantsByActivity(activityId);
-        BigDecimal average = participants == 0
+        BigDecimal totalSpent = expenseRepository.getTotalSpentByActivity(activityId);//ver nota de repositorio
+        int participants = participantRepository.countParticipantsByActivity(activityId);
+        BigDecimal average = participants == 0 //ver si conviene seguir teniendo esto ya que el total gastado va a cambiar si la actividad tiene un costo de por sí
                 ? BigDecimal.ZERO
                 : totalSpent.divide(
                 BigDecimal.valueOf(participants),
@@ -306,9 +309,7 @@ public class ActivityService {
 
     @Transactional(readOnly = true)
     public ActivitySummaryDTO getActivitySummary(ActivityIdRequestDTO activityId, Long userId) {
-        ActivityCostData data =
-                getValidatedActivityCostData(activityId.getActivityId(), userId);
-
+        ActivityCostData data = getValidatedActivityCostData(activityId.getActivityId(), userId);
         return new ActivitySummaryDTO(
                 data.activity().getId(),
                 data.activity().getName(),

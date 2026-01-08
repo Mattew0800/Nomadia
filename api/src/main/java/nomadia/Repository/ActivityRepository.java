@@ -26,28 +26,28 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     }
 
     @Query("""
-SELECT DISTINCT a
-FROM Activity a
-JOIN a.trip t
-LEFT JOIN t.users u
-WHERE u.id = :userId
-  AND (:tripId IS NULL OR t.id = :tripId)
-  AND (:fromDate IS NULL OR a.date >= :fromDate)
-  AND (:toDate IS NULL OR a.date <= :toDate)
-  AND (
-        (:fromTime IS NULL AND :toTime IS NULL)
-        OR (a.startTime < :toTime AND a.endTime > :fromTime)
-      )
-ORDER BY a.date ASC, a.startTime ASC, a.name ASC
-""")
-    List<Activity> findAllByUserTrips(
-            @Param("userId") Long userId,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
-            @Param("fromTime") LocalTime fromTime,
-            @Param("toTime") LocalTime toTime,
-            @Param("tripId") Long tripId
-    );
+    SELECT DISTINCT a
+    FROM Activity a
+    JOIN a.trip t
+    JOIN t.users u
+    WHERE u.id = :userId
+      AND (:tripIds IS NULL OR t.id IN :tripIds)
+      AND (:fromDate IS NULL OR a.date >= :fromDate)
+      AND (:toDate IS NULL OR a.date <= :toDate)
+      AND (
+            (:fromTime IS NULL AND :toTime IS NULL)
+            OR (a.startTime < :toTime AND a.endTime > :fromTime)
+          )
+    ORDER BY a.date ASC, a.startTime ASC, a.name ASC
+    """)
+        List<Activity> findAllByUserTrips(
+                @Param("userId") Long userId,
+                @Param("fromDate") LocalDate fromDate,
+                @Param("toDate") LocalDate toDate,
+                @Param("fromTime") LocalTime fromTime,
+                @Param("toTime") LocalTime toTime,
+                @Param("tripIds") List<Long> tripIds
+        );
     @Query("""
     SELECT COALESCE(SUM(a.cost), 0)
     FROM Activity a

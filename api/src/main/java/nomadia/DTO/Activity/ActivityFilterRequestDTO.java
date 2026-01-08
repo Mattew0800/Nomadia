@@ -1,9 +1,9 @@
 package nomadia.DTO.Activity;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 public class ActivityFilterRequestDTO {
@@ -11,6 +11,5 @@ public class ActivityFilterRequestDTO {
     private LocalDate toDate;
     private LocalTime fromTime;
     private LocalTime toTime;
-    @NotBlank(message = "El id del viaje es necesario")
-    private Long tripId;
+    private List<Long> tripIds;
 }
