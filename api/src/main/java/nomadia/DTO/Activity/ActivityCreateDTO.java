@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nomadia.Model.Activity;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;

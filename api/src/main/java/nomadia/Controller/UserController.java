@@ -11,10 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -28,7 +25,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/me") // chequeado
+    @GetMapping("/me")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserResponseDTO> getSelf(@AuthenticationPrincipal UserDetailsImpl principal) {
         return userService.findById(principal.getId())
@@ -39,13 +36,9 @@ public class UserController {
 
     @PutMapping("/me/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserResponseDTO> updateSelf(
-            @AuthenticationPrincipal UserDetailsImpl principal,
-            @Valid @RequestBody UserUpdateDTO dto) {
-        UserResponseDTO response = userService.updateSelf(principal.getId(), dto);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<UserResponseDTO> updateSelf(@AuthenticationPrincipal UserDetailsImpl principal,@Valid @RequestBody UserUpdateDTO dto){
+        return ResponseEntity.ok(userService.updateSelf(principal.getId(), dto));
     }
-
 
     @PostMapping("/create") // esto dsps se va, solo para prueba
     @PreAuthorize("hasRole('ADMIN')")
@@ -54,7 +47,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDTO.fromEntity(saved,true));
     }
 
-    @GetMapping("/get-all") //chequeado
+    @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponseDTO> getAllUsers() {
         return userService.findAll().stream()

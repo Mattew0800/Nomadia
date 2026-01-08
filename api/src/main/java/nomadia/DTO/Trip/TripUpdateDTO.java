@@ -9,7 +9,6 @@ import nomadia.Enum.State;
 import nomadia.Enum.TripType;
 import nomadia.Model.Activity;
 import nomadia.Model.Trip;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;

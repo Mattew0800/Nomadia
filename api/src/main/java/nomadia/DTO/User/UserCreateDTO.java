@@ -2,7 +2,6 @@ package nomadia.DTO.User;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import nomadia.Enum.Role;
@@ -20,7 +19,7 @@ public class UserCreateDTO {
     private String email;
 
     @NotBlank(message = "La contraseña es requerida")
-    @Size(min = 6,message = "La contrasenia debe tener 6 caracteres como minimo")
+    @Size(min = 6,message = "La contraseña debe tener 6 caracteres como minimo")
     private String password;
 
     private Role role;
