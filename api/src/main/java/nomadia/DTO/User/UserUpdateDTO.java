@@ -67,7 +67,6 @@ public class UserUpdateDTO {
         if (this.photoUrl != null) user.setPhotoUrl(this.photoUrl.trim());
         if (this.birth != null) user.setBirth(this.birth);
         if (this.age != null) user.setAge(this.age);
-
         if (this.newNewPassword != null && !this.newNewPassword.isBlank()) {
             user.setPassword(passwordEncoder.encode(this.newNewPassword));
         }

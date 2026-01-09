@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import nomadia.Enum.Role;
 import nomadia.Model.User;
-
 import java.time.LocalDate;
-import java.util.Date;
+
 
 @Data
 public class UserResponseDTO {
@@ -40,6 +39,7 @@ public class UserResponseDTO {
         }
         return dto;
     }
+    //NO SE USA
     public UserResponseDTO withToken(String token) {
         this.token = token;
         return this;

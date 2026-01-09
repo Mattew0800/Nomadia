@@ -28,6 +28,6 @@ public class Participant {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = true, precision = 10, scale = 2)
+    @Column(precision = 10, scale = 2)
     private BigDecimal amountPaid;
 }
