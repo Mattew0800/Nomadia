@@ -69,7 +69,7 @@ export class ActivityListComponent implements OnInit {
         // --- LÓGICA DE BÚSQUEDA INTEGRADA ---
         if (searchTerm) {
           const term = searchTerm.toLowerCase();
-          result = result.filter(a => a.name.toLowerCase().includes(term));
+          result = result.filter(a => a.name.toLowerCase().startsWith(term));
         }
 
         // Ordenar: fecha asc, luego nombre
