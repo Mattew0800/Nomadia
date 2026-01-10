@@ -23,6 +23,16 @@
           <input type="time" [(ngModel)]="toTime">
         </label>
 
+        <label>
+          Por Viaje
+          <select [(ngModel)]="selectedTripId" (change)="fetch()" class="filter-select">
+            <option value="">Todos los viajes</option>
+            <option *ngFor="let trip of trips" [value]="trip.id">
+              {{ trip.name }}
+            </option>
+          </select>
+        </label>
+
         <div class="actions">
           <button type="button" (click)="fetch()">Aplicar</button>
           <button type="button" class="ghost" (click)="clearFilters()">Limpiar</button>

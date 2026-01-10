@@ -6,6 +6,8 @@ import {ActivityService} from '../../services/Activity/activity-service';
 import { ActivityResponseDTO } from '../../models/ActivityResponse';
 import {Test} from '../test/test';
 import {ActivatedRoute} from '@angular/router';
+import {TripService} from '../../services/Trip/trip-service';
+import {TripResponse} from '../../models/TripResponse';
 
 @Component({
   selector: 'app-activity-list',
@@ -30,19 +32,29 @@ export class ActivityListComponent implements OnInit {
   fromTime?: string;               // 'HH:mm'
   toTime?: string;
 
-  constructor(private activityService: ActivityService, private route: ActivatedRoute) {}
+  trips: TripResponse[] = [];
+  selectedTripId: string = '';
+
+  constructor(private activityService: ActivityService,private tripService: TripService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    // Escuchamos los parámetros de la URL
+    this.loadTrips();
     this.route.queryParams.subscribe(params => {
       const searchTerm = params['search'];
       if (searchTerm) {
-        // Si hay un término de búsqueda, filtramos
         this.fetch(searchTerm);
       } else {
-        // Si no, cargamos todo normal como ya hacías
         this.fetch();
       }
+    });
+  }
+
+  loadTrips(): void {
+    this.tripService.getTrips().subscribe({
+      next: (data) => {
+        this.trips = data ?? [];
+      },
+      error: (err) => console.error('Error al cargar viajes para el filtro', err)
     });
   }
 
@@ -72,6 +84,11 @@ export class ActivityListComponent implements OnInit {
           result = result.filter(a => a.name.toLowerCase().startsWith(term));
         }
 
+        if (this.selectedTripId && this.selectedTripId !== '') {
+          // Convertimos a número para comparar con a.tripId
+          result = result.filter(a => a.tripId === Number(this.selectedTripId));
+        }
+
         // Ordenar: fecha asc, luego nombre
         this.activities = [...result].sort((a, b) =>
           (a.date ?? '').localeCompare(b.date ?? '') || a.name.localeCompare(b.name)
@@ -96,7 +113,7 @@ export class ActivityListComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.fromDate = this.toDate = this.fromTime = this.toTime = undefined;
+    this.fromDate = this.toDate = this.fromTime = this.toTime = undefined; this.selectedTripId = '';
     this.fetch();
   }
 

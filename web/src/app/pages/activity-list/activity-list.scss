@@ -1,7 +1,7 @@
 .activity-list {
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 90%;
   margin: 1rem 3rem;
   gap: 1rem;
 }
@@ -15,7 +15,7 @@
 
 .filters .row {
   display: grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  grid-template-columns: repeat(6, minmax(140px, 1fr));
   gap: 12px;
   align-items: end;
 }
@@ -34,6 +34,28 @@
   border: 1px solid rgba(255, 255, 255, .08);
   border-radius: 10px;
   padding: 8px 10px;
+}
+
+.filter-select {
+  background-color: #1c1f37;
+  color: #5f647e;
+  border: 1px solid rgba(95, 100, 126, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:focus {
+    border-color: #d1f366;
+    color: #d7dbee;
+  }
+
+  option {
+    background: #1c1f37;
+    color: #d7dbee;
+  }
 }
 
 .filters .actions {
