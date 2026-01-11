@@ -30,4 +30,7 @@ public class Participant {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal amountPaid;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal amountOwned;
 }

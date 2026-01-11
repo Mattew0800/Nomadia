@@ -1,4 +1,4 @@
-package nomadia.DTO.UserBalance;
+package nomadia.DTO.Expense;
 
 import lombok.Data;
 import nomadia.Model.Expense;

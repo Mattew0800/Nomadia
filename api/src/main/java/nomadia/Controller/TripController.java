@@ -24,24 +24,19 @@ public class TripController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
-        TripResponseDTO created = tripService.createTrip(dto, me.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,@AuthenticationPrincipal UserDetailsImpl me){
+        return ResponseEntity.status(HttpStatus.CREATED).body(tripService.createTrip(dto, me.getId()));
     }
 
     @GetMapping("/my-trips")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<TripListDTO>> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl me) {
-        List<TripListDTO> trips = tripService.getMyTrips(me.getId());
-        if (trips.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
-        return ResponseEntity.ok(trips);
+    public ResponseEntity<List<TripListDTO>> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl me){
+        return ResponseEntity.ok(tripService.getMyTrips(me.getId()));
     }
 
     @PostMapping("/view-trip")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> viewTrip(@AuthenticationPrincipal UserDetailsImpl me,@RequestBody TripIdRequestDTO request) {
+    public ResponseEntity<TripResponseDTO> viewTrip(@AuthenticationPrincipal UserDetailsImpl me,@RequestBody TripIdRequestDTO request){
         return ResponseEntity.ok(tripService.viewTrip(request.getTripId(), me.getId()));
     }
 

@@ -270,18 +270,6 @@ public class ActivityService {
         );
     }
 
-    @Transactional(readOnly = true)
-    public BigDecimal getTotalTripCost(TripIdRequestDTO tripId, Long userId) {
-        if (!tripService.isMember(tripId.getTripId(), userId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "No tenés permiso para ver esta información");
-        }
-        return activityRepository.getTotalActivityCostByTrip(tripId.getTripId())
-                .add(expenseRepository.getTotalExpensesByTrip(tripId.getTripId()));
-    }
-
-
     private ActivityCostData getValidatedActivityCostData(Long activityId, Long userId) {
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new ResponseStatusException(

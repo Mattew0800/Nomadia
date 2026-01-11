@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
@@ -48,5 +49,19 @@ AND p.user.id = :userId
             @Param("userId") Long userId
     );
 
+    @Query("""
+        SELECT e
+        FROM Expense e
+        JOIN FETCH e.trip t
+        WHERE e.id = :expenseId
+    """)
+    Optional<Expense> findByIdWithTrip(@Param("expenseId") Long expenseId);
+
+    @Query("""
+        SELECT COALESCE(SUM(e.totalAmount), 0)
+        FROM Expense e
+        WHERE e.trip.id = :tripId
+    """)
+    BigDecimal getTotalByTrip(@Param("tripId") Long tripId);
 }
 
