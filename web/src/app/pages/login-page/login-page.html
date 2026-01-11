@@ -1,22 +1,29 @@
-<div class="login-wrapper">
-    <div class="beach-section">
-        <img src="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920"
-            alt="Tropical Paradise Beach" class="beach-background">
+<!-- Estado de carga -->
+@if(loading){
+    <div class="loading-state">
+        <div class="spinner"></div>
+    </div>
+}
+@else {
+    <div class="login-wrapper">
+        <div class="beach-section">
+            <img src="https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920"
+                alt="Tropical Paradise Beach" class="beach-background" loading="eager" fetchpriority="high">
 
-        <div class="sun-rays"></div>
-        <div class="beach-overlay"></div>
+            <div class="sun-rays"></div>
+            <div class="beach-overlay"></div>
 
 
 
-        <div class="beach-text">
-            <div class="mascot-container">
-                <img src="nomadia-penguin.png" alt="Nomadia Penguin" class="mascot">
-            </div>
-            <div class="dialog-bubble">
-                <p>Iniciá sesión y <span class="highlight">sigamos planeando</span> tu próxima aventura juntos.</p>
+            <div class="beach-text">
+                <div class="mascot-container">
+                    <img src="nomadia-penguin.png" alt="Nomadia Penguin" class="mascot" loading="eager">
+                </div>
+                <div class="dialog-bubble">
+                    <p>Iniciá sesión y <span class="highlight">sigamos planeando</span> tu próxima aventura juntos.</p>
+                </div>
             </div>
         </div>
-    </div>
 
     <div class="login-section">
         <div class="login-card">
@@ -90,4 +97,4 @@
         </div>
     </div>
 </div>
-
+}

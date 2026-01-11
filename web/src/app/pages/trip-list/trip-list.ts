@@ -12,7 +12,7 @@ import {TripService} from '../../services/Trip/trip-service';
 })
 export class TripList implements OnInit {
 
-
+  isLoading: boolean = true;
   showingActiveTrips: boolean = true;
   msgError?: string;
 
@@ -25,12 +25,15 @@ export class TripList implements OnInit {
   }
 
   getTrips() {
+    this.isLoading = true;
     return this.tService.getTrips().subscribe({
       next: (data) => {
         this.tService.trips = data;
+        this.isLoading = false;
       },
       error: (e) => {
         console.log(e);
+        this.isLoading = false;
       }
     })
   }
@@ -51,29 +54,22 @@ export class TripList implements OnInit {
     today.setHours(0, 0, 0, 0);
 
     const filtered = (this.tService.trips ?? []).filter(t => {
-      if (!t.endDate) return this.showingActiveTrips; // Si no tiene fecha, mostrar en activos
+      if (!t.endDate) return this.showingActiveTrips;
 
-      // Parsear la fecha de fin como fecha local (sin problemas de zona horaria)
-      // Si viene como 'YYYY-MM-DD', parsearlo correctamente
       let endDate: Date;
       if (t.endDate.includes('T')) {
-        // Tiene timestamp, usar constructor normal
         endDate = new Date(t.endDate);
       } else {
-        // Es solo fecha 'YYYY-MM-DD', parsear como fecha local
         const [year, month, day] = t.endDate.split('-').map(Number);
         endDate = new Date(year, month - 1, day);
       }
       endDate.setHours(0, 0, 0, 0);
 
-      // Un viaje está finalizado si su fecha de fin ya pasó (es decir, hoy es DESPUÉS de la fecha de fin)
-      // Si endDate es 30/12, el viaje está activo el 30/12 y finalizado a partir del 31/12
+
       const isFinished = endDate < today;
 
       console.log(`Viaje: ${t.name}, EndDate: ${t.endDate}, EndDateParsed: ${endDate.toLocaleDateString()}, Today: ${today.toLocaleDateString()}, IsFinished: ${isFinished}`);
 
-      // Si showingActiveTrips es true, mostrar viajes activos (no finalizados)
-      // Si showingActiveTrips es false, mostrar viajes finalizados
       return this.showingActiveTrips ? !isFinished : isFinished;
     });
 

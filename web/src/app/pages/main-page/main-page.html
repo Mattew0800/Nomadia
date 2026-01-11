@@ -1,9 +1,21 @@
 <app-test>
-  @if(currentTrip){
+  <!-- Estado de carga -->
+  @if(isLoading){
+    <div class="loading-state">
+      <div class="spinner"></div>
+    </div>
+  }
+  @else if(currentTrip){
     <section class="grid" [class.blurred]="isBlurred">
         <div class="hero">
           @if(currentTrip.type){
-            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.jpg'" alt="" [ngClass]="{ 'deportivo-img-pos': currentTrip.type === 'DEPORTIVO' }"/>
+            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.webp'" alt="" loading="eager" fetchpriority="high" [ngClass]="
+            { 'deportivo-img-pos': currentTrip.type === 'DEPORTIVO',
+              'familiar-img-pos':currentTrip.type === 'FAMILIAR',
+              'fiesta-img-pos':currentTrip.type === 'FIESTA',
+              'cultural-img-pos':currentTrip.type === 'CULTURAL',
+              'relax-img-pos':currentTrip.type === 'RELAX'
+            }"/>
           }
           @if(currentTrip.name){
             <h2 class="trip-title">{{ currentTrip.name }}</h2>
