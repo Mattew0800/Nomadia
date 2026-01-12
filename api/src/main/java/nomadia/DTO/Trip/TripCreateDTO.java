@@ -46,13 +46,17 @@ public class TripCreateDTO {
 
     private List<ActivityCreateDTO> activities;
 
-    //NO SE USA
-    @AssertTrue(message = "La fecha de finalización debe ser posterior a la fecha de inicio")
-    public boolean isEndAfterStart() {
+
+    private static final int MAX_YEAR = 2200;
+
+    @AssertTrue(message = "Las fechas no pueden superar el año 2200")
+    private boolean isDateWithinAllowedRange() {
         if (startDate == null || endDate == null) return true;
-        return endDate.isAfter(startDate);
+
+        return startDate.getYear() <= MAX_YEAR
+                && endDate.getYear() <= MAX_YEAR;
     }
-    //NO SE USA
+
     @AssertTrue(message = "La fecha de inicio no puede ser anterior a hoy")
     public boolean isStartTodayOrFuture() {
         if (startDate == null) return true;
