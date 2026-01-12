@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/Auth/auth-service';
@@ -10,12 +10,19 @@ import { AuthService } from '../../services/Auth/auth-service';
   templateUrl: './register-page.html',
   styleUrl: './register-page.scss',
 })
-export class RegisterPage {
+export class RegisterPage implements OnInit {
 
   registerForm: FormGroup;
   submitted = false;
   registerMsg?:string;
-  errorMsg?:string
+  errorMsg?:string;
+  loading = true;
+
+  private imagesToPreload = [
+    'coliseo-romano.jpg',
+    'nomadia-penguin.png',
+    'nomadia-logo.png'
+  ];
 
   constructor(public authService: AuthService, private router: Router) {
       this.registerForm = new FormGroup({
@@ -31,6 +38,30 @@ export class RegisterPage {
           password: new FormControl('', [Validators.required, Validators.minLength(6)]),
 
           terms: new FormControl(false, [Validators.requiredTrue])
+      });
+  }
+
+  ngOnInit() {
+    this.preloadImages();
+  }
+
+  private preloadImages() {
+    const imagePromises = this.imagesToPreload.map(src => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(src);
+        img.onerror = () => reject(src);
+        img.src = src;
+      });
+    });
+
+    Promise.all(imagePromises)
+      .then(() => {
+        this.loading = false;
+      })
+      .catch((error) => {
+        console.warn('Error cargando imagen:', error);
+        this.loading = false;
       });
   }
 

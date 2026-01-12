@@ -1,25 +1,31 @@
 <app-test>
-
-  <div class="profile-card">
-    <div class="profile-header">
-      <section class="profile-main">
-        <div class="profile-user-profile">
-          @if(user){
-            <div class="user-image large">
-              <img [src]="photoPreview || 'default-user-img.jpg'" alt="Foto de Usuario">
-            </div>
-            <div class="user-info large">
-              @if(user.name){
-                <h2 class="user-name">{{user.name}}</h2>
-              }@else{
-                <h2 class="user-name">Yo</h2>
-              }
-              <p class="user-status">Traveler Pro</p>
-            </div>
-          }
-        </div>
-      </section>
+  <!-- Estado de carga -->
+  @if(loading){
+    <div class="loading-state">
+      <div class="spinner"></div>
     </div>
+  }
+  @else {
+    <div class="profile-card">
+      <div class="profile-header">
+        <section class="profile-main">
+          <div class="profile-user-profile">
+            @if(user){
+              <div class="user-image large">
+                <img [src]="photoPreview || 'default-user-img.jpg'" alt="Foto de Usuario">
+              </div>
+              <div class="user-info large">
+                @if(user.name){
+                  <h2 class="user-name">{{user.name}}</h2>
+                }@else{
+                  <h2 class="user-name">Yo</h2>
+                }
+                <p class="user-status">Traveler Pro</p>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
 
     <form [formGroup]="form" (ngSubmit)="save()" novalidate>
       <div class="form-grid">
@@ -253,4 +259,5 @@
     </form>
 
   </div>
+  }
 </app-test>

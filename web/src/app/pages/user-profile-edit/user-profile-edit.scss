@@ -219,3 +219,38 @@ div[style*="margin-top:.5rem"] {
   }
 }
 
+// Estado de carga
+:host ::ng-deep .loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(100vw - 260px);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 260px;
+  background-color: #141627;
+  z-index: 9999;
+}
+
+:host ::ng-deep .spinner {
+  width: 64px;
+  height: 64px;
+  border: 6px solid rgba(170, 233, 65, 0.1);
+  border-top-color: #aae941;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  :host ::ng-deep .loading-state {
+    left: 0;
+    width: 100vw;
+  }
+}

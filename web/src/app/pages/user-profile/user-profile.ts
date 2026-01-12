@@ -15,18 +15,22 @@ import { Test } from '../test/test';
 export class UserProfile implements OnInit{
 
   user?: User
+  loading = true;
 
   constructor(public authService: AuthService, private router: Router, public userService: UserService) {
 
   }
 
   ngOnInit() {
+    this.loading = true;
     this.userService.getCurrentUser().subscribe({
       next: (userData: User) => {
         this.user = userData;
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error al obtener el usuario', err);
+        this.loading = false;
       }
     });
   }
