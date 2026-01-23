@@ -1,0 +1,20 @@
+name: Backup repository
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # todos los días a las 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone mirror
+        run: |
+          git clone --mirror https://github.com/Mattew0800/Nomadia.git
+
+      - name: Push to backup repo
+        run: |
+          cd Nomadia.git
+          git remote add backup https://x-access-token:${{ secrets.BACKUP_TOKEN }}@github.com/Mattew0800/Nomadia-backup.git
+          git push --mirror backup
