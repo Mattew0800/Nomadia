@@ -17,4 +17,6 @@ jobs:
         run: |
           cd Nomadia.git
           git remote add backup https://x-access-token:${{ secrets.BACKUP_TOKEN }}@github.com/Mattew0800/Nomadia-backup.git
-          git push --mirror backup
+          git push backup --all
+          git push backup --tags
+
