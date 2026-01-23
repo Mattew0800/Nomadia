@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("nomadia/trip")
@@ -24,9 +25,7 @@ public class TripController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> createTrip(
-            @Valid @RequestBody TripCreateDTO dto,
-            @AuthenticationPrincipal UserDetailsImpl me) {
+    public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
         TripResponseDTO created = tripService.createTrip(dto, me.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -43,63 +42,48 @@ public class TripController {
 
     @PostMapping("/view-trip")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> viewTrip(
-            @AuthenticationPrincipal UserDetailsImpl me,
-            @RequestBody TripIdRequestDTO request) {
-        TripResponseDTO trip = tripService.viewTrip(request.getTripId(), me.getId());
-        return ResponseEntity.ok(trip);
+    public ResponseEntity<TripResponseDTO> viewTrip(@AuthenticationPrincipal UserDetailsImpl me,@RequestBody TripIdRequestDTO request) {
+        return ResponseEntity.ok(tripService.viewTrip(request.getTripId(), me.getId()));
     }
 
     @PostMapping("/get-travelers")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> listTravelers(
-            @AuthenticationPrincipal UserDetailsImpl me,
-            @RequestBody TripIdRequestDTO dto) {
-        var travelers = tripService.getTravelers(dto.getTripId(), me.getId());
-        if (travelers.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(travelers);
+    public ResponseEntity<?> listTravelers(@AuthenticationPrincipal UserDetailsImpl me, @RequestBody TripIdRequestDTO dto) {
+        return ResponseEntity.ok(tripService.getTravelers(dto.getTripId(), me.getId()));
     }
 
     @PostMapping("/add-user")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> addUser(
-            @Valid @RequestBody TripAddUserByEmailDTO dto,
-            @AuthenticationPrincipal UserDetailsImpl me) {
-        System.out.println("DTO email = '" + dto.getEmail() + "'");
-        System.out.println("DTO tripId = " + dto.getTripId());
-        System.out.println("ME userId = " + me.getId());
-        System.out.println("tripService class = " + tripService.getClass());
-
+    public ResponseEntity<?> addUser(@Valid @RequestBody TripAddUserByEmailDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
         return ResponseEntity.ok(tripService.addUserToTrip(dto.getTripId(), dto.getEmail(),me.getId()));
     }
 
     @PutMapping("/remove-user")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> removeUser(
-            @Valid @RequestBody TripAddUserByEmailDTO dto,
-            @AuthenticationPrincipal UserDetailsImpl me) {
+    public ResponseEntity<?> removeUser(@Valid @RequestBody TripAddUserByEmailDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
         tripService.removeUserFromTrip(dto.getTripId(), dto.getEmail(), me.getId());
-        return ResponseEntity.ok("Usuario removido con exito");
+        return ResponseEntity.ok(Map.of("message", "Usuario removido con exito"));
     }
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> deleteTrip(
-            @RequestBody TripIdRequestDTO dto,
-            @AuthenticationPrincipal UserDetailsImpl me) {
+    public ResponseEntity<?> deleteTrip(@RequestBody TripIdRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
         tripService.deleteTrip(dto.getTripId(),me.getId());
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> updateTrip(
-            @Valid @RequestBody TripUpdateDTO dto,
-            @AuthenticationPrincipal UserDetailsImpl me) {
+    public ResponseEntity<?> updateTrip(@Valid @RequestBody TripUpdateDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
         return tripService.updateTrip(dto.getTripId(), dto, me.getId())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @PutMapping("/remove-self")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> removeSelf(@Valid @RequestBody TripIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me){
+        tripService.removeUserFromTrip(dto.getTripId(), me.getEmail(), me.getId());
+        return ResponseEntity.ok("Te removiste con exito del viaje ");
     }
 }

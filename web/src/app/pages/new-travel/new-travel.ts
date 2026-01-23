@@ -1,11 +1,19 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth-service';
+import { AuthService } from '../../services/Auth/auth-service';
 import { HttpClient } from '@angular/common/http';
 import {Test} from '../test/test';
-import { TripService } from '../../services/trip-service';
+import { TripService } from '../../services/Trip/trip-service';
 import { TripCreate } from '../../models/TripCreate';
 
 
@@ -15,7 +23,7 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
   if (!desde || !hasta) return null;
   const d = new Date(desde);
   const h = new Date(hasta);
-  return h >= d ? null : { dateRange: true };
+  return h > d ? null : { dateRange: true };
 }
 
 @Component({
@@ -29,18 +37,30 @@ export class NewTravel {
 
   currentStep: number=0;
 
-  tripTypes: string[] = [
-        'turismo','aventura','gastronomico','educativo','familiar', 'relax', 'romantico', 'cultural', 'playa', 'deportivo', 'voluntariado', 'fiesta', 'profesional'
-
-    ];
+  // Tipos de viaje con iconos, nombres mejorados e imágenes de fondo
+  tripTypesWithIcons = [
+    { value: 'turismo', label: 'Turismo', icon: '🗺️', image: '/tripTypes/TURISMO.webp' },
+    { value: 'aventura', label: 'Aventura', icon: '🏔️', image: '/tripTypes/AVENTURA.webp' },
+    { value: 'gastronomico', label: 'Gastronómico', icon: '🍽️', image: '/tripTypes/GASTRONOMICO.webp' },
+    { value: 'educativo', label: 'Educativo', icon: '📚', image: '/tripTypes/EDUCATIVO.webp' },
+    { value: 'familiar', label: 'Familiar', icon: '👨‍👩‍👧‍👦', image: '/tripTypes/FAMILIAR.webp' },
+    { value: 'relax', label: 'Relax', icon: '🧘', image: '/tripTypes/RELAX.webp' },
+    { value: 'romantico', label: 'Romántico', icon: '💑', image: '/tripTypes/ROMANTICO.webp' },
+    { value: 'cultural', label: 'Cultural', icon: '🏛️', image: '/tripTypes/CULTURAL.webp' },
+    { value: 'playa', label: 'Playa', icon: '🏖️', image: '/tripTypes/PLAYA.webp' },
+    { value: 'deportivo', label: 'Deportivo', icon: '⚽', image: '/tripTypes/DEPORTIVO.webp' },
+    { value: 'voluntariado', label: 'Voluntariado', icon: '🤝', image: '/tripTypes/VOLUNTARIADO.webp' },
+    { value: 'fiesta', label: 'Fiesta', icon: '🎉', image: '/tripTypes/FIESTA.webp' },
+    { value: 'profesional', label: 'Profesional', icon: '💼', image: '/tripTypes/PROFESIONAL.webp' }
+  ];
 
   // --- FORMULARIO CORREGIDO SIN 'budget' ---
   form = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),
     type: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    startDate: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
+    startDate: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, this.pastDateValidator()]}),
     endDate: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    description: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }), // Description ahora es required
+    description: new FormControl<string>('', { validators: [Validators.maxLength(100)] }),
   }, { validators: dateRangeValidator });
   // -------------------------------------------
 
@@ -69,6 +89,23 @@ export class NewTravel {
     return `trip-type-${typeControl.value.toUpperCase()}`;
   }
 
+  get tripTypeLabel(): string {
+    const typeValue = this.form.get('type')?.value;
+    if (!typeValue) return '';
+
+    const tripType = this.tripTypesWithIcons.find(t => t.value.toUpperCase() === typeValue);
+    return tripType ? tripType.label : typeValue;
+  }
+
+  public get nameControl() {
+    return this.form.get('name')!;
+  }
+
+  public get typeControl() {
+    return this.form.get('type')!;
+  }
+
+
 
  selectTripType(type: string): void {
     this.form.get('type')?.setValue(type.toUpperCase());
@@ -90,6 +127,30 @@ export class NewTravel {
   }
 
 
+  public pastDateValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const dateValue = control.value;
+
+      if (!dateValue) {
+        return null;
+      }
+
+      const inputDate = new Date(dateValue);
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+      inputDate.setHours(0, 0, 0, 0);
+
+      // Para viajes, la fecha NO debe ser anterior a hoy
+      if (inputDate < today) {
+        return { pastDate: true };
+      }
+
+      return null;
+    };
+  }
+
+
   // --- FUNCIÓN SAVE AJUSTADA SIN 'budget' ---
   save() {
     this.submitted = true;
@@ -99,11 +160,7 @@ export class NewTravel {
 
     if (this.form.invalid) {
       this.loading = false;
-      if (this.form.hasError('dateRange')) {
-        this.msgError = 'La fecha "Hasta" debe ser posterior a "Desde".';
-      } else {
-        this.msgError = 'Revisá los campos obligatorios.';
-      }
+      this.form.markAllAsTouched();
       return;
     }
 
@@ -155,7 +212,7 @@ export class NewTravel {
                 this.loading = false;
                 console.error('Error del backend:', err);
                 // Usamos el mensaje de error del backend
-                this.msgError = err.error?.message || 'Error al conectar con el servidor. Verifica tu token.';
+                this.msgError = err.error || 'Error al conectar con el servidor. Verifica tu token.';
                 this.submitted = false;
             }
         });

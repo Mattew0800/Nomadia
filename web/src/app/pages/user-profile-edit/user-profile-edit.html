@@ -1,178 +1,263 @@
 <app-test>
-
+  <!-- Estado de carga -->
+  @if(loading){
+    <div class="loading-state">
+      <div class="spinner"></div>
+    </div>
+  }
+  @else {
     <div class="profile-card">
-        <div class="profile-header">
-            <section class="profile-main">
-                <div class="profile-user-profile">
-                  @if(user){
-                    <div class="user-image large">
-                        <img [src]="photoPreview || 'default-user-img.jpg'" alt="Foto de Usuario">
-                    </div>
-                    <div class="user-info large">
-                        @if(user.name){
-                        <h2 class="user-name">{{user.name}}</h2>
-                        }@else{
-                        <h2 class="user-name">Yo</h2>
-                        }
-                        <p class="user-status">Traveler Pro</p>
-                    </div>
-                  }
-                </div>
-            </section>
+      <div class="profile-header">
+        <section class="profile-main">
+          <div class="profile-user-profile">
+            @if(user){
+              <div class="user-image large">
+                <img [src]="photoPreview || 'default-user-img.jpg'" alt="Foto de Usuario">
+              </div>
+              <div class="user-info large">
+                @if(user.name){
+                  <h2 class="user-name">{{user.name}}</h2>
+                }@else{
+                  <h2 class="user-name">Yo</h2>
+                }
+                <p class="user-status">Traveler Pro</p>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="form-grid">
+        <div>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Nombre completo
+          </label>
+          <input type="text" formControlName="name" placeholder="Ej: Juan Pérez"
+                 [ngClass]="{'input-invalid': form.get('name')?.invalid && form.get('name')?.touched}">
+
+          <div>
+            @if(f['name'].touched && f['name'].hasError('required')){
+              <p class="formError">El nombre completo es obligatorio.</p>
+            }
+          </div>
+          <div>
+            @if(f['name'].touched && f['name'].hasError('pattern')){
+              <p class="formError">Debes ingresar un nombre y apellido válidos.</p>
+            }
+          </div>
+
         </div>
 
-        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
-            <div class="form-grid">
-                <div>
-                    <label>Nombre completo</label>
-                    <input type="text" formControlName="name"
-                        [ngClass]="{'input-invalid': form.get('name')?.invalid && form.get('name')?.touched}">
+        <div>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#bef264"/>
+            </svg>
+            Apodo
+          </label>
+          <input type="text"
+                 formControlName="nick"
+                 placeholder="Ej: Juancho"
+                 alt="Apodo"
+                 maxlength="10"
+                 [ngClass]="{'input-invalid': nickControl?.invalid && nickControl?.touched}">
 
-                  <div *ngIf="f['name'].touched && f['name'].hasError('required')" class="text-danger">
-                    <p class="formError">El nombre completo es obligatorio.</p>
-                  </div>
-                  <div *ngIf="f['name'].touched && f['name'].hasError('pattern')" class="text-danger">
-                    <p class="formError">Debes ingresar un nombre y apellido válidos (ej: Juan Pérez).</p>
-                  </div>
+          @if(nickControl?.touched && nickControl?.hasError("maxlength")){
+            <p class="formError">El apodo no puede exceder los 10 caracteres.</p>
+          }
+        </div>
 
-                </div>
+        <div>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 6l-10 7L2 6" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Email
+          </label>
+          <input type="email"
+                 formControlName="email"
+                 placeholder="ejemplo@correo.com"
+                 maxlength="50"
+                 [ngClass]="{'input-invalid': emailControl?.invalid && emailControl?.touched}">
 
-                <div>
-                    <label>Apodo</label>
-                    <input type="text" formControlName="nick">
-                </div>
-
-                <div>
-                    <label>Email</label>
-                    <input type="email" formControlName="email">
-                  <div *ngIf="emailControl?.touched && emailControl?.hasError('required')" class="text-danger">
-                    <p class="formError">El email es obligatorio.</p>
-                  </div>
-                  <div *ngIf="emailControl?.touched && emailControl?.hasError('email')" class="text-danger">
-                    <p class="formError">El formato del email es inválido (ej: usuario&#64;dominio.com).</p>
-                  </div>
-                </div>
-
-                <div>
-                    <label>Teléfono</label>
-                  <input type="text"
-                         formControlName="phone"
-                         maxlength="13"
-                         pattern="[0-9]*"
-                         title="Solo números">
-
-
-                @if(phoneControl?.touched){
-                  @if(phoneControl?.hasError("required")){
-
-                      <p class="formError">El teléfono es obligatorio.</p>
-
-                  }
-                  @if(phoneControl?.hasError("minlength")){
-                      <p class="formError">El teléfono debe tener al menos 10 dígitos.</p>
-                  }
-                  @if(phoneControl?.hasError("maxlength")){
-                      <p class="formError">El teléfono no puede tener más de 13 dígitos.</p>
-                  }
-                  @if(phoneControl?.hasError("pattern")){
-                    <p class="formError">El teléfono solo puede contener números.</p>
-                  }
-                }
-                </div>
-
-                <div>
-                    <label>Fecha de nacimiento</label>
-                    <input type="date" formControlName="birth">
-                    <div *ngIf="f['birth'].errors?.['pattern'] && f['birth'].touched" class="text-danger">
-                        <p class="formError">La fecha debe tener formato YYYY-MM-DD con año de 4 dígitos.</p>
-                    </div>
-
-                  <div *ngIf="f['birth'].touched && f['birth'].hasError('futureDate')" class="text-danger">
-                    <p class="formError">La fecha de nacimiento no puede ser futura.</p>
-                  </div>
-
-                  <div *ngIf="f['birth'].touched && f['birth'].hasError('isUnderage')" class="text-danger">
-                    <!-- El validador usa 15, así que el mensaje es sobre 15 -->
-                    <p class="formError">Debes tener al menos 15 años.</p>
-                  </div>
-                </div>
+          @if(emailControl?.touched && emailControl?.hasError('required')){
+            <p class="formError">El email es obligatorio.</p>
+          }
+          @if(emailControl?.touched && emailControl?.hasError('email')){
+            <p class="formError">El formato del email es inválido.</p>
+          }
 
 
-                <div>
-                    <label>Edad</label>
-                    <input type="number" formControlName="age" readonly>
-                </div>
+        </div>
 
-                <div id="form__grid-aboutme">
-                    <label>Sobre mí</label>
-                    <textarea formControlName="about" rows="4" maxlength="100"></textarea>
+        <div>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Teléfono
+          </label>
+          <input type="text"
+                 formControlName="phone"
+                 placeholder="1234567890"
+                 maxlength="13"
+                 pattern="[0-9]*"
+                 title="Solo números"
+                 [ngClass]="{'input-invalid': phoneControl?.invalid && phoneControl?.touched}">
 
-                    @if(aboutControl?.touched){
-                      @if(aboutControl?.hasError("maxlength")){
-                          <p class="formError">La descripción no puede exceder los 100 caracteres.</p>
-                      }
-                      @if(aboutControl?.hasError("minlength")){
-                        <p class="formError">La descripción debe tener 3 caracteres como minimo.</p>
-                      }
-                    }
-                </div>
 
-                <div>
-                    <label>Foto de perfil</label>
-                    <input type="file" #fileInput accept="image/*" (change)="onSelectPhoto($event)">
-                    <div style="margin-top:.5rem; display:flex; gap:.75rem; align-items:center;">
-                        <ng-container *ngIf="photoPreview">
-                            <img [src]="photoPreview" alt="preview"
-                                style="width:64px;height:64px;border-radius:12px;object-fit:cover;">
-                            <button type="button" class="filters-btn" (click)="removePhoto()">
-                                Quitar foto
-                            </button>
-                        </ng-container>
-                    </div>
-                </div>
+          @if(phoneControl?.touched){
+            @if(phoneControl?.hasError("required")){
 
-                <div style="grid-column:1/3;">
-                    <label style="display:block;margin-bottom:.5rem;">Cambiar contraseña (opcional)</label>
-                    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
-                        <div>
-                            <label>Contraseña actual</label>
-                            <input type="password" formControlName="currentPass">
-                        </div>
+              <p class="formError">El teléfono es obligatorio.</p>
 
-                        <div>
-                            <label>Nueva contraseña</label>
-                            <input type="password" formControlName="newPass"
-                                [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
-                          <div *ngIf="newPassControl?.touched && newPassControl?.hasError('minlength')" class="text-danger">
-                            <p class="formError">La contraseña debe tener al menos 6 caracteres.</p>
-                          </div>
-                        </div>
+            }
+            @if(phoneControl?.hasError("minlength")){
+              <p class="formError">El teléfono debe tener al menos 10 dígitos.</p>
+            }
+            @if(phoneControl?.hasError("maxlength")){
+              <p class="formError">El teléfono no puede tener más de 13 dígitos.</p>
+            }
+            @if(phoneControl?.hasError("pattern")){
+              <p class="formError">El teléfono solo puede contener números.</p>
+            }
+          }
+        </div>
 
-                        <div style="grid-column:1/3;">
-                            <label>Confirmar nueva contraseña</label>
-                            <input type="password" formControlName="confirmPass"
-                                [ngClass]="{'input-invalid': !passwordsMatch() && form.get('confirmPass')?.touched}">
-                            <p *ngIf="!passwordsMatch()" class="formError" style="margin-top:.25rem;">
-                                Las contraseñas no coinciden.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <div>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="2" x2="16" y2="6" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="8" y1="2" x2="8" y2="6" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="3" y1="10" x2="21" y2="10" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Fecha de nacimiento
+          </label>
+          <input type="date" formControlName="birth" [min]="getMinDate()" [max]="getMaxDate()" [ngClass]="{'input-invalid': f['birth'].invalid && f['birth'].touched}">
+
+          @if(f['birth'].errors?.['pattern'] && f['birth'].touched){
+            <p class="formError">La fecha debe tener formato YYYY-MM-DD con año de 4 dígitos.</p>
+          }@else if(f['birth'].touched && f['birth'].hasError('pastDate')){
+            <p class="formError">La fecha de nacimiento no puede ser futura.</p>
+          }@else if(f['birth'].touched && f['birth'].hasError('isUnderage')){
+            <p class="formError">Debes tener al menos 8 años.</p>
+          }@else if(f['birth'].touched && f['birth'].hasError('isTooOld')){
+            <p class="formError">La fecha de nacimiento es incorrecta.</p>
+          }
+
+        </div>
+
+
+        <div>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <circle cx="12" cy="12" r="10" stroke="#94a3b8" stroke-width="2"/>
+              <path d="M12 6v6l4 2" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Edad
+          </label>
+          <input type="number" formControlName="age" readonly>
+        </div>
+
+        <div id="form__grid-aboutme">
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="14,2 14,8 20,8" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="13" x2="8" y2="13" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="17" x2="8" y2="17" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Sobre mí
+          </label>
+          <textarea formControlName="about" rows="4" maxlength="200" placeholder="Cuéntanos algo sobre ti..." [ngClass]="{'input-invalid':f['about'].invalid && f['about'].touched}"></textarea>
+
+          @if(aboutControl?.touched){
+            @if(aboutControl?.hasError("maxlength")){
+              <p class="formError">La descripción no puede exceder los 200 caracteres.</p>
+            }
+            @if(aboutControl?.hasError("minlength")){
+              <p class="formError">La descripción debe tener 3 caracteres como minimo.</p>
+            }
+          }
+        </div>
+
+        <div>
+          <label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="8.5" cy="8.5" r="1.5" fill="#bef264"/>
+              <polyline points="21,15 16,10 5,21" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Foto de perfil
+          </label>
+          <input type="file" #fileInput accept="image/*" (change)="onSelectPhoto($event)">
+          <div style="margin-top:.5rem; display:flex; gap:.75rem; align-items:center;">
+            <ng-container *ngIf="photoPreview">
+              <img [src]="photoPreview" alt="preview"
+                   style="width:64px;height:64px;border-radius:12px;object-fit:cover;">
+              <button type="button" class="filters-btn" (click)="removePhoto()">
+                Quitar foto
+              </button>
+            </ng-container>
+          </div>
+        </div>
+
+        <div style="grid-column:1/3;">
+          <label style="display:block;margin-bottom:.5rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block; vertical-align:middle; margin-right:6px;">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#bef264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Cambiar contraseña (opcional)
+          </label>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+            <div>
+              <label>Contraseña actual</label>
+              <input type="password" formControlName="currentPass" placeholder="••••••••">
             </div>
 
-            <div style="display:flex; gap:1rem; margin-top:2rem;">
-                <button class="edit-btn" type="submit">Guardar cambios</button>
-                <button class="filters-btn" type="button" (click)="cancel()">Volver</button>
+            <div>
+              <label>Nueva contraseña</label>
+              <input type="password" formControlName="newPass" placeholder="••••••••"
+                     [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
+              <div *ngIf="newPassControl?.touched && newPassControl?.hasError('minlength')">
+                <p class="formError">La contraseña debe tener al menos 6 caracteres.</p>
+              </div>
             </div>
 
-            <div *ngFor="let key of (errorMessages | keyvalue)" class="formError" id="profileEditError">
-                <strong>{{ key.key }}:</strong> {{ key.value }}
+            <div style="grid-column:1/3;">
+              <label>Confirmar nueva contraseña</label>
+              <input type="password" formControlName="confirmPass" placeholder="••••••••"
+                     [ngClass]="{'input-invalid': !passwordsMatch() && form.get('confirmPass')?.touched}">
+              <p *ngIf="!passwordsMatch()" class="formError" style="margin-top:.25rem;">
+                Las contraseñas no coinciden.
+              </p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:1rem; margin-top:2rem;">
+        <button class="edit-btn" type="submit">Guardar cambios</button>
+        <button class="filters-btn" type="button" (click)="cancel()">Volver</button>
+      </div>
+
+      <div *ngFor="let key of (errorMessages | keyvalue)" class="formError" id="profileEditError">
+        <strong>{{ key.key }}:</strong> {{ key.value }}
+      </div>
 
 
-            <p *ngIf="msgOk" style="margin-top:1rem; color:#d1f366;">{{ msgOk }}</p>
-            <p *ngIf="msgError" style="margin-top:1rem; color:#eb3f3a;">{{ msgError }}</p>
-        </form>
+      <p *ngIf="msgOk" style="margin-top:1rem; color:#d1f366;">{{ msgOk }}</p>
+      <p *ngIf="msgError" style="margin-top:1rem; color:#eb3f3a;">{{ msgError }}</p>
+    </form>
 
-    </div>
+  </div>
+  }
 </app-test>

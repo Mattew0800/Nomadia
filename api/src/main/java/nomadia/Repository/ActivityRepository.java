@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -16,7 +17,6 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByTripId(Long tripId);
     List<Activity> findByTripIdAndDate(Long tripId, LocalDate date);
     Optional<Activity> findByIdAndTripId(Long id, Long tripId);
-    boolean existsByTripIdAndNameIgnoreCase(Long tripId, String name);
     Optional<Activity> findById(Long activityId);
 
     @Modifying
@@ -26,31 +26,44 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     }
 
     @Query("""
-SELECT DISTINCT a
-FROM Activity a
+    SELECT DISTINCT a
+    FROM Activity a
+    JOIN a.trip t
+    JOIN t.users u
+    WHERE u.id = :userId
+      AND (:tripIds IS NULL OR t.id IN :tripIds)
+      AND (:fromDate IS NULL OR a.date >= :fromDate)
+      AND (:toDate IS NULL OR a.date <= :toDate)
+      AND (
+            (:fromTime IS NULL AND :toTime IS NULL)
+            OR (a.startTime < :toTime AND a.endTime > :fromTime)
+          )
+    ORDER BY a.date ASC, a.startTime ASC, a.name ASC
+    """)
+        List<Activity> findAllByUserTrips(
+                @Param("userId") Long userId,
+                @Param("fromDate") LocalDate fromDate,
+                @Param("toDate") LocalDate toDate,
+                @Param("fromTime") LocalTime fromTime,
+                @Param("toTime") LocalTime toTime,
+                @Param("tripIds") List<Long> tripIds
+        );
+    @Query("""
+    SELECT COALESCE(SUM(a.cost), 0)
+    FROM Activity a
+    WHERE a.trip.id = :tripId
+    """)
+    BigDecimal getTotalActivityCostByTrip(@Param("tripId") Long tripId);
+
+    @Query("""
+SELECT a.id, p.user.id, COALESCE(SUM(p.amountPaid), 0)
+FROM Participant p
+JOIN p.expense e
+JOIN e.activity a
 JOIN a.trip t
-LEFT JOIN t.users u
-WHERE u.id = :userId
-  AND (:tripId IS NULL OR t.id = :tripId)
-  AND (:fromDate IS NULL OR a.date >= :fromDate)
-  AND (:toDate IS NULL OR a.date <= :toDate)
-  AND (
-        (:fromTime IS NULL AND :toTime IS NULL)
-        OR (a.startTime < :toTime AND a.endTime > :fromTime)
-      )
-ORDER BY a.date ASC, a.startTime ASC, a.name ASC
+WHERE t.id = :tripId
+GROUP BY a.id, p.user.id
 """)
-    List<Activity> findAllByUserTrips(
-            @Param("userId") Long userId,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
-            @Param("fromTime") LocalTime fromTime,
-            @Param("toTime") LocalTime toTime,
-            @Param("tripId") Long tripId
-    );
-
-
-
-
+    List<Object[]> findPaidByUserAndActivity(@Param("tripId") Long tripId);
 }
 

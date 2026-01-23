@@ -46,12 +46,13 @@ public class TripCreateDTO {
 
     private List<ActivityCreateDTO> activities;
 
+    //NO SE USA
     @AssertTrue(message = "La fecha de finalización debe ser posterior a la fecha de inicio")
     public boolean isEndAfterStart() {
         if (startDate == null || endDate == null) return true;
         return endDate.isAfter(startDate);
     }
-
+    //NO SE USA
     @AssertTrue(message = "La fecha de inicio no puede ser anterior a hoy")
     public boolean isStartTodayOrFuture() {
         if (startDate == null) return true;

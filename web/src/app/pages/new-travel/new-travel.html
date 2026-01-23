@@ -12,13 +12,14 @@
     </div>
 
     <div class="selection-grid">
-        
-        <button 
-            *ngFor="let type of tripTypes" 
-            (click)="selectTripType(type)"
+        <button
+            *ngFor="let tripType of tripTypesWithIcons"
+            (click)="selectTripType(tripType.value)"
             class="type-selection-btn"
+            [style.background-image]="'url(' + tripType.image + ')'"
         >
-            {{ type }}
+            <span class="trip-icon">{{ tripType.icon }}</span>
+            <span class="trip-label">{{ tripType.label }}</span>
         </button>
     </div>
 </div>
@@ -40,41 +41,97 @@
 
         <div>
           <label for="nombreViaje">Nombre de Viaje</label>
-          <input id="nombreViaje" type="text" formControlName="name" placeholder="Nombre del viaje" />
+          <input
+            id="nombreViaje"
+            type="text"
+            formControlName="name"
+            placeholder="Ej: Vacaciones en Bariloche"
+            [class.input-invalid]="f['name'].touched && f['name'].invalid"
+          />
+          <div class="formError" *ngIf="f['name'].touched && f['name'].hasError('required')">
+            El nombre del viaje es obligatorio
+          </div>
+          <div class="formError" *ngIf="f['name'].touched && f['name'].hasError('minlength')">
+            El nombre debe tener al menos 3 caracteres
+          </div>
         </div>
 
         <div>
           <label for="tipoDeViaje">Tipo de viaje</label>
           <div class="type-input-container">
-          <input id="tipoDeViaje" class="tipoDeViaje" type="text" formControlName="type" readonly/>
-          <button type="button" class="type-btn" style="width: auto;" (click)="goToStep(0)">Modificar Tipo</button>
+            <input
+              id="tipoDeViaje"
+              class="tipoDeViaje"
+              type="text"
+              [value]="tripTypeLabel"
+              readonly
+              [class.input-invalid]="f['type'].touched && f['type'].invalid"
+            />
+            <button type="button" class="type-btn" (click)="goToStep(0)">Modificar Tipo</button>
+          </div>
+          <div class="formError" *ngIf="f['type'].touched && f['type'].hasError('required')">
+            Debes seleccionar un tipo de viaje
           </div>
         </div>
 
         <div>
-          <label for="desde">Desde</label>
-          <input id="desde" type="date" formControlName="startDate" />
+          <label for="desde">Fecha de Inicio</label>
+          <input
+            id="desde"
+            type="date"
+            formControlName="startDate"
+            [class.input-invalid]="f['startDate'].touched && f['startDate'].invalid"
+          />
+          <div class="formError" *ngIf="f['startDate'].touched && f['startDate'].hasError('required')">
+            La fecha de inicio es obligatoria
+          </div>
+          <div class="formError" *ngIf="f['startDate'].touched && f['startDate'].hasError('pastDate')">
+            La fecha de inicio debe ser hoy o futura
+          </div>
         </div>
 
         <div>
-          <label for="hasta">Hasta</label>
-          <input id="hasta" type="date" formControlName="endDate" />
+          <label for="hasta">Fecha de Fin</label>
+          <input
+            id="hasta"
+            type="date"
+            formControlName="endDate"
+            [class.input-invalid]="(f['endDate'].touched && f['endDate'].invalid) || (f['endDate'].touched && form.hasError('dateRange'))"
+          />
+          <div class="formError" *ngIf="f['endDate'].touched && f['endDate'].hasError('required')">
+            La fecha de fin es obligatoria
+          </div>
+          <div class="formError" *ngIf="f['endDate'].touched && form.hasError('dateRange')">
+            La fecha de fin debe ser posterior a la fecha de inicio
+          </div>
         </div>
 
         <div id="form__grid-aboutme">
           <label for="about">Descripción de viaje</label>
-          <textarea id="about" formControlName="description" rows="4" placeholder="Contanos detalles del viaje..."></textarea>
+          <textarea
+            id="about"
+            formControlName="description"
+            rows="4"
+            placeholder="Contanos sobre tu viaje, lugares que visitarás, actividades planeadas..."
+            [class.input-invalid]="f['description'].touched && f['description'].invalid"
+          ></textarea>
+          <div class="formError" *ngIf="f['description'].touched && f['description'].hasError('required')">
+            La descripción es obligatoria
+          </div>
+          <div class="formError" *ngIf="f['description'].touched && f['description'].hasError('maxlength')">
+            La descripción no puede superar los 100 caracteres
+          </div>
         </div>
 
         <div style="grid-column: 1/3; margin-top:1rem;">
-          <button type="submit" class="edit-btn" style="width: auto;">Cargar Viaje</button>
+          <button type="submit" class="edit-btn">Cargar Viaje</button>
         </div>
 
       </div>
     </form>
 
-    <div *ngIf="submitted && msgError" class="alert error">{{ msgError }}</div>
-    <div *ngIf="submitted && msgOk" class="alert ok">{{ msgOk }}</div>
+    <div *ngIf="msgError" class="alert error" id="tripError">{{ msgError }}</div>
+    <div *ngIf="msgOk" class="alert ok">{{ msgOk }}</div>
 
   </div>
 </app-test>

@@ -10,7 +10,6 @@ import nomadia.Service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import static nomadia.Enum.Role.ADMIN;
 import static nomadia.Enum.Role.USER;
 
@@ -26,25 +25,23 @@ public class AuthController {
         this.authService = authService;
         this.userService = userService;
     }
-    @PostMapping("/register")// chequeado
+
+    @PostMapping("/register")
     public ResponseEntity<LoginResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
         user.setRole(USER);
-
         User savedUser = userService.createUser(user);
-
         String token = authService.generateToken(savedUser);
-
         LoginResponseDTO response = new LoginResponseDTO();
         response.setToken(token);
         response.setName(savedUser.getName());
         response.setEmail(savedUser.getEmail());
-
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
     @PostMapping("/register-admin") // esto para prueba dsps se va
     public ResponseEntity<LoginResponseDTO> registerAdmin(@Valid @RequestBody RegisterRequestDTO request) {
         User user = new User();
@@ -52,19 +49,16 @@ public class AuthController {
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
         user.setRole(ADMIN);
-
         User savedUser = userService.createUser(user);
-
         String token = authService.generateToken(savedUser);
-
         LoginResponseDTO response = new LoginResponseDTO();
         response.setToken(token);
         response.setName(savedUser.getName());
         response.setEmail(savedUser.getEmail());
-
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    @PostMapping("/login")// chequeado
+
+    @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         return authService.authenticate(request.getEmail(), request.getPassword())
                 .map(user -> {
@@ -83,7 +77,6 @@ public class AuthController {
                                 .body(null)
                 );
     }
-
 
     @PostMapping("/logout") // por mera cortesia
     public ResponseEntity<Void> logout() {

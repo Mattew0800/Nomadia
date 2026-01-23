@@ -13,6 +13,7 @@ import { NewTravel } from './pages/new-travel/new-travel';
 import { TripList } from './pages/trip-list/trip-list';
 import {TripEdit} from './pages/edit-trip/edit-trip';
 import {ActivityListComponent} from './pages/activity-list/activity-list';
+import {ExpensesPage} from './pages/expenses-page/expenses-page';
 
 export const routes: Routes = [
     {path: 'landing', component: LandingPage, canActivate: [PublicGuard]},
@@ -23,10 +24,12 @@ export const routes: Routes = [
     {path: 'editProfile', component: UserProfileEdit, canActivate: [AuthGuard]},
     {path: 'newTrip', component: NewTravel, canActivate: [AuthGuard]},
     {path: 'tripList', component: TripList, canActivate: [AuthGuard]},
-    { path: 'editTrip/:id', component: TripEdit, canActivate: [AuthGuard] },
-     {path: "activities", component: ActivityListComponent, canActivate: [AuthGuard]},
+    { path: 'editTrip', component: TripEdit, canActivate: [AuthGuard] },
+    {path: "activities", component: ActivityListComponent, canActivate: [AuthGuard]},
+    {path: 'expenses', component: ExpensesPage, canActivate: [AuthGuard]},
     {path: 'test', component: Test},
     {path: 'error', component: ErrorPage},
-    {path: '', redirectTo: 'mainPage', pathMatch: 'full'},
+    {path: '', redirectTo: 'landing', pathMatch: 'full'},
     {path: '**', redirectTo: 'error' },
+
 ];

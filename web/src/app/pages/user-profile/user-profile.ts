@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth-service';
+import { AuthService } from '../../services/Auth/auth-service';
 import { User } from '../../models/User';
-import { UserService } from '../../services/user-service';
+import { UserService } from '../../services/User/user-service';
 import { DatePipe } from '@angular/common';
 import { Test } from '../test/test';
 
@@ -15,18 +15,22 @@ import { Test } from '../test/test';
 export class UserProfile implements OnInit{
 
   user?: User
+  loading = true;
 
   constructor(public authService: AuthService, private router: Router, public userService: UserService) {
 
   }
 
   ngOnInit() {
+    this.loading = true;
     this.userService.getCurrentUser().subscribe({
       next: (userData: User) => {
         this.user = userData;
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error al obtener el usuario', err);
+        this.loading = false;
       }
     });
   }

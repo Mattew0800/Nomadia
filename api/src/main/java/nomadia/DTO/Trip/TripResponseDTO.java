@@ -1,6 +1,5 @@
 package nomadia.DTO.Trip;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,12 +8,9 @@ import nomadia.DTO.Activity.ActivityResponseDTO;
 import nomadia.Enum.State;
 import nomadia.Enum.TripType;
 import nomadia.Model.Trip;
-
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 @Data
 @NoArgsConstructor

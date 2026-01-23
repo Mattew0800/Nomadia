@@ -2,9 +2,12 @@
 import { Component, EventEmitter, Output, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {ActivityService} from '../../services/activity-service';
+import {ActivityService} from '../../services/Activity/activity-service';
 import { ActivityResponseDTO } from '../../models/ActivityResponse';
 import {Test} from '../test/test';
+import {ActivatedRoute} from '@angular/router';
+import {TripService} from '../../services/Trip/trip-service';
+import {TripResponse} from '../../models/TripResponse';
 
 @Component({
   selector: 'app-activity-list',
@@ -29,13 +32,33 @@ export class ActivityListComponent implements OnInit {
   fromTime?: string;               // 'HH:mm'
   toTime?: string;
 
-  constructor(private activityService: ActivityService) {}
+  trips: TripResponse[] = [];
+  selectedTripId: string = '';
+
+  constructor(private activityService: ActivityService,private tripService: TripService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.fetch(); // arranca sin filtros
+    this.loadTrips();
+    this.route.queryParams.subscribe(params => {
+      const searchTerm = params['search'];
+      if (searchTerm) {
+        this.fetch(searchTerm);
+      } else {
+        this.fetch();
+      }
+    });
   }
 
-  fetch(): void {
+  loadTrips(): void {
+    this.tripService.getTrips().subscribe({
+      next: (data) => {
+        this.trips = data ?? [];
+      },
+      error: (err) => console.error('Error al cargar viajes para el filtro', err)
+    });
+  }
+
+  fetch(searchTerm?: string): void {
     this.loading.set(true);
     this.errorMsg.set(null);
     this.activities = [];
@@ -53,9 +76,29 @@ export class ActivityListComponent implements OnInit {
 
     req$.subscribe({
       next: (list) => {
-        // orden: fecha asc, luego nombre
-        this.activities = [...(list ?? [])]
-          .sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '') || a.name.localeCompare(b.name));
+        let result = list ?? [];
+
+        // --- LÓGICA DE BÚSQUEDA INTEGRADA ---
+        if (searchTerm) {
+          const term = searchTerm.toLowerCase();
+          result = result.filter(a => a.name.toLowerCase().startsWith(term));
+        }
+
+        if (this.selectedTripId && this.selectedTripId !== '') {
+          // Convertimos a número para comparar con a.tripId
+          result = result.filter(a => a.tripId === Number(this.selectedTripId));
+        }
+
+        // Ordenar: fecha asc, luego nombre
+        this.activities = [...result].sort((a, b) =>
+          (a.date ?? '').localeCompare(b.date ?? '') || a.name.localeCompare(b.name)
+        );
+
+        // Si después de filtrar no hay nada, mostrar mensaje
+        if (this.activities.length === 0) {
+          this.errorMsg.set(searchTerm ? `No se encontró: "${searchTerm}"` : 'No hay actividades.');
+        }
+
         this.loading.set(false);
       },
       error: (e) => {
@@ -71,6 +114,7 @@ export class ActivityListComponent implements OnInit {
 
   clearFilters(): void {
     this.fromDate = this.toDate = this.fromTime = this.toTime = undefined;
+    this.selectedTripId = '';
     this.fetch();
   }
 

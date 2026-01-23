@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {AuthService} from './auth-service';
-import {TripResponse} from '../models/TripResponse';
-import {TripCreate} from '../models/TripCreate';
-import {User} from '../models/User';
-import {TravelerResponse} from '../models/TravelerResponse';
+import {AuthService} from '../Auth/auth-service';
+import {TripResponse} from '../../models/TripResponse';
+import {TripCreate} from '../../models/TripCreate';
+import {User} from '../../models/User';
+import {TravelerResponse} from '../../models/TravelerResponse';
 
 
 @Injectable({
@@ -43,7 +43,7 @@ export class TripService {
     return this.http.delete(`${this.API_URL}/delete`, {body: {tripId: id}, headers: this.authService.authHeaders()});
   }
 
-  getTripById(id: string): Observable<TripResponse> {
+  getTripById(id: string){
 
     return this.http.post<TripResponse>(
       `${this.API_URL}/view-trip`,
@@ -73,6 +73,15 @@ export class TripService {
     return this.http.post<TravelerResponse[]>(
       `${this.API_URL}/get-travelers`,
       {tripId: tripId},
+      {headers: this.authService.authHeaders()});
+  }
+
+  removeUser(tripId: string, email: string) {
+    const body = {tripId: tripId, email: email};
+
+    return this.http.put(
+      `${this.API_URL}/remove-user`,
+      body,
       {headers: this.authService.authHeaders()});
   }
 

@@ -121,12 +121,16 @@
 }
 
 .logout-item:hover svg path {
-  fill: #fff; /* cambia el color del path del svg */
+  fill: #fff;
 }
 
 .nav-item:hover .hole,
 .nav-item:focus .hole {
   fill: #303730;
+}
+
+.nav-item.active .hole {
+  fill: #d1f366;
 }
 
 
@@ -269,6 +273,11 @@
 .dropdown-btn svg {
   width: 24px;
   height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
 }
 
 .dropdown-menu {
@@ -507,3 +516,48 @@
   background: #d1f366;
 }
 
+.search-container {
+  position: relative; /* Importante para posicionar el dropdown de sugerencias */
+}
+
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  background: #1c1f37;
+  border-radius: 12px;
+  border: 1px solid rgba(209, 243, 102, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 1100;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(95, 100, 126, 0.1);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: rgba(209, 243, 102, 0.1);
+}
+
+.suggestion-name {
+  color: #d7dbee;
+  font-size: 14px;
+}
+
+.suggestion-date {
+  color: #5f647e;
+  font-size: 12px;
+}

@@ -10,14 +10,19 @@
         </button>
     </div>
 
-        @if(filteredViajes.length > 0){
+        <!-- Estado de carga -->
+        @if(isLoading){
+            <div class="loading-state">
+                <div class="spinner"></div>
+            </div>
+        }@else if(filteredViajes.length > 0){
             <section class="grid-container">
             @for (trip of filteredViajes; track trip.id) {
 
             <div class="activity-card" (click)="selectTrip(String(trip.id))">
                 <div class="card-image-wrapper">
 
-                    <img class="card-image" [src]="'tripTypes/' + trip.type + '.jpg'" alt="" srcset="">
+                    <img class="card-image" [src]="'tripTypes/' + trip.type + '.webp'" alt="" loading="eager" fetchpriority="high">
 
                     <div class="image-overlay-gradient"></div>
 
@@ -27,10 +32,7 @@
 
                       <button (click)="deleteTrip(trip.id, $event)"><i class="fa-solid fa-trash delete-btn"></i></button>
 
-                      <button [routerLink]="['/editTrip', trip.id]"><i class="fa-solid fa-pen trip-edit-btn"></i></button>
-
-
-
+                      <button (click)="editTrip(trip.id, $event)"><i class="fa-solid fa-pen trip-edit-btn"></i></button>
 
 
                     </div>

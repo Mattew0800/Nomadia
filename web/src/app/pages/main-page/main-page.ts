@@ -2,10 +2,10 @@ import {Component, HostListener, ElementRef, ViewChild, HostBinding, OnInit} fro
 import {CommonModule} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
 import {Test} from '../test/test';
-import {TripService} from '../../services/trip-service';
+import {TripService} from '../../services/Trip/trip-service';
 import {TripResponse} from '../../models/TripResponse';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ActivityService} from '../../services/activity-service';
+import {ActivityService} from '../../services/Activity/activity-service';
 import {User} from '../../models/User';
 import {TravelerResponse} from '../../models/TravelerResponse';
 import {ActivityResponseDTO} from '../../models/ActivityResponse';
@@ -36,6 +36,7 @@ type AgendaItem = {
 
 export class MainPage implements OnInit {
 
+  isLoading: boolean = true;
   activeNav = 0;
   startWeekOnMonday = true;
 
@@ -123,6 +124,7 @@ export class MainPage implements OnInit {
   }
 
   private fetchTripData(id: string) {
+    this.isLoading = true;
     this.tService.getTripById(id).subscribe({
       next: (trip: TripResponse) => {
         this.currentTrip = trip;
@@ -131,10 +133,12 @@ export class MainPage implements OnInit {
         this.loadAgendaForSelectedDay();
 
         console.log('Viaje cargado:', this.currentTrip);
+        this.isLoading = false;
       },
       error: (e: any) => {
         console.error('Error al cargar el viaje con ID:', id, e);
         localStorage.removeItem('selectedTripId');
+        this.isLoading = false;
         this.router.navigate(['/tripList']);
       }
     });
@@ -483,6 +487,44 @@ export class MainPage implements OnInit {
 
       }
     })
+  }
+
+  removeMember(email: string) {
+    if (!this.currentTrip) {
+      console.error('No hay viaje actual seleccionado');
+      return;
+    }
+
+    const tripId = String(this.currentTrip.id);
+
+    this.tService.removeUser(tripId, email).subscribe({
+      next: (response) => {
+        console.log('Usuario eliminado exitosamente:', response);
+        // Actualizar la lista local de usuarios
+        this.tService.users = this.tService.users.filter(user => user.email !== email);
+        this.msgInviteOk = "Usuario eliminado con éxito.";
+        this.msgInviteError = "";
+      },
+      error: (e: any) => {
+        console.error('Error completo al eliminar usuario:', e);
+        this.msgInviteOk = "";
+
+        // Manejar diferentes tipos de errores
+        if (e.error && typeof e.error === 'string') {
+          this.msgInviteError = e.error;
+        } else if (e.error && e.error.message) {
+          this.msgInviteError = e.error.message;
+        } else if (e.message) {
+          this.msgInviteError = e.message;
+        } else if (e.status === 0) {
+          this.msgInviteError = "No se pudo conectar con el servidor.";
+        } else if (e.status) {
+          this.msgInviteError = `Error ${e.status}: ${e.statusText || 'Error al eliminar el usuario'}`;
+        } else {
+          this.msgInviteError = "Error desconocido al eliminar el usuario.";
+        }
+      }
+    });
   }
 
   deleteEvent(index: number) {

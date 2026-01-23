@@ -1,9 +1,21 @@
 <app-test>
-  @if(currentTrip){
+  <!-- Estado de carga -->
+  @if(isLoading){
+    <div class="loading-state">
+      <div class="spinner"></div>
+    </div>
+  }
+  @else if(currentTrip){
     <section class="grid" [class.blurred]="isBlurred">
         <div class="hero">
           @if(currentTrip.type){
-            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.jpg'" alt="" [ngClass]="{ 'deportivo-img-pos': currentTrip.type === 'DEPORTIVO' }"/>
+            <img [src]="'tripTypes/' + (currentTrip.type || 'default') + '.webp'" alt="" loading="eager" fetchpriority="high" [ngClass]="
+            { 'deportivo-img-pos': currentTrip.type === 'DEPORTIVO',
+              'familiar-img-pos':currentTrip.type === 'FAMILIAR',
+              'fiesta-img-pos':currentTrip.type === 'FIESTA',
+              'cultural-img-pos':currentTrip.type === 'CULTURAL',
+              'relax-img-pos':currentTrip.type === 'RELAX'
+            }"/>
           }
           @if(currentTrip.name){
             <h2 class="trip-title">{{ currentTrip.name }}</h2>
@@ -159,13 +171,17 @@
 
             <li>
               <div class="avatar" style="background-color: #5C6BC0;">MO</div>
-              <div>
+              <div class="member-info">
                 <p>{{user.name}}</p>
-
                 <span>{{user.email}}</span>
-
               </div>
-              </li>
+
+              @if($index !== 0) {
+                <button class="remove-member-btn" (click)="removeMember(user.email); $event.stopPropagation()" title="Eliminar miembro">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              }
+            </li>
             }
           </ul>
         </div>

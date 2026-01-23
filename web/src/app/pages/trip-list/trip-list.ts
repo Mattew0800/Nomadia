@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Test} from '../test/test';
 import {Router, RouterLink} from '@angular/router';
-import {TripService} from '../../services/trip-service';
+import {TripService} from '../../services/Trip/trip-service';
 
 @Component({
   selector: 'app-trip-list',
@@ -12,7 +12,7 @@ import {TripService} from '../../services/trip-service';
 })
 export class TripList implements OnInit {
 
-
+  isLoading: boolean = true;
   showingActiveTrips: boolean = true;
   msgError?: string;
 
@@ -22,16 +22,18 @@ export class TripList implements OnInit {
 
   ngOnInit(): void {
     this.getTrips();
-    console.log(this.tService.trips);
   }
 
   getTrips() {
+    this.isLoading = true;
     return this.tService.getTrips().subscribe({
       next: (data) => {
         this.tService.trips = data;
+        this.isLoading = false;
       },
       error: (e) => {
         console.log(e);
+        this.isLoading = false;
       }
     })
   }
@@ -48,8 +50,31 @@ export class TripList implements OnInit {
   }
 
   get filteredViajes() {
-    const targetState = this.showingActiveTrips ? 'CONFIRMADO' : 'FINALIZADO';
-    return (this.tService.trips ?? []).filter(t => t.state === targetState);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const filtered = (this.tService.trips ?? []).filter(t => {
+      if (!t.endDate) return this.showingActiveTrips;
+
+      let endDate: Date;
+      if (t.endDate.includes('T')) {
+        endDate = new Date(t.endDate);
+      } else {
+        const [year, month, day] = t.endDate.split('-').map(Number);
+        endDate = new Date(year, month - 1, day);
+      }
+      endDate.setHours(0, 0, 0, 0);
+
+
+      const isFinished = endDate < today;
+
+      console.log(`Viaje: ${t.name}, EndDate: ${t.endDate}, EndDateParsed: ${endDate.toLocaleDateString()}, Today: ${today.toLocaleDateString()}, IsFinished: ${isFinished}`);
+
+      return this.showingActiveTrips ? !isFinished : isFinished;
+    });
+
+    console.log(`Total viajes filtrados: ${filtered.length}`);
+    return filtered;
   }
 
   deleteTrip(id: string, event: Event) {
@@ -66,6 +91,13 @@ export class TripList implements OnInit {
         }
       });
     }
+  }
+
+  editTrip(id: string, event: Event) {
+    event.stopPropagation();
+    // Guardar el ID en localStorage y también pasarlo como state
+    localStorage.setItem('editTripId', id);
+    this.router.navigate(['/editTrip'], { state: { tripId: id } });
   }
 
   protected readonly String = String;
