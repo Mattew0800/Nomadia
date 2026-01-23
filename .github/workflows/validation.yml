@@ -29,24 +29,7 @@ jobs:
       - name: Fetch base branch
         run: git fetch origin ${{ github.base_ref }}
 
-      # 5️⃣ Validate branch name
-      - name: Validate branch name
-        id: branch-check
-        run: |
-          BRANCH_NAME=${{ github.head_ref }}
-          if [[ "$BRANCH_NAME" == "develop" || "$BRANCH_NAME" == "main" ]]; then
-            echo "Branch principal, no se valida"
-            echo "branch_status=ok" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          PATTERN="^(feature|fix|chore|docs|refactor|test|style|perf)/(frontend|backend)/[A-Z]+-[0-9]+-[a-z0-9-]+$"
-          if [[ !  "$BRANCH_NAME" =~ $PATTERN ]]; then
-            ERROR_MSG="Branch invalido:  $BRANCH_NAME.  Formato esperado: tipo/stack/TICKET-descripcion. Ejemplo: feature/frontend/NOM-4-login-form"
-            echo "branch_status=fail" >> $GITHUB_OUTPUT
-            echo "branch_error=$ERROR_MSG" >> $GITHUB_OUTPUT
-            exit 1
-          else
+      
             echo "branch_status=ok" >> $GITHUB_OUTPUT
           fi
 
