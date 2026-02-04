@@ -2,6 +2,15 @@
 @use '../../styles/profile-shared';
 @use "../../styles/base";
 
+  .user-image{
+    transition: transform 0.3s ease;
+  }
+
+  .user-image:hover{
+    transform: translateY(1rem);
+    cursor: pointer;
+  }
+
 // 🎨 Mejoras visuales para inputs del formulario
 
 .form-grid {

@@ -1,0 +1,25 @@
+/* Scrollbar styling mixin */
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #141627;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #5f647e;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #d1f366;
+  }
+}
+
+/* Aplicar a los selectores existentes */
+.sidebar,
+.main-content {
+  @include custom-scrollbar;
+}

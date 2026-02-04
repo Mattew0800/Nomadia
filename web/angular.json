@@ -30,7 +30,9 @@
             ],
             "styles": [
               "src/styles.scss"
-            ]
+            ],
+            "watch": true,
+            "poll": 2000
           },
           "configurations": {
             "production": {
@@ -65,6 +67,10 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "poll": 2000,
+            "liveReload": true
+          },
           "configurations": {
             "production": {
               "buildTarget": "Nomadia:build:production"
