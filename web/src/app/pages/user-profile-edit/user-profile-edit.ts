@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import {
   AbstractControl,
@@ -29,6 +29,8 @@ import {environment} from '../../../environments/environment';
   styleUrl: './user-profile-edit.scss'
 })
 export class UserProfileEdit {
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   form: FormGroup;
   submitted = false;
@@ -269,6 +271,10 @@ removePhoto() {
   this.photoFile = undefined;
   this.photoPreview = this.DEFAULT_PHOTO;
   this.form.patchValue({ photo: this.photoPreview });
+}
+
+triggerFileInput() {
+  this.fileInput.nativeElement.click();
 }
 
 

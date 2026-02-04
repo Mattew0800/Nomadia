@@ -26,12 +26,24 @@ export class LoginPage implements OnInit {
     constructor(private authService: AuthService, private router: Router){
       this.logForm = new FormGroup({
         email: new FormControl(),
-        password: new FormControl()
+        password: new FormControl(),
+        remember: new FormControl(false)
       })
     }
 
     ngOnInit() {
       this.preloadImages();
+      this.loadRememberedEmail();
+    }
+
+    private loadRememberedEmail() {
+      const rememberedEmail = localStorage.getItem('rememberedEmail');
+      if (rememberedEmail) {
+        this.logForm.patchValue({
+          email: rememberedEmail,
+          remember: true
+        });
+      }
     }
 
     private preloadImages() {
@@ -57,11 +69,18 @@ export class LoginPage implements OnInit {
 
   login() {
 
-    const { email, password } = this.logForm.value;
+    const { email, password, remember } = this.logForm.value;
 
     this.authService.logUser(email, password).subscribe({
       next: (res) => {
         console.log("LOGUEADO JOYA");
+
+        if (remember) {
+          localStorage.setItem('rememberedEmail', email);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
+
         localStorage.setItem('token', res.token);
         this.authService.users = [{
           name: res.name,
