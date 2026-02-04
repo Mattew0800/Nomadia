@@ -76,8 +76,6 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "trip_id")
     )
-
-    @Column(nullable = true)
     private Set<Trip> trips = new HashSet<>();
 
 //    @OneToMany(mappedBy = "user")

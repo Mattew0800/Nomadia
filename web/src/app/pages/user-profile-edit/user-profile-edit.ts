@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import {
   AbstractControl,
@@ -19,6 +19,7 @@ import { ErrorResponse } from '../../models/ErrorResponse';
 import { User } from '../../models/User';
 import { Test } from '../test/test';
 import {AuthErrorResponse} from '../../models/AuthErrorResponse';
+import {environment} from '../../../environments/environment';
 
 @Component({
   selector: 'app-user-profile-edit',
@@ -29,6 +30,8 @@ import {AuthErrorResponse} from '../../models/AuthErrorResponse';
 })
 export class UserProfileEdit {
 
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   form: FormGroup;
   submitted = false;
   photoFile?: File;
@@ -36,6 +39,7 @@ export class UserProfileEdit {
   msgOk?: string;
   msgError?: string;
   loading = true;
+  uploadingPhoto = false;
   errorMessages: string = "";
   user?: User;
   DEFAULT_PHOTO = 'default-user-img.jpg';
@@ -215,16 +219,51 @@ export class UserProfileEdit {
     return maxDate.toISOString().split('T')[0];
   }
 
-onSelectPhoto(event: any) {
+async onSelectPhoto(event: any) {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onload = () => {
       this.photoPreview = reader.result as string;
-      this.form.patchValue({ photo: this.photoPreview });
     };
     reader.readAsDataURL(file);
+
+    try {
+      // Subir a Cloudinary
+      this.uploadingPhoto = true;
+      this.msgError = undefined;
+      const cloudinaryUrl = await this.uploadToCloudinary(file);
+      this.photoPreview = cloudinaryUrl;
+      console.log('Imagen subida exitosamente:', cloudinaryUrl);
+    } catch (error) {
+      console.error('Error al subir imagen:', error);
+      this.msgError = 'Error al subir la imagen. Intenta de nuevo.';
+      this.photoPreview = this.user?.photoUrl || this.DEFAULT_PHOTO;
+    } finally {
+      this.uploadingPhoto = false;
+    }
   }
+}
+
+async uploadToCloudinary(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', environment.cloudinary.uploadPreset);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${environment.cloudinary.cloudName}/image/upload`,
+    {
+      method: 'POST',
+      body: formData
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Error al subir imagen a Cloudinary');
+  }
+
+  const data = await response.json();
+  return data.secure_url; // URL de la imagen en Cloudinary
 }
 
 
@@ -232,6 +271,10 @@ removePhoto() {
   this.photoFile = undefined;
   this.photoPreview = this.DEFAULT_PHOTO;
   this.form.patchValue({ photo: this.photoPreview });
+}
+
+triggerFileInput() {
+  this.fileInput.nativeElement.click();
 }
 
 

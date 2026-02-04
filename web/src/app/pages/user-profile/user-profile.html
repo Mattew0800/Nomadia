@@ -1,34 +1,41 @@
 <app-test>
-    <div class="profile-card">
-        <div class="profile-header">
-            <section class="profile-main">
+    <!-- Estado de carga -->
+    @if(loading){
+        <div class="loading-state">
+            <div class="spinner"></div>
+        </div>
+    }
+    @else {
+        <div class="profile-card">
+            <div class="profile-header">
+                <section class="profile-main">
 
-                <div class="profile-user-profile">
-                  @if(user){
-                    <div class="user-image large">
+                    <div class="profile-user-profile">
                       @if(user){
-                        @if(user.photoUrl){
-                          <img src="{{user.photoUrl}}" alt="Foto de Usuario">
-                        }@else{
-                          <img src="default-user-img.jpg" alt="Foto de Usuario">
-                        }
+                        <div class="user-image large">
+                          @if(user){
+                            @if(user.photoUrl){
+                              <img src="{{user.photoUrl}}" alt="Foto de Usuario">
+                            }@else{
+                              <img src="default-user-img.jpg" alt="Foto de Usuario">
+                            }
+                          }
+                        </div>
+                        <div class="user-info large">
+                            @if(user){
+                            <h2 class="user-name">{{user.name}}</h2>
+                            <p class="user-status">Traveler Pro</p>
+                            }@else{
+                            <h2 class="user-name">Yo</h2>
+                            <p class="user-status">Traveler Pro</p>                        }
+
+                        </div>
                       }
                     </div>
-                    <div class="user-info large">
-                        @if(user){
-                        <h2 class="user-name">{{user.name}}</h2>
-                        <p class="user-status">Traveler Pro</p>
-                        }@else{
-                        <h2 class="user-name">Yo</h2>
-                        <p class="user-status">Traveler Pro</p>                        }
-
-                    </div>
-                  }
-                </div>
-            </section>
+                </section>
 
 
-        </div>
+            </div>
 
         <form id="userForm">
             <div class="form-grid">
@@ -121,4 +128,5 @@
             <button class="edit-btn" id="toggleEdit" routerLink="/editProfile">Editar perfil</button>
         </form>
     </div>
+    }
 </app-test>

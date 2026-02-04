@@ -1,3 +1,211 @@
 <app-test>
-  <img id="centerImg" src="noTrips.png" alt="">
+
+  <div class="grid-container">
+    <!-- Tarjetas superiores -->
+    <div class="top-cards">
+      <h3>Total gastado</h3>
+      <p class="subtitle">Costo completo de la tabla</p>
+      <h1 class="amount">$1200</h1>
+    </div>
+
+    <div class="top-cards">
+      <h3>Gasto propio</h3>
+      <p class="subtitle">Aquellos gastos en los que te involucraste</p>
+      <h1 class="amount">$300</h1>
+    </div>
+
+    <div class="top-cards">
+      <h3>Deudas pendientes</h3>
+      <p class="subtitle">Debes saldar tu parte de algunos gastos</p>
+      <h1 class="amount">$0</h1>
+    </div>
+
+    <!-- Tabla de gastos (ocupa 2 columnas) -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>Gastos</h2>
+        <div class="table-controls">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 14L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input type="text" placeholder="Buscar" />
+          </div>
+          <button class="filter-btn">Filtrar Recientes</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="expenses-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Actividad</th>
+              <th>Participantes</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=1" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=2" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=3" alt="User 3" />
+                  <img src="https://i.pravatar.cc/40?img=4" alt="User 4" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=5" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=6" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=7" alt="User 3" />
+                  <img src="https://i.pravatar.cc/40?img=8" alt="User 4" />
+                  <img src="https://i.pravatar.cc/40?img=9" alt="User 5" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=10" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=11" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=12" alt="User 3" />
+                  <img src="https://i.pravatar.cc/40?img=13" alt="User 4" />
+                  <img src="https://i.pravatar.cc/40?img=14" alt="User 5" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=15" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=16" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=17" alt="User 3" />
+                  <img src="https://i.pravatar.cc/40?img=18" alt="User 4" />
+                  <img src="https://i.pravatar.cc/40?img=19" alt="User 5" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=20" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=21" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=22" alt="User 3" />
+                  <img src="https://i.pravatar.cc/40?img=23" alt="User 4" />
+                  <img src="https://i.pravatar.cc/40?img=24" alt="User 5" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=25" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=26" alt="User 2" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=27" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=28" alt="User 2" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=29" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=30" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=31" alt="User 3" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=32" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=33" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=34" alt="User 3" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=35" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=36" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=37" alt="User 3" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=38" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=39" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=40" alt="User 3" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+            <tr>
+              <td>Cena</td>
+              <td>Sin asignar</td>
+              <td>
+                <div class="participants">
+                  <img src="https://i.pravatar.cc/40?img=41" alt="User 1" />
+                  <img src="https://i.pravatar.cc/40?img=42" alt="User 2" />
+                  <img src="https://i.pravatar.cc/40?img=43" alt="User 3" />
+                </div>
+              </td>
+              <td class="amount-cell">$115.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Sidebar (ocupa 1 columna) -->
+    <div class="sidebar-card">
+      <p>Sidebar content</p>
+    </div>
+  </div>
 </app-test>

@@ -36,6 +36,7 @@ type AgendaItem = {
 
 export class MainPage implements OnInit {
 
+  isLoading: boolean = true;
   activeNav = 0;
   startWeekOnMonday = true;
 
@@ -123,6 +124,7 @@ export class MainPage implements OnInit {
   }
 
   private fetchTripData(id: string) {
+    this.isLoading = true;
     this.tService.getTripById(id).subscribe({
       next: (trip: TripResponse) => {
         this.currentTrip = trip;
@@ -131,10 +133,12 @@ export class MainPage implements OnInit {
         this.loadAgendaForSelectedDay();
 
         console.log('Viaje cargado:', this.currentTrip);
+        this.isLoading = false;
       },
       error: (e: any) => {
         console.error('Error al cargar el viaje con ID:', id, e);
         localStorage.removeItem('selectedTripId');
+        this.isLoading = false;
         this.router.navigate(['/tripList']);
       }
     });

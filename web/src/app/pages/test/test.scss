@@ -1,5 +1,6 @@
 @use '../../styles/buttons';
 @use '../../styles/base';
+@use '../../styles/scrollbar-styling';
 
 .app-container {
   display: flex;
@@ -494,25 +495,49 @@
   }
 }
 
-/* Scrollbar styling */
-.sidebar::-webkit-scrollbar,
-.main-content::-webkit-scrollbar {
-  width: 8px;
+
+.search-container {
+  position: relative; /* Importante para posicionar el dropdown de sugerencias */
 }
 
-.sidebar::-webkit-scrollbar-track,
-.main-content::-webkit-scrollbar-track {
-  background: #141627;
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  background: #1c1f37;
+  border-radius: 12px;
+  border: 1px solid rgba(209, 243, 102, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 1100;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-.sidebar::-webkit-scrollbar-thumb,
-.main-content::-webkit-scrollbar-thumb {
-  background: #5f647e;
-  border-radius: 4px;
+.suggestion-item {
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(95, 100, 126, 0.1);
 }
 
-.sidebar::-webkit-scrollbar-thumb:hover,
-.main-content::-webkit-scrollbar-thumb:hover {
-  background: #d1f366;
+.suggestion-item:last-child {
+  border-bottom: none;
 }
 
+.suggestion-item:hover {
+  background: rgba(209, 243, 102, 0.1);
+}
+
+.suggestion-name {
+  color: #d7dbee;
+  font-size: 14px;
+}
+
+.suggestion-date {
+  color: #5f647e;
+  font-size: 12px;
+}

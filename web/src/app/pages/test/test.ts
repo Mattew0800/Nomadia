@@ -22,6 +22,8 @@ export class Test implements OnInit{
 
   searchQuery: string = ''; // Texto del buscador
   allActivities: ActivityResponseDTO[] = []; // Lista completa para comparar
+  filteredSuggestions: ActivityResponseDTO[] = [];
+  showSuggestions: boolean = false;
 
   constructor(private router: Router, public userService: UserService, public authService: AuthService, private activityService: ActivityService ){}
 
@@ -59,22 +61,33 @@ export class Test implements OnInit{
     });
   }
 
-  onSearch() {
+  onInputChange() {
     const term = this.searchQuery.trim().toLowerCase();
 
-    if (!term) return; // Si no hay texto, no hace nada
-
-    // Buscamos si hay alguna actividad que coincida con el nombre
-    const found = this.allActivities.find(a =>
-      a.name.toLowerCase().includes(term)
-    );
-
-    if (found) {
-      // Usamos 'activities' porque es el path que tienes en tu routes
-      this.router.navigate(['/activities'], { queryParams: { search: found.name } });
+    if (term.length >= 1) {
+      this.filteredSuggestions = this.allActivities
+        .filter(a => a.name.toLowerCase().includes(term))
+        .slice(0, 10); // Mostramos solo las primeras 5 sugerencias
+      this.showSuggestions = true;
     } else {
-      this.router.navigate(['/activities'], { queryParams: { search: this.searchQuery } });
+      this.showSuggestions = false;
     }
+  }
+
+  selectSuggestion(activity: ActivityResponseDTO) {
+    this.searchQuery = activity.name;
+    this.showSuggestions = false;
+    this.router.navigate(['/activities'], { queryParams: { search: activity.name } });
+  }
+
+
+  onSearch() {
+    this.showSuggestions = false;
+    const term = this.searchQuery.trim().toLowerCase();
+
+    if (!term) return;
+
+    this.router.navigate(['/activities'], { queryParams: { search: term } });
 
     this.searchQuery = '';
   }
@@ -104,11 +117,14 @@ export class Test implements OnInit{
     if (!clickedInsideMenu && !clickedButton) {
       this.showMenu = false;
     }
+    this.showSuggestions = false;
+
   }
 
   @HostListener('document:keydown.escape')
   onEsc() {
     this.showMenu = false;
+    this.showSuggestions = false;
   }
 
   isRouteActive(routePath: string): boolean {
