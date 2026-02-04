@@ -63,19 +63,13 @@ public class ActivityController {
         return activityService.getTripDebts(tripId, me.getId());
     }
 
-    @PostMapping("/total-cost")//FUNCIONA (INCREIBLEMENTE)
-    @PreAuthorize("hasRole('USER')")
-    public BigDecimal getTotalTripCost(@RequestBody TripIdRequestDTO tripId, @AuthenticationPrincipal UserDetailsImpl me){
-        return activityService.getTotalTripCost(tripId,me.getId());
-    }
-
-    @PostMapping("/average-cost")//ARREGLAR
+    @PostMapping("/average-cost")//ARREGLAR Y MOVER A TRIPCONTROLLER
     @PreAuthorize("hasRole('USER')")
     public BigDecimal getAverageCostByActivity(@RequestBody ActivityIdRequestDTO activityId,@AuthenticationPrincipal UserDetailsImpl me){
         return activityService.getAverageCostByActivity(activityId,me.getId());
     }
 
-    @PostMapping("/summary")//agregar que sume a
+    @PostMapping("/summary")//agregar que sume los costos que ya de por si tienen las actividades, tmbn mover a tripcontroller
     @PreAuthorize("hasRole('USER')")
     public ActivitySummaryDTO getActivitySummary(@RequestBody ActivityIdRequestDTO activityId, @AuthenticationPrincipal UserDetailsImpl me){
         return activityService.getActivitySummary(activityId,me.getId());

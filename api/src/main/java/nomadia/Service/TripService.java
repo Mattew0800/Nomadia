@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.PublicKey;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class TripService {
     }
 
     //USAR PARA REEMPLAZAR MEMBER Y LLAMAR A ESTO
-    private Trip getTripAndValidateMember(Long tripId,Long userId){
+    public Trip getTripAndValidateMember(Long tripId, Long userId){
         Trip trip=tripRepository.findById(tripId)
                 .orElseThrow(()->new ResponseStatusException(
                         HttpStatus.NOT_FOUND,"El viaje no existe"));
@@ -75,6 +76,11 @@ public class TripService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Trip findById(Long tripId) {
+        return tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Viaje no encontrado" ));
+    }
 
     @Transactional(readOnly = true)
     public List<UserResponseDTO> getTravelers(Long tripId,Long requesterId){
