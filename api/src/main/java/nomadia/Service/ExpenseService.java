@@ -30,33 +30,19 @@ public class ExpenseService {
         this.userService = userService;
     }
 
-    @Transactional
-    public ExpenseResponseDTO createExpense(CreateExpenseDTO dto, Long creatorId) {
+    private void rebuildParticipantsFromPayersAndSplits(Expense expense,Trip trip,BigDecimal totalAmount,List<PayerDTO> payers,boolean customSplit,List<SplitDTO> splits) {
 
-        Activity activity = null;
-        Trip trip;
-
-        if (dto.getActivityId() != null) {
-            activity = activityRepository.findById(dto.getActivityId())
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Actividad no encontrada"));
-            trip = tripService.getTripAndValidateMember(activity.getTrip().getId(), creatorId);
-        } else if (dto.getTripId() != null) {
-            trip = tripService.getTripAndValidateMember(dto.getTripId(), creatorId);
-        } else {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "El gasto debe estar asociado a una actividad o a un viaje"
-            );
+        if (payers == null || payers.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Debe haber al menos un usuario que pague");
         }
 
-        Expense expense = new Expense();
-        expense.setName(dto.getName());
-        expense.setNote(dto.getNote());
-        expense.setTotalAmount(dto.getTotalAmount());
-        expense.setActivity(activity);
-        expense.setTrip(trip);
+        if (totalAmount == null || totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El monto total debe ser mayor a cero");
+        }
 
+        expense.getParticipants().clear();
 
         Map<Long, BigDecimal> paidMap = new HashMap<>();
         Map<Long, BigDecimal> owedMap = new HashMap<>();
@@ -65,35 +51,52 @@ public class ExpenseService {
         BigDecimal totalPaid = BigDecimal.ZERO;
         BigDecimal totalOwed = BigDecimal.ZERO;
 
-        for (PayerDTO payer : dto.getPayers()) {
+        for (PayerDTO payer : payers) {
             User user = userService.findById(payer.getUserId())
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
             if (!trip.getUsers().contains(user)) {
                 throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "El pagador no pertenece al viaje");
+                        HttpStatus.FORBIDDEN, "Pagador fuera del viaje");
             }
 
-            paidMap.put(user.getId(), payer.getAmountPaid());
+            if (payer.getAmountPaid() == null ||
+                    payer.getAmountPaid().compareTo(BigDecimal.ZERO) < 0) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Monto pagado inválido");
+            }
+
+            if (paidMap.putIfAbsent(user.getId(), payer.getAmountPaid()) != null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Pagador duplicado");
+            }
+
             involvedUsers.add(user.getId());
             totalPaid = totalPaid.add(payer.getAmountPaid());
         }
 
-        if (totalPaid.compareTo(dto.getTotalAmount()) != 0) {
+        if (paidMap.values().stream().allMatch(v -> v.compareTo(BigDecimal.ZERO) == 0)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Al menos un usuario debe pagar un monto mayor a cero");
+        }
+
+        if (totalPaid.compareTo(totalAmount) != 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "La suma de los pagos no coincide con el total");
         }
 
-        if (dto.isCustomSplit()) {
-            if (dto.getSplits() == null || dto.getSplits().isEmpty()) {
+        if (customSplit) {
+            if (splits == null || splits.isEmpty()) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "La división personalizada requiere splits");
+                        "Split personalizado requerido");
             }
 
-            for (SplitDTO split : dto.getSplits()) {
+            for (SplitDTO split : splits) {
                 User user = userService.findById(split.getUserId())
                         .orElseThrow(() -> new ResponseStatusException(
                                 HttpStatus.NOT_FOUND, "Usuario no encontrado"));
@@ -103,30 +106,60 @@ public class ExpenseService {
                             HttpStatus.FORBIDDEN, "Participante fuera del viaje");
                 }
 
-                owedMap.put(user.getId(), split.getAmountOwed());
+                if (split.getAmountOwed() == null ||
+                        split.getAmountOwed().compareTo(BigDecimal.ZERO) < 0) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Monto del split inválido");
+                }
+
+                if (owedMap.putIfAbsent(user.getId(), split.getAmountOwed()) != null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Split duplicado para el mismo usuario");
+                }
+
                 involvedUsers.add(user.getId());
                 totalOwed = totalOwed.add(split.getAmountOwed());
             }
 
-            if (totalOwed.compareTo(dto.getTotalAmount()) != 0) {
+            if (totalOwed.compareTo(totalAmount) != 0) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "La suma de los consumos no coincide con el total");
+                        "La suma del split no coincide con el total");
+            }
+
+            for (Long payerId : paidMap.keySet()) {
+                if (!owedMap.containsKey(payerId)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Todo pagador debe estar incluido en el split");
+                }
             }
 
         } else {
-            BigDecimal equalShare = dto.getTotalAmount()
-                    .divide(BigDecimal.valueOf(involvedUsers.size()), 2, RoundingMode.HALF_UP);
+            BigDecimal base = totalAmount.divide(
+                    BigDecimal.valueOf(involvedUsers.size()),
+                    2,
+                    RoundingMode.DOWN);
+
+            BigDecimal remainder = totalAmount.subtract(
+                    base.multiply(BigDecimal.valueOf(involvedUsers.size())));
+
             for (Long userId : involvedUsers) {
-                owedMap.put(userId, equalShare);
-                totalOwed = totalOwed.add(equalShare);
+                BigDecimal share = base;
+                if (remainder.compareTo(BigDecimal.ZERO) > 0) {
+                    share = share.add(new BigDecimal("0.01"));
+                    remainder = remainder.subtract(new BigDecimal("0.01"));
+                }
+                owedMap.put(userId, share);
             }
         }
 
-        List<Participant> participants = new ArrayList<>();
-
         for (Long userId : involvedUsers) {
-            User user = userService.findById(userId).get();
+            User user = userService.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
             Participant participant = new Participant();
             participant.setExpense(expense);
@@ -134,22 +167,54 @@ public class ExpenseService {
             participant.setAmountPaid(paidMap.getOrDefault(userId, BigDecimal.ZERO));
             participant.setAmountOwned(owedMap.getOrDefault(userId, BigDecimal.ZERO));
 
-            participants.add(participant);
+            expense.getParticipants().add(participant);
         }
-
-        expense.setParticipants(participants);
-
-        return ExpenseResponseDTO.fromEntity(expenseRepository.save(expense));
     }
 
 
-    private void validateIntegrity(BigDecimal totalPaid, BigDecimal totalOwned, BigDecimal totalAmount) {
-        if (totalPaid.compareTo(totalAmount) != 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La suma de los pagos no coincide con el total");
+
+    @Transactional
+    public ExpenseResponseDTO updateExpense(UpdateExpenseDTO dto, Long userId) {
+
+        Expense expense = expenseRepository.findById(dto.getExpenseId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Gasto no encontrado"));
+
+        Trip trip = expense.getTrip();
+        if (trip.getUsers().stream().noneMatch(u -> u.getId().equals(userId))) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "No pertenecés al viaje");
         }
-        if (totalOwned.compareTo(totalAmount) != 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La suma de los pagos no coincide con el total");
-        }
+
+        expense.setName(dto.getName());
+        expense.setNote(dto.getNote());
+        expense.setTotalAmount(dto.getTotalAmount());
+
+        rebuildParticipantsFromPayersAndSplits(
+                expense,
+                trip,
+                dto.getTotalAmount(),
+                dto.getPayers(),
+                dto.isCustomSplit(),
+                dto.getSplits()
+        );
+
+        expenseRepository.save(expense);
+
+        return ExpenseResponseDTO.fromEntity(expense);
+    }
+
+
+    @Transactional
+    public ExpenseResponseDTO createExpense(CreateExpenseDTO dto, Long userId) {
+        Trip trip = tripService.getTripAndValidateMember(dto.getTripId(), userId);
+        Expense expense = new Expense();
+        expense.setName(dto.getName());
+        expense.setNote(dto.getNote());
+        expense.setTotalAmount(dto.getTotalAmount());
+        expense.setTrip(trip);
+        rebuildParticipantsFromPayersAndSplits(expense,trip,dto.getTotalAmount(),dto.getPayers(),dto.isCustomSplit(),dto.getSplits());
+        return ExpenseResponseDTO.fromEntity(expenseRepository.save(expense));
     }
 
     @Transactional(readOnly = true)
@@ -160,75 +225,11 @@ public class ExpenseService {
     }
 
     @Transactional
-    public ExpenseResponseDTO updateExpense(UpdateExpenseDTO dto, Long userId) {
-
-        Expense expense = expenseRepository.findById(dto.getExpenseId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Gasto no encontrado"
-                ));
-
-        Trip trip = expense.getTrip();
-        if (!trip.getUsers().stream().anyMatch(u -> u.getId().equals(userId))) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "No pertenecés al viaje"
-            );
-        }
-
-        expense.setName(dto.getName());
-        expense.setNote(dto.getNote());
-        expense.setTotalAmount(dto.getTotalAmount());
-
-        expense.getParticipants().clear();
-
-        BigDecimal totalPaid = BigDecimal.ZERO;
-        BigDecimal totalOwned = BigDecimal.ZERO;
-
-        Set<Long> uniqueUsers = new HashSet<>();
-        for (ExpenseParticipantDTO p : dto.getParticipants()) {
-
-            User user = userService.findById(p.getUserId())
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Usuario no encontrado"
-                    ));
-
-            if (!trip.getUsers().contains(user)) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "El usuario no pertenece al viaje"
-                );
-            }
-            if (!uniqueUsers.add(p.getUserId())) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Un usuario no puede figurar más de una vez"
-                );
-            }
-
-            Participant participant = new Participant();
-            participant.setExpense(expense);
-            participant.setUser(user);
-            participant.setAmountPaid(p.getAmountPaid());
-            participant.setAmountOwned(p.getAmountOwned());
-
-            totalPaid = totalPaid.add(p.getAmountPaid());
-            totalOwned = totalOwned.add(p.getAmountOwned());
-
-            expense.getParticipants().add(participant);
-        }
-
-        validateIntegrity(totalPaid, totalOwned, dto.getTotalAmount());
-
-        return ExpenseResponseDTO.fromEntity(expense);
-    }
-
-
-    @Transactional
     public void deleteExpense(Long expenseId, Long userId) {
         Expense expense = expenseRepository.findByIdWithTrip(expenseId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Gasto no encontrado"));
         tripService.getTripAndValidateMember(expense.getTrip().getId(), userId);
-
         expenseRepository.delete(expense);
     }
 

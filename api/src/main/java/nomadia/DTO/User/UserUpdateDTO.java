@@ -43,13 +43,10 @@ public class UserUpdateDTO {
     @PastOrPresent(message = "La fecha no puede ser futura")
     private LocalDate birth;
 
-    @Size(min = 6, message = "La contraseña debe tener 6 caracteres como mínimo")
     private String oldPassword;
 
-    @Size(min = 6, message = "La contraseña debe tener 6 caracteres como mínimo")
     private String newNewPassword;
 
-    @Size(min = 6, message = "La contraseña debe tener 6 caracteres como mínimo")
     private String newPassword;
 
     @Min(value = 0, message = "La edad no puede ser negativa")
@@ -59,11 +56,11 @@ public class UserUpdateDTO {
     private Role role;
 
     public void applyToEntity(User user, PasswordEncoder passwordEncoder, boolean allowRoleChange){
-        if (this.name != null) user.setName(this.name.trim());
-        if (this.email != null) user.setEmail(this.email.trim().toLowerCase());
-        if (this.phone != null) user.setPhone(this.phone.trim());
-        if (this.nick != null) user.setNick(this.nick.trim());
-        if (this.about != null) user.setAbout(this.about.trim());
+        if (this.name != null && !this.name.isBlank()) user.setName(this.name.trim());
+        if (this.email != null && !this.email.isBlank()) user.setEmail(this.email.trim());
+        if (this.phone != null && !this.phone.isBlank()) user.setPhone(this.phone.trim());
+        if (this.nick != null && !this.nick.isBlank()) user.setNick(this.nick.trim());
+        if (this.about != null && !this.about.isBlank()) user.setAbout(this.about.trim());
         if (this.photoUrl != null) user.setPhotoUrl(this.photoUrl.trim());
         if (this.birth != null) user.setBirth(this.birth);
         if (this.age != null) user.setAge(this.age);
