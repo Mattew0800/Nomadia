@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class UpdateExpenseDTO extends CreateExpenseDTO{
+public class ExpenseUpdateDTO extends CreateExpenseDTO{
 
     @NotNull
     private Long expenseId;

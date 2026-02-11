@@ -3,6 +3,9 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Trip.*;
+import nomadia.DTO.UserBalance.DebtDTO;
+import nomadia.DTO.UserBalance.UserBalanceDTO;
+import nomadia.Service.ExpenseService;
 import nomadia.Service.TripService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +20,11 @@ import java.util.List;
 public class TripController {
 
     private final TripService tripService;
+    private final ExpenseService expenseService;
 
-    public TripController(TripService tripService) {
+    public TripController(TripService tripService,ExpenseService expenseService) {
         this.tripService = tripService;
+        this.expenseService = expenseService;
     }
 
     @PostMapping("/create")
@@ -80,4 +85,11 @@ public class TripController {
         tripService.removeUserFromTrip(dto.getTripId(), me.getEmail(), me.getId());
         return ResponseEntity.ok("Te removiste con exito del viaje ");
     }
+
+    @PostMapping("/debts")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<DebtDTO>> getTripDebts(@Valid @RequestBody TripIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.ok(expenseService.calculateDebts(expenseService.getTripBalance(dto, me.getId())));
+    }
+
 }

@@ -1,11 +1,16 @@
 package nomadia.Service;
 
 
+import nomadia.DTO.Activity.ActivityIdRequestDTO;
 import nomadia.DTO.Expense.*;
 import nomadia.DTO.Trip.TripIdRequestDTO;
+import nomadia.DTO.User.UserResponseDTO;
+import nomadia.DTO.UserBalance.DebtDTO;
+import nomadia.DTO.UserBalance.UserBalanceDTO;
 import nomadia.Model.*;
 import nomadia.Repository.ActivityRepository;
 import nomadia.Repository.ExpenseRepository;
+import nomadia.Repository.ParticipantRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,16 +26,29 @@ public class ExpenseService {
     private final ActivityRepository activityRepository;
     private final TripService tripService;
     private final UserService userService;
+    private final ParticipantRepository participantRepository;
 
-    public ExpenseService(ExpenseRepository expenseRepository, ActivityRepository activityRepository,
-                          TripService tripService, UserService userService) {
+    public ExpenseService(ExpenseRepository expenseRepository, ActivityRepository activityRepository,TripService tripService, UserService userService,ParticipantRepository participantRepository) {
         this.expenseRepository = expenseRepository;
         this.activityRepository = activityRepository;
         this.tripService = tripService;
         this.userService = userService;
+        this.participantRepository = participantRepository;
     }
 
-    private void rebuildParticipantsFromPayersAndSplits(Expense expense,Trip trip,BigDecimal totalAmount,List<PayerDTO> payers,boolean customSplit,List<SplitDTO> splits) {
+    private static class BalanceNode {
+        Long userId;
+        String email;
+        BigDecimal amount;
+
+        BalanceNode(Long userId, String email, BigDecimal amount) {
+            this.userId = userId;
+            this.email = email;
+            this.amount = amount;
+        }
+    }
+
+    private void rebuildParticipantsFromPayersAndSplits(Expense expense,Trip trip,BigDecimal totalAmount,List<PayerDTO> payers,boolean customSplit,List<SplitDTO> splits,boolean clearBefore) {
 
         if (payers == null || payers.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -41,8 +59,11 @@ public class ExpenseService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "El monto total debe ser mayor a cero");
         }
-
-        expense.getParticipants().clear();
+        if (clearBefore) {
+            expense.getParticipants().clear();
+        } else if (expense.getParticipants() == null) {
+            expense.setParticipants(new ArrayList<>());
+        }
 
         Map<Long, BigDecimal> paidMap = new HashMap<>();
         Map<Long, BigDecimal> owedMap = new HashMap<>();
@@ -155,65 +176,67 @@ public class ExpenseService {
                 owedMap.put(userId, share);
             }
         }
-
         for (Long userId : involvedUsers) {
             User user = userService.findById(userId)
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
             Participant participant = new Participant();
             participant.setExpense(expense);
             participant.setUser(user);
             participant.setAmountPaid(paidMap.getOrDefault(userId, BigDecimal.ZERO));
             participant.setAmountOwned(owedMap.getOrDefault(userId, BigDecimal.ZERO));
-
             expense.getParticipants().add(participant);
         }
     }
 
-
+    private Trip resolveTripAndValidateMember(CreateExpenseDTO dto, Long userId) {
+        Trip trip;
+        if (dto.getActivityId() != null) {
+            Activity activity = activityRepository.findById(dto.getActivityId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada"));
+            trip = activity.getTrip();
+            if (trip.getUsers().stream().noneMatch(u -> u.getId().equals(userId))) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "No pertenecés al viaje");
+            }
+        } else {
+            trip = tripService.getTripAndValidateMember(dto.getTripId(), userId);
+        }
+        return trip;
+    }
 
     @Transactional
-    public ExpenseResponseDTO updateExpense(UpdateExpenseDTO dto, Long userId) {
+    public ExpenseResponseDTO createExpense(CreateExpenseDTO dto, Long userId) {
+        Trip trip = resolveTripAndValidateMember(dto, userId);
+        Expense expense = new Expense();
+        if (dto.isCustomSplit() && (dto.getSplits() == null || dto.getSplits().isEmpty())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Debe especificar el split personalizado"
+            );
+        }
+        expense.setName(dto.getName());
+        expense.setNote(dto.getNote());
+        expense.setTotalAmount(dto.getTotalAmount());
+        expense.setTrip(trip);
+        rebuildParticipantsFromPayersAndSplits(expense,trip,dto.getTotalAmount(),dto.getPayers(),dto.isCustomSplit(),dto.getSplits(),false);
+        return ExpenseResponseDTO.fromEntity(expenseRepository.save(expense));
+    }
 
+    @Transactional
+    public ExpenseResponseDTO updateExpense(ExpenseUpdateDTO dto, Long userId) {
         Expense expense = expenseRepository.findById(dto.getExpenseId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Gasto no encontrado"));
-
         Trip trip = expense.getTrip();
         if (trip.getUsers().stream().noneMatch(u -> u.getId().equals(userId))) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "No pertenecés al viaje");
         }
-
         expense.setName(dto.getName());
         expense.setNote(dto.getNote());
         expense.setTotalAmount(dto.getTotalAmount());
-
-        rebuildParticipantsFromPayersAndSplits(
-                expense,
-                trip,
-                dto.getTotalAmount(),
-                dto.getPayers(),
-                dto.isCustomSplit(),
-                dto.getSplits()
-        );
-
-        expenseRepository.save(expense);
-
-        return ExpenseResponseDTO.fromEntity(expense);
-    }
-
-
-    @Transactional
-    public ExpenseResponseDTO createExpense(CreateExpenseDTO dto, Long userId) {
-        Trip trip = tripService.getTripAndValidateMember(dto.getTripId(), userId);
-        Expense expense = new Expense();
-        expense.setName(dto.getName());
-        expense.setNote(dto.getNote());
-        expense.setTotalAmount(dto.getTotalAmount());
-        expense.setTrip(trip);
-        rebuildParticipantsFromPayersAndSplits(expense,trip,dto.getTotalAmount(),dto.getPayers(),dto.isCustomSplit(),dto.getSplits());
+        rebuildParticipantsFromPayersAndSplits(expense,trip,dto.getTotalAmount(),dto.getPayers(),dto.isCustomSplit(),dto.getSplits(),true);
         return ExpenseResponseDTO.fromEntity(expenseRepository.save(expense));
     }
 
@@ -231,6 +254,156 @@ public class ExpenseService {
                         HttpStatus.NOT_FOUND, "Gasto no encontrado"));
         tripService.getTripAndValidateMember(expense.getTrip().getId(), userId);
         expenseRepository.delete(expense);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ExpenseResponseDTO> getExpensesByTrip(TripIdRequestDTO dto, Long userId) {
+        Trip trip = tripService.getTripAndValidateMember(dto.getTripId(), userId);
+        return expenseRepository.findByTripId(trip.getId()).stream()
+                .map(ExpenseResponseDTO::fromEntity)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ExpenseResponseDTO> getExpensesByActivity(ActivityIdRequestDTO dto, Long userId) {
+        Activity activity = activityRepository.findById(dto.getActivityId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Actividad no encontrada"));
+        Trip trip = activity.getTrip();
+
+        if (trip.getUsers().stream().noneMatch(u -> u.getId().equals(userId))) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "No pertenecés al viaje");
+        }
+        return expenseRepository.findByActivityId(activity.getId()).stream()
+                .map(ExpenseResponseDTO::fromEntity)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ExpenseResponseDTO getExpense(ExpenseIdRequestDTO dto, Long userId) {
+        Expense expense = expenseRepository.findByIdWithTrip(dto.getExpenseId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Gasto no encontrado"));
+
+        Trip trip = expense.getTrip();
+
+        if (trip.getUsers().stream().noneMatch(u -> u.getId().equals(userId))) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "No pertenecés al viaje");
+        }
+        return ExpenseResponseDTO.fromEntity(expense);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserBalanceDTO> getTripBalance(TripIdRequestDTO dto, Long userId) {
+
+        Trip trip = tripService.getTripAndValidateMember(dto.getTripId(), userId);
+        Map<Long, UserBalanceDTO> balances = new HashMap<>();
+        for (User user : trip.getUsers()) {
+            balances.put(
+                    user.getId(),
+                    new UserBalanceDTO(
+                            user.getId(),
+                            user.getEmail(),
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO
+                    )
+            );
+        }
+
+        List<Participant> participants =
+                participantRepository.findByTripId(trip.getId());
+
+        for (Participant p : participants) {
+            UserBalanceDTO b = balances.get(p.getUser().getId());
+            b.setPaid(b.getPaid().add(p.getAmountPaid()));
+            b.setOwed(b.getOwed().add(p.getAmountOwned()));
+        }
+
+        balances.values().forEach(b ->
+                b.setBalance(b.getPaid().subtract(b.getOwed()))
+        );
+
+        return new ArrayList<>(balances.values());
+    }
+
+
+    public List<DebtDTO> calculateDebts(List<UserBalanceDTO> balances) {
+
+        List<BalanceNode> creditors = balances.stream()
+                .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) > 0)
+                .map(b -> new BalanceNode(
+                        b.getUserId(),
+                        b.getEmail(),
+                        b.getBalance()))
+                .toList();
+
+        List<BalanceNode> debtors = balances.stream()
+                .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) < 0)
+                .map(b -> new BalanceNode(
+                        b.getUserId(),
+                        b.getEmail(),
+                        b.getBalance().abs()))
+                .toList();
+
+        List<DebtDTO> debts = new ArrayList<>();
+        int i = 0, j = 0;
+
+        while (i < debtors.size() && j < creditors.size()) {
+            BalanceNode debtor = debtors.get(i);
+            BalanceNode creditor = creditors.get(j);
+
+            BigDecimal amount = debtor.amount.min(creditor.amount);
+
+            debts.add(new DebtDTO(debtor.userId,debtor.email,creditor.userId,creditor.email,amount));
+
+            debtor.amount = debtor.amount.subtract(amount);
+            creditor.amount = creditor.amount.subtract(amount);
+
+            if (debtor.amount.compareTo(BigDecimal.ZERO) == 0) i++;
+            if (creditor.amount.compareTo(BigDecimal.ZERO) == 0) j++;
+        }
+
+        return debts;
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<DebtDTO> getTripDebts(TripIdRequestDTO tripId, Long userId) {
+        tripService.getTripAndValidateMember(tripId.getTripId(),userId);
+        return calculateDebts(
+                getUserBalancesByTrip(tripId.getTripId(), userId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserBalanceDTO> getUserBalancesByTrip(Long tripId, Long requesterId) {
+        tripService.getTripAndValidateMember(tripId,requesterId);
+        Map<Long, UserBalanceDTO> balances = new HashMap<>();
+
+        for (UserResponseDTO user : tripService.getTravelers(tripId, requesterId)) {
+            balances.put(
+                    user.getId(),
+                    new UserBalanceDTO(
+                            user.getId(),
+                            user.getEmail(),
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO
+                    )
+            );
+        }
+        for (Participant p : participantRepository.findByTripId(tripId)) {
+            UserBalanceDTO dto = balances.get(p.getUser().getId());
+            dto.setPaid(dto.getPaid().add(p.getAmountPaid()));
+            dto.setOwed(dto.getOwed().add(p.getAmountOwned()));
+        }
+        balances.values().forEach(b ->
+                b.setBalance(b.getPaid().subtract(b.getOwed()))
+        );
+        return new ArrayList<>(balances.values());
     }
 
 }

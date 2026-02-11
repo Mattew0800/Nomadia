@@ -39,7 +39,7 @@ public class UserResponseDTO {
         }
         return dto;
     }
-    //NO SE USA
+
     public UserResponseDTO withToken(String token) {
         this.token = token;
         return this;

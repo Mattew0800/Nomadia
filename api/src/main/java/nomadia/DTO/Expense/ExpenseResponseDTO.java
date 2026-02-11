@@ -22,7 +22,9 @@ public class ExpenseResponseDTO {
         dto.setName(expense.getName());
         dto.setNote(expense.getNote());
         dto.setTotalAmount(expense.getTotalAmount());
-        dto.setActivityId(expense.getActivity().getId());
+        if (expense.getActivity() != null) {
+            dto.setActivityId(expense.getActivity().getId());
+        }
         dto.setParticipants(
                 expense.getParticipants().stream().map(p -> {
                     ExpenseParticipantDTO pDto = new ExpenseParticipantDTO();

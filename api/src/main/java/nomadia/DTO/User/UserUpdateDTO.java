@@ -16,9 +16,6 @@ public class UserUpdateDTO {
     @Email(message = "Email inválido")
     private String email;
 
-    @Size(min = 6, message = "La contraseña debe tener 6 caracteres como mínimo")
-    private String password;
-
     @Pattern(
             regexp = "^$|^\\+?[0-9\\s-]{10,13}$",
             message = "El teléfono debe tener entre 10 y 13 dígitos"
@@ -64,9 +61,6 @@ public class UserUpdateDTO {
         if (this.photoUrl != null) user.setPhotoUrl(this.photoUrl.trim());
         if (this.birth != null) user.setBirth(this.birth);
         if (this.age != null) user.setAge(this.age);
-        if (this.newNewPassword != null && !this.newNewPassword.isBlank()) {
-            user.setPassword(passwordEncoder.encode(this.newNewPassword));
-        }
         if (this.role != null && allowRoleChange) {
             user.setRole(this.role);
         }

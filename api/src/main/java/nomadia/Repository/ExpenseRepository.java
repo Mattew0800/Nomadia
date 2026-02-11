@@ -63,5 +63,12 @@ AND p.user.id = :userId
         WHERE e.trip.id = :tripId
     """)
     BigDecimal getTotalByTrip(@Param("tripId") Long tripId);
+
+    @Query("SELECT e FROM Expense e WHERE e.trip.id = :tripId")
+    List<Expense> findByTripId(@Param ("tripId")Long tripId);
+
+    @Query("SELECT e FROM Expense e WHERE e.activity.id = :activityId")
+    List<Expense> findByActivityId(@Param("activityId")Long activityId);
+
 }
 

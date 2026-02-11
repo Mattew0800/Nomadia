@@ -13,16 +13,16 @@ public class CreateExpenseDTO {
     private Long activityId;
     private Long tripId;
 
-    @NotBlank
+    @NotBlank(message = "El nombre no tiene que estar vacio")
     private String name;
 
     private String note;
 
-    @NotNull
+    @NotNull(message = "El monto total no tiene que estar vacio")
     @Positive
     private BigDecimal totalAmount;
 
-    @NotEmpty
+    @NotEmpty(message = "Los que pagan no tiene que estar vacio")
     @Valid
     private List<PayerDTO> payers;
 
@@ -31,7 +31,7 @@ public class CreateExpenseDTO {
 
     private boolean customSplit;
 
-    @AssertTrue(message = "Debe asociarse a un viaje o a una actividad")
+    @AssertTrue(message = "Debe asociarse directamente a un viaje o a una actividad")
     public boolean isTripOrActivityPresent() {
         return tripId != null || activityId != null;
     }

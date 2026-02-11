@@ -27,15 +27,12 @@ public class TripUpdateDTO {
 
     private Long tripId;
 
-    @FutureOrPresent(message = "La fecha de inicio debe ser hoy o futura")
     private LocalDate startDate;
 
     private LocalDate endDate;
 
     @Size(min = 2, max = 100)
     private String description;
-
-    private State state;
 
     private TripType type;
 
@@ -44,13 +41,18 @@ public class TripUpdateDTO {
 
     private List<Activity> activities;
 
+    @AssertTrue(message = "La fecha de finalización no puede ser anterior a la de inicio")
+    public boolean isDateRangeValid() {
+        if (startDate == null || endDate == null) return true;
+        return !endDate.isBefore(startDate);
+    }
+
     public void applyToEntity(Trip trip) {
         if(tripId!=null) trip.setId(tripId);
         if (name != null) trip.setName(name);
         if (startDate != null) trip.setStartDate(startDate);
         if (endDate != null) trip.setEndDate(endDate);
         if (description != null) trip.setDescription(description);
-        if (state != null) trip.setState(state);
         if (type != null) trip.setType(type);
         if (budget != null) trip.setBudget(budget);
         if (activities != null) {
@@ -76,4 +78,5 @@ public class TripUpdateDTO {
             trip.getActivities().addAll(updatedList);
         }
     }
+
 }
