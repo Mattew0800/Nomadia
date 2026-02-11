@@ -7,12 +7,10 @@ import nomadia.DTO.Expense.*;
 import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.DTO.UserBalance.UserBalanceDTO;
 import nomadia.Service.ExpenseService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 

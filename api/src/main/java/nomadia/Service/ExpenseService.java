@@ -301,45 +301,25 @@ public class ExpenseService {
         Trip trip = tripService.getTripAndValidateMember(dto.getTripId(), userId);
         Map<Long, UserBalanceDTO> balances = new HashMap<>();
         for (User user : trip.getUsers()) {
-            balances.put(
-                    user.getId(),
-                    new UserBalanceDTO(
-                            user.getId(),
-                            user.getEmail(),
-                            BigDecimal.ZERO,
-                            BigDecimal.ZERO,
-                            BigDecimal.ZERO
-                    )
-            );
+            balances.put(user.getId(),new UserBalanceDTO(user.getId(),user.getEmail(),BigDecimal.ZERO,BigDecimal.ZERO,BigDecimal.ZERO));
         }
-
-        List<Participant> participants =
-                participantRepository.findByTripId(trip.getId());
-
+        List<Participant> participants = participantRepository.findByTripId(trip.getId());
         for (Participant p : participants) {
             UserBalanceDTO b = balances.get(p.getUser().getId());
             b.setPaid(b.getPaid().add(p.getAmountPaid()));
             b.setOwed(b.getOwed().add(p.getAmountOwned()));
         }
-
         balances.values().forEach(b ->
                 b.setBalance(b.getPaid().subtract(b.getOwed()))
         );
-
         return new ArrayList<>(balances.values());
     }
 
 
     public List<DebtDTO> calculateDebts(List<UserBalanceDTO> balances) {
-
         List<BalanceNode> creditors = balances.stream()
                 .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) > 0)
-                .map(b -> new BalanceNode(
-                        b.getUserId(),
-                        b.getEmail(),
-                        b.getBalance()))
-                .toList();
-
+                .map(b -> new BalanceNode(b.getUserId(),b.getEmail(),b.getBalance())).toList();
         List<BalanceNode> debtors = balances.stream()
                 .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) < 0)
                 .map(b -> new BalanceNode(

@@ -30,7 +30,7 @@ public class TripController {
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,@AuthenticationPrincipal UserDetailsImpl me){
-        return ResponseEntity.status(HttpStatus.CREATED).body(tripService.createTrip(dto, me.getId()));
+        return ResponseEntity.ok(tripService.createTrip(dto, me.getId()));
     }
 
     @GetMapping("/my-trips")

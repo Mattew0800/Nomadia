@@ -14,6 +14,7 @@ public class ExpenseResponseDTO {
     private String note;
     private BigDecimal totalAmount;
     private Long activityId;
+    private Long tripId;
     private List<ExpenseParticipantDTO> participants;
 
     public static ExpenseResponseDTO fromEntity(Expense expense) {
@@ -22,6 +23,7 @@ public class ExpenseResponseDTO {
         dto.setName(expense.getName());
         dto.setNote(expense.getNote());
         dto.setTotalAmount(expense.getTotalAmount());
+        dto.setTripId(expense.getTrip().getId());
         if (expense.getActivity() != null) {
             dto.setActivityId(expense.getActivity().getId());
         }

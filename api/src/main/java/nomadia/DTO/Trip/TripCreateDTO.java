@@ -6,11 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nomadia.DTO.Activity.ActivityCreateDTO;
-import nomadia.Enum.State;
 import nomadia.Enum.TripType;
 import nomadia.Model.Activity;
 import nomadia.Model.Trip;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -58,7 +56,6 @@ public class TripCreateDTO {
         if (startDate == null || endDate == null) return true;
         return endDate.isAfter(startDate);
     }
-
 
     public Trip toEntity() {
         Trip trip = new Trip();
