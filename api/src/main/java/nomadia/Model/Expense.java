@@ -32,7 +32,7 @@ public class Expense {
     private Trip trip;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "activity_id")
+    @JoinColumn(name = "activity_id", nullable = true)
     private Activity activity;
 
     @Column(nullable = true)

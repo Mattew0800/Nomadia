@@ -1,12 +1,809 @@
-import { Component } from '@angular/core';
-import {Test} from '../test/test';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Test } from '../test/test';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { TravelerResponse } from '../../models/TravelerResponse';
+import { ActivityResponseDTO } from '../../models/ActivityResponse';
+import { CreateExpenseDTO } from '../../models/CreateExpenseDTO';
+import { ExpenseUpdateDTO } from '../../models/ExpenseUpdateDTO';
+import { ExpenseResponseDTO } from '../../models/ExpenseResponseDTO';
+import { ExpenseService } from '../../services/Expenses/expense-service';
+import { TripService } from '../../services/Trip/trip-service';
+import { ActivityService } from '../../services/Activity/activity-service';
+import { UserService } from '../../services/User/user-service';
+import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-expenses-page',
-  imports: [Test],
+  imports: [Test, CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './expenses-page.html',
   styleUrl: './expenses-page.scss',
 })
-export class ExpensesPage {
+export class ExpensesPage implements OnInit {
+  expenseForm!: FormGroup;
 
+  tripMembers: TravelerResponse[] = [];
+  activities: ActivityResponseDTO[] = [];
+
+  tripId: string = '';
+  isLoading: boolean = true;
+  noTripSelected: boolean = false;
+
+  expenses: any[] = [];
+  filteredExpenses: any[] = [];
+  allExpenses: any[] = [];
+
+  divisionType: 'equal' | 'custom' = 'equal';
+
+  showForm: boolean = false;
+  showFilters: boolean = false;
+  selectedExpenseId: number | null = null;
+  selectedExpense: any = null;
+
+  showDeleteModal: boolean = false;
+  expenseToDelete: number | null = null;
+
+  filterActivityId: number | null = null;
+  filterMinAmount: number | null = null;
+  filterMaxAmount: number | null = null;
+
+  currentUserId: number | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private expenseService: ExpenseService,
+    private tripService: TripService,
+    private activityService: ActivityService,
+    private userService: UserService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {
+    const tripId = localStorage.getItem('selectedTripId') || '';
+    if (!tripId || tripId === 'null' || tripId === 'undefined') {
+      this.noTripSelected = true;
+      this.isLoading = false;
+    }
+  }
+
+  ngOnInit(): void {
+    this.tripId = localStorage.getItem('selectedTripId') || '';
+
+
+    if (!this.tripId || this.tripId === 'null' || this.tripId === 'undefined') {
+
+      if (this.tripId) {
+        localStorage.removeItem('selectedTripId');
+      }
+
+      this.noTripSelected = true;
+      this.isLoading = false;
+      this.showForm = false;
+
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.noTripSelected = false;
+    this.cdr.detectChanges();
+    this.initForm();
+    this.loadData();
+  }
+
+  goToTripList(): void {
+    this.router.navigate(['/tripList']);
+  }
+
+  get totalGastado(): number {
+    return this.expenses.reduce((sum, expense) => sum + Number(expense.totalAmount), 0);
+  }
+
+  get gastoPropio(): number {
+    if (!this.currentUserId) {
+      return 0;
+    }
+
+    return this.expenses.reduce((sum, expense) => {
+      const participant = expense.rawData?.participants?.find(
+        (p: any) => Number(p.userId) === this.currentUserId
+      );
+
+      if (participant) {
+        return sum + Number(participant.amountOwned || 0);
+      }
+      return sum;
+    }, 0);
+  }
+
+  get deudasPendientes(): number {
+    if (!this.currentUserId) {
+      return 0;
+    }
+
+    return this.expenses.reduce((sum, expense) => {
+      const participant = expense.rawData?.participants?.find(
+        (p: any) => Number(p.userId) === this.currentUserId
+      );
+
+      if (participant) {
+        const deuda = Number(participant.amountOwned || 0) - Number(participant.amountPaid || 0);
+        return sum + (deuda > 0 ? deuda : 0);
+      }
+      return sum;
+    }, 0);
+  }
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
+
+  applyFilters(): void {
+
+
+    let filtered = [...this.allExpenses];
+
+    if (this.filterActivityId !== null) {
+      filtered = filtered.filter(expense => expense.activityId === this.filterActivityId);
+    }
+
+    if (this.filterMinAmount !== null && this.filterMinAmount > 0) {
+      filtered = filtered.filter(expense => expense.totalAmount >= this.filterMinAmount!);
+    }
+
+    if (this.filterMaxAmount !== null && this.filterMaxAmount > 0) {
+      filtered = filtered.filter(expense => expense.totalAmount <= this.filterMaxAmount!);
+    }
+
+    this.filteredExpenses = filtered;
+    this.expenses = filtered;
+  }
+
+  clearFilters(): void {
+    this.filterActivityId = null;
+    this.filterMinAmount = null;
+    this.filterMaxAmount = null;
+    this.filteredExpenses = [...this.allExpenses];
+    this.expenses = [...this.allExpenses];
+  }
+
+  hasActiveFilters(): boolean {
+    return this.filterActivityId !== null ||
+           (this.filterMinAmount !== null && this.filterMinAmount > 0) ||
+           (this.filterMaxAmount !== null && this.filterMaxAmount > 0);
+  }
+
+  private hasValidTrip(): boolean {
+    if (!this.tripId || this.noTripSelected || !this.expenseForm) {
+      return false;
+    }
+    return true;
+  }
+
+  private getCurrentUserId(): void {
+    this.userService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.currentUserId = user.id ? Number(user.id) : null;
+      },
+      error: (err) => {
+        console.error('❌ Error al obtener usuario actual:', err);
+      }
+    });
+  }
+
+  private loadData(): void {
+    this.isLoading = true;
+
+    this.tripService.getTripById(this.tripId).subscribe({
+      next: (trip) => {
+
+        this.getCurrentUserId();
+
+        this.loadTripData();
+      },
+      error: (err) => {
+        console.error('❌ Error al verificar el viaje:', err);
+
+        if (err.status === 403) {
+
+          localStorage.removeItem('selectedTripId');
+
+          this.noTripSelected = true;
+          this.isLoading = false;
+          this.showForm = false;
+          this.tripId = '';
+          this.cdr.detectChanges();
+
+          alert('No tienes acceso a este viaje o tu sesión ha expirado. Por favor, inicia sesión nuevamente si el problema persiste.');
+        } else if (err.status === 404) {
+          console.warn('⚠️ Error 404: El viaje no existe');
+          localStorage.removeItem('selectedTripId');
+
+          this.noTripSelected = true;
+          this.isLoading = false;
+          this.showForm = false;
+          this.tripId = '';
+          this.cdr.detectChanges();
+
+          alert('El viaje seleccionado ya no existe.');
+        } else {
+          console.error('Error inesperado al cargar el viaje');
+          this.isLoading = false;
+        }
+      }
+    });
+  }
+
+  private loadTripData(): void {
+    this.isLoading = true;
+
+    forkJoin({
+      users: this.tripService.getUsers(this.tripId),
+      activities: this.activityService.listByTrip(Number(this.tripId)),
+      expenses: this.expenseService.getExpensesByTrip(Number(this.tripId))
+    }).subscribe({
+      next: (result) => {
+        this.tripMembers = result.users;
+        this.activities = result.activities;
+
+
+        this.allExpenses = result.expenses.map(exp => this.mapExpenseToDisplay(exp));
+        this.expenses = [...this.allExpenses];
+        this.filteredExpenses = [...this.allExpenses];
+
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar datos del viaje:', err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private mapExpenseToDisplay(exp: ExpenseResponseDTO): any {
+
+    return {
+      id: exp.id,
+      name: exp.name,
+      note: exp.note || '',
+      activityId: exp.activityId || null,
+      activityName: exp.activityId
+        ? this.activities.find(a => a.id === exp.activityId)?.name || 'Sin asignar'
+        : 'Sin asignar',
+      participants: exp.participants.map(p => {
+        const user = this.tripMembers.find(m => Number(m.id) === p.userId);
+
+
+        return {
+          id: p.userId,
+          photoUrl: user?.photoUrl || '/default-user-img.jpg'
+        };
+      }),
+      totalAmount: exp.totalAmount,
+      rawData: exp
+    };
+  }
+
+
+  private initForm(): void {
+    this.expenseForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      note: ['', [Validators.maxLength(255)]],
+      totalAmount: [0, [Validators.required, Validators.min(0.01)]],
+      activityId: [null],
+      payers: this.fb.array([], [Validators.required, this.atLeastOneValidator()]),
+      splits: this.fb.array([], [Validators.required, this.atLeastOneValidator()])
+    }, { validators: [this.totalPayersValidator(), this.totalSplitsValidator()] });
+  }
+
+  get payers(): FormArray {
+    if (!this.expenseForm) return this.fb.array([]);
+    return this.expenseForm.get('payers') as FormArray;
+  }
+
+  get splits(): FormArray {
+    if (!this.expenseForm) return this.fb.array([]);
+    return this.expenseForm.get('splits') as FormArray;
+  }
+
+  get nameControl() {
+    if (!this.expenseForm) return null;
+    return this.expenseForm.get('name');
+  }
+
+  get totalAmountControl() {
+    if (!this.expenseForm) return null;
+    return this.expenseForm.get('totalAmount');
+  }
+
+  addPayer(user: TravelerResponse): void {
+    if (!this.expenseForm || this.noTripSelected) {
+      console.warn('No se puede agregar pagador: formulario no inicializado o sin viaje seleccionado');
+      return;
+    }
+
+    console.log('addPayer llamado con usuario:', user);
+
+    const exists = this.payers.controls.some(
+      control => String(control.get('userId')?.value) === String(user.id)
+    );
+
+    if (exists) {
+      console.log('Usuario ya existe en payers');
+      return;
+    }
+
+    const payerGroup = this.fb.group({
+      userId: [user.id, Validators.required],
+      userName: [user.name],
+      amountPaid: [0, [Validators.required, Validators.min(0)]]
+    });
+
+    this.payers.push(payerGroup);
+    console.log('Payer agregado. Total payers:', this.payers.length);
+  }
+
+  // Manejar selección de pagador desde dropdown
+  onSelectPayer(userId: string): void {
+    console.log('onSelectPayer llamado con userId:', userId);
+
+    if (!userId) {
+      console.log('userId está vacío');
+      return;
+    }
+
+    const user = this.tripMembers.find(m => String(m.id) === String(userId));
+    console.log('Usuario encontrado:', user);
+
+    if (user) {
+      this.addPayer(user);
+    } else {
+      console.log('No se encontró el usuario con id:', userId);
+    }
+  }
+
+  // Remover pagador
+  removePayer(index: number): void {
+    this.payers.removeAt(index);
+  }
+
+  // Agregar consumidor
+  addSplit(user: TravelerResponse): void {
+    if (!this.expenseForm || this.noTripSelected) {
+      console.warn('No se puede agregar consumidor: formulario no inicializado o sin viaje seleccionado');
+      return;
+    }
+
+    console.log('addSplit llamado con usuario:', user);
+
+    const exists = this.splits.controls.some(
+      control => String(control.get('userId')?.value) === String(user.id)
+    );
+
+    if (exists) {
+      console.log('Usuario ya existe en splits');
+      return;
+    }
+
+    const splitGroup = this.fb.group({
+      userId: [user.id, Validators.required],
+      userName: [user.name],
+      amountOwed: [0, [Validators.required, Validators.min(0)]]
+    });
+
+    this.splits.push(splitGroup);
+    console.log('Split agregado. Total splits:', this.splits.length);
+
+    if (this.divisionType === 'equal') {
+      this.distributeEqually();
+    }
+  }
+
+  onSelectSplit(userId: string): void {
+    console.log('onSelectSplit llamado con userId:', userId);
+    console.log('tripMembers:', this.tripMembers);
+
+    if (!userId) {
+      console.log('userId está vacío');
+      return;
+    }
+
+    const user = this.tripMembers.find(m => String(m.id) === String(userId));
+    console.log('Usuario encontrado:', user);
+
+    if (user) {
+      this.addSplit(user);
+    } else {
+      console.log('No se encontró el usuario con id:', userId);
+    }
+  }
+
+  removeSplit(index: number): void {
+    this.splits.removeAt(index);
+
+    if (this.divisionType === 'equal') {
+      this.distributeEqually();
+    }
+  }
+
+  changeDivisionType(type: 'equal' | 'custom'): void {
+    this.divisionType = type;
+
+    if (type === 'equal') {
+      this.distributeEqually();
+    }
+  }
+
+  private distributeEqually(): void {
+    const total = this.expenseForm.get('totalAmount')?.value || 0;
+    const count = this.splits.length;
+
+    if (count === 0) return;
+
+    const amountPerPerson = total / count;
+
+    this.splits.controls.forEach(control => {
+      control.get('amountOwed')?.setValue(amountPerPerson, { emitEvent: false });
+    });
+  }
+
+  private atLeastOneValidator() {
+    return (formArray: AbstractControl): ValidationErrors | null => {
+      const arr = formArray as FormArray;
+      return arr.length > 0 ? null : { atLeastOne: true };
+    };
+  }
+
+  private totalPayersValidator() {
+    return (form: AbstractControl): ValidationErrors | null => {
+      const formGroup = form as FormGroup;
+      const total = formGroup.get('totalAmount')?.value || 0;
+      const payersArray = formGroup.get('payers') as FormArray;
+
+      if (!payersArray || payersArray.length === 0) return null;
+
+      const sumPaid = payersArray.controls.reduce((sum, control) => {
+        return sum + (control.get('amountPaid')?.value || 0);
+      }, 0);
+
+      return Math.abs(sumPaid - total) < 0.01 ? null : { payersTotal: true };
+    };
+  }
+
+  private totalSplitsValidator() {
+    return (form: AbstractControl): ValidationErrors | null => {
+      const formGroup = form as FormGroup;
+      const total = formGroup.get('totalAmount')?.value || 0;
+      const splitsArray = formGroup.get('splits') as FormArray;
+
+      if (!splitsArray || splitsArray.length === 0) return null;
+
+      const sumOwed = splitsArray.controls.reduce((sum, control) => {
+        return sum + (control.get('amountOwed')?.value || 0);
+      }, 0);
+
+      return Math.abs(sumOwed - total) < 0.01 ? null : { splitsTotal: true };
+    };
+  }
+
+  getAvailablePayers(): TravelerResponse[] {
+    return this.tripMembers.filter(member =>
+      !this.payers.controls.some(control => String(control.get('userId')?.value) === String(member.id))
+    );
+  }
+
+  getAvailableSplits(): TravelerResponse[] {
+    return this.tripMembers.filter(member =>
+      !this.splits.controls.some(control => String(control.get('userId')?.value) === String(member.id))
+    );
+  }
+
+  onTotalAmountChange(): void {
+    if (this.divisionType === 'equal') {
+      this.distributeEqually();
+    }
+  }
+
+  onSubmit(): void {
+    if (!this.hasValidTrip()) {
+      alert('No hay un viaje seleccionado. Por favor selecciona un viaje primero.');
+      this.router.navigate(['/tripList']);
+      return;
+    }
+
+    if (this.expenseForm.invalid) {
+      this.expenseForm.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.expenseForm.value;
+
+    if (this.selectedExpenseId) {
+      let splitsToSend: any;
+      if (this.divisionType === 'custom') {
+        splitsToSend = formValue.splits.map((s: any) => ({
+          userId: Number(s.userId),
+          amountOwed: Number(s.amountOwed)
+        }));
+      } else {
+        splitsToSend = null;
+      }
+
+      const updateDTO: ExpenseUpdateDTO = {
+        expenseId: this.selectedExpenseId,
+        tripId: Number(this.tripId),
+        activityId: formValue.activityId || null,
+        name: formValue.name,
+        note: formValue.note || '',
+        totalAmount: formValue.totalAmount,
+        payers: formValue.payers.map((p: any) => ({
+          userId: Number(p.userId),
+          amountPaid: Number(p.amountPaid)
+        })),
+        splits: splitsToSend,
+        customSplit: this.divisionType === 'custom'
+      };
+
+      console.log('📤 DTO a actualizar:', JSON.stringify(updateDTO, null, 2));
+
+      this.expenseService.updateExpense(updateDTO).subscribe({
+        next: (response) => {
+          console.log('Gasto actualizado:', response);
+          const updatedExpense = this.mapExpenseToDisplay(response);
+
+          const allIndex = this.allExpenses.findIndex(e => e.id === this.selectedExpenseId);
+          if (allIndex !== -1) {
+            this.allExpenses[allIndex] = updatedExpense;
+          }
+
+          if (this.hasActiveFilters()) {
+            this.applyFilters();
+          } else {
+            this.expenses = [...this.allExpenses];
+          }
+
+          this.onCancel();
+        },
+        error: (err) => {
+          console.error('❌ Error al actualizar gasto:', err);
+          console.error('❌ Error completo:', JSON.stringify(err, null, 2));
+
+          let errorMsg = 'Error al actualizar el gasto. ';
+
+          if (err.error?.message) {
+            errorMsg += err.error.message;
+          } else if (err.message) {
+            errorMsg += err.message;
+          } else {
+            errorMsg += 'Por favor intenta de nuevo.';
+          }
+
+          alert(errorMsg);
+        }
+      });
+    } else {
+      let splitsToSend: any;
+      if (this.divisionType === 'custom') {
+        splitsToSend = formValue.splits.map((s: any) => ({
+          userId: Number(s.userId),
+          amountOwed: Number(s.amountOwed)
+        }));
+      } else {
+        splitsToSend = null;
+      }
+
+      const createDTO: CreateExpenseDTO = {
+        tripId: Number(this.tripId),
+        activityId: formValue.activityId || null,
+        name: formValue.name,
+        note: formValue.note || '',
+        totalAmount: formValue.totalAmount,
+        payers: formValue.payers.map((p: any) => ({
+          userId: Number(p.userId),
+          amountPaid: Number(p.amountPaid)
+        })),
+        splits: splitsToSend,
+        customSplit: this.divisionType === 'custom'
+      };
+
+
+      const invalidPayers = createDTO.payers.filter(p =>
+        !this.tripMembers.some(m => Number(m.id) === p.userId)
+      );
+
+      if (invalidPayers.length > 0) {
+        console.error('❌ ERROR: Pagadores inválidos detectados:', invalidPayers);
+        return;
+      }
+
+      this.expenseService.createExpense(createDTO).subscribe({
+        next: (response) => {
+          console.log('Gasto creado:', response);
+          const newExpense = this.mapExpenseToDisplay(response);
+          this.allExpenses.push(newExpense);
+
+          if (this.hasActiveFilters()) {
+            this.applyFilters();
+          } else {
+            this.expenses = [...this.allExpenses];
+          }
+
+          this.onCancel();
+        },
+        error: (err) => {
+          console.error('❌ Error al crear gasto:', err);
+          console.error('❌ Error completo:', JSON.stringify(err, null, 2));
+
+          let errorMsg = 'Error al crear el gasto. ';
+
+          if (err.error?.message) {
+            errorMsg += err.error.message;
+          } else if (err.message) {
+            errorMsg += err.message;
+          } else {
+            errorMsg += 'Por favor verifica:\n';
+            errorMsg += '- Que hayas agregado al menos un PAGADOR\n';
+            errorMsg += '- Que la suma de pagadores sea igual al monto total\n';
+            errorMsg += '- Que todos los campos requeridos estén completos';
+          }
+
+          alert(errorMsg);
+        }
+      });
+    }
+  }
+
+  onCancel(): void {
+    this.expenseForm.reset();
+    this.payers.clear();
+    this.splits.clear();
+    this.divisionType = 'equal';
+    this.showForm = false;
+    this.selectedExpenseId = null;
+    this.selectedExpense = null;
+  }
+
+  deleteExpense(expenseId: number, event: Event): void {
+    event.stopPropagation();
+    this.expenseToDelete = expenseId;
+    this.showDeleteModal = true;
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+    this.expenseToDelete = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.expenseToDelete) {
+      return;
+    }
+
+    const expenseId = this.expenseToDelete;
+    console.log('🗑️ Eliminando gasto con ID:', expenseId);
+
+    this.showDeleteModal = false;
+    this.expenseToDelete = null;
+
+    this.expenseService.deleteExpense(expenseId).subscribe({
+      next: () => {
+        console.log('✅ Gasto eliminado exitosamente');
+
+        this.allExpenses = this.allExpenses.filter(e => e.id !== expenseId);
+
+        if (this.hasActiveFilters()) {
+          this.applyFilters();
+        } else {
+          this.expenses = [...this.allExpenses];
+        }
+
+        if (this.selectedExpenseId === expenseId) {
+          this.onCancel();
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error al eliminar gasto:', err);
+
+        let errorMsg = 'Error al eliminar el gasto. ';
+        if (err.error?.message) {
+          errorMsg += err.error.message;
+        } else if (err.status === 403) {
+          errorMsg += 'No tenés permisos para eliminar este gasto.';
+        } else if (err.status === 404) {
+          errorMsg += 'El gasto ya no existe.';
+        } else {
+          errorMsg += 'Por favor intentá de nuevo.';
+        }
+
+        alert(errorMsg);
+      }
+    });
+  }
+
+  showCreateForm(): void {
+    if (!this.expenseForm || this.noTripSelected) {
+      console.warn('No se puede crear gasto: sin viaje seleccionado');
+      alert('Por favor selecciona un viaje primero');
+      return;
+    }
+
+    if (this.showForm) {
+      this.onCancel();
+      return;
+    }
+
+    this.showForm = true;
+    this.selectedExpenseId = null;
+    this.selectedExpense = null;
+    this.expenseForm.reset();
+    this.payers.clear();
+    this.splits.clear();
+    this.divisionType = 'equal';
+  }
+
+  viewExpenseDetails(expense: any): void {
+    if (!this.hasValidTrip()) {
+      console.warn('No se puede ver detalles: sin viaje seleccionado');
+      return;
+    }
+
+    this.selectedExpense = expense;
+    this.selectedExpenseId = expense.id;
+    this.showForm = true;
+
+    this.expenseService.getExpenseById(expense.id).subscribe({
+      next: (fullExpense) => {
+
+        this.expenseForm.patchValue({
+          name: fullExpense.name,
+          note: fullExpense.note || '',
+          totalAmount: fullExpense.totalAmount,
+          activityId: fullExpense.activityId || null
+        });
+
+        this.payers.clear();
+        this.splits.clear();
+
+        if (fullExpense.participants && fullExpense.participants.length > 0) {
+
+          fullExpense.participants.forEach((participant: any) => {
+
+            const user = this.tripMembers.find(m => Number(m.id) === participant.userId);
+
+
+            if (participant.amountPaid && participant.amountPaid > 0) {
+              const payerGroup = this.fb.group({
+                userId: [participant.userId, Validators.required],
+                userName: [user?.name],
+                amountPaid: [participant.amountPaid, [Validators.required, Validators.min(0)]]
+              });
+              this.payers.push(payerGroup);
+            }
+
+            if (participant.amountOwned && participant.amountOwned > 0) {
+              const splitGroup = this.fb.group({
+                userId: [participant.userId, Validators.required],
+                userName: [user?.name],
+                amountOwed: [participant.amountOwned, [Validators.required, Validators.min(0)]]
+              });
+              this.splits.push(splitGroup);
+            }
+          });
+
+
+          if (this.splits.length > 0) {
+            this.divisionType = 'custom';
+          } else {
+            this.divisionType = 'equal';
+          }
+
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar detalles del gasto:', err);
+        alert('Error al cargar los detalles del gasto.');
+        this.onCancel();
+      }
+    });
+  }
 }

@@ -150,13 +150,6 @@ public class ExpenseService {
                         "La suma del split no coincide con el total");
             }
 
-            for (Long payerId : paidMap.keySet()) {
-                if (!owedMap.containsKey(payerId)) {
-                    throw new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Todo pagador debe estar incluido en el split");
-                }
-            }
 
         } else {
             BigDecimal base = totalAmount.divide(
