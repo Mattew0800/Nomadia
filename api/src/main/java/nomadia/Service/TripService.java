@@ -16,7 +16,6 @@ import nomadia.Repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -47,8 +46,7 @@ public class TripService {
         return tripRepository.existsByIdAndCreatedBy_Id(tripId,userId);
     }
 
-    //USAR PARA REEMPLAZAR MEMBER Y LLAMAR A ESTO
-    private Trip getTripAndValidateMember(Long tripId,Long userId){
+    public Trip getTripAndValidateMember(Long tripId, Long userId){
         Trip trip=tripRepository.findById(tripId)
                 .orElseThrow(()->new ResponseStatusException(
                         HttpStatus.NOT_FOUND,"El viaje no existe"));
@@ -75,6 +73,11 @@ public class TripService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Trip findById(Long tripId) {
+        return tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Viaje no encontrado" ));
+    }
 
     @Transactional(readOnly = true)
     public List<UserResponseDTO> getTravelers(Long tripId,Long requesterId){
@@ -91,13 +94,24 @@ public class TripService {
                 getTripAndValidateMember(tripId,userId));
     }
 
+    private void calculateState(Trip trip) {
+        LocalDate today = LocalDate.now();
+        if (trip.getEndDate().isBefore(today)) {
+            trip.setState(State.FINALIZADO);
+        } else if (trip.getStartDate().isBefore(today)&&trip.getEndDate().isAfter(today)) {
+            trip.setState(State.EN_CURSO);
+        } else {
+            trip.setState(State.CONFIRMADO);
+        }
+    }
+
     @Transactional
     public TripResponseDTO createTrip(TripCreateDTO dto,Long userId){
         User user=userRepository.findById(userId)
                 .orElseThrow(()->new ResponseStatusException(
                         HttpStatus.NOT_FOUND,"Usuario no encontrado"));
         Trip trip=dto.toEntity();
-        trip.setState(State.CONFIRMADO);
+        calculateState(trip);
         trip.setCreatedBy(user);
         trip.getUsers().add(user);
         Trip saved=tripRepository.save(trip);
@@ -168,12 +182,19 @@ public class TripService {
 
     @Transactional
     public Optional<TripResponseDTO> updateTrip(Long tripId, TripUpdateDTO dto, Long userId) {
-        if (!isOwner(dto.getTripId(), userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"No tenés permiso para modificar este viaje");
-        } if (dto.getName() != null && tripRepository.existsByNameIgnoreCaseAndUsers_Id(dto.getName(), userId)) {
+        validateOwner(tripId,userId);
+         if (dto.getName() != null && tripRepository.existsByNameIgnoreCaseAndUsers_Id(dto.getName(), userId)) {
             throw new IllegalArgumentException("Ya tenés otro viaje con ese nombre."); }
-        return tripRepository.findById(tripId).map(trip -> { dto.applyToEntity(trip);
+        return tripRepository.findById(tripId).map(trip -> {
+            dto.applyToEntity(trip);
+            if (trip.getEndDate().isBefore(trip.getStartDate())) {
+                throw new IllegalArgumentException(
+                        "La fecha de finalización no puede ser anterior a la de inicio"
+                );
+            }
+            calculateState(trip);
             Trip updated = tripRepository.save(trip);
             return TripResponseDTO.fromEntity(updated);
         });
-    } }
+    }
+}
