@@ -1,23 +1,75 @@
 <app-test>
 
+  <!-- Mensaje cuando no hay viaje seleccionado -->
+  @if(noTripSelected) {
+    <div class="no-trip-container">
+      <div class="no-trip-card">
+        <img src="/nomadia-penguin.png" alt="Nomadia Penguin" class="penguin-icon" />
+        <h2>No hay viaje seleccionado</h2>
+        <p class="message">Para poder ver y gestionar los gastos, primero necesitas seleccionar un viaje activo.</p>
+        <p class="submessage">Ve a la sección de viajes y elige el viaje del que quieres gestionar los gastos.</p>
+
+
+        <button class="btn-primary" (click)="goToTripList()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          Ir a mis viajes
+        </button>
+      </div>
+    </div>
+  } @else {
+  <!-- Contenido normal cuando hay viaje seleccionado -->
+
+  <!-- Modal de confirmación de eliminación -->
+  @if(showDeleteModal) {
+    <div class="delete-modal-overlay" (click)="cancelDelete()">
+      <div class="delete-modal" (click)="$event.stopPropagation()">
+        <div class="modal-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+        </div>
+        <h3>¿Eliminar gasto?</h3>
+        <p>Esta acción no se puede deshacer</p>
+        <div class="modal-actions">
+          <button class="btn-cancel-modal" (click)="cancelDelete()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Cancelar
+          </button>
+          <button class="btn-confirm-delete" (click)="confirmDelete()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
   <div class="grid-container" [class.sidebar-visible]="showForm">
     <!-- Tarjetas superiores -->
     <div class="top-cards">
       <h3>Total gastado</h3>
       <p class="subtitle">Costo completo de la tabla</p>
-      <h1 class="amount">$1200</h1>
+      <h1 class="amount">${{ totalGastado | number:'1.2-2' }}</h1>
     </div>
 
     <div class="top-cards">
       <h3>Gasto propio</h3>
       <p class="subtitle">Aquellos gastos en los que te involucraste</p>
-      <h1 class="amount">$300</h1>
+      <h1 class="amount">${{ gastoPropio | number:'1.2-2' }}</h1>
     </div>
 
     <div class="top-cards">
       <h3>Deudas pendientes</h3>
       <p class="subtitle">Debes saldar tu parte de algunos gastos</p>
-      <h1 class="amount">$0</h1>
+      <h1 class="amount">${{ deudasPendientes | number:'1.2-2' }}</h1>
     </div>
 
     <!-- Contenedor de contenido (tabla + sidebar) -->
@@ -34,7 +86,15 @@
               </svg>
               <input type="text" placeholder="Buscar" />
             </div>
-            <button class="filter-btn">Filtrar</button>
+            <button class="filter-btn" (click)="toggleFilters()" [class.active]="showFilters || hasActiveFilters()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"></path>
+              </svg>
+              Filtrar
+              @if(hasActiveFilters()) {
+                <span class="filter-badge">{{ hasActiveFilters() ? '●' : '' }}</span>
+              }
+            </button>
             <button class="btn-add-expense" (click)="showCreateForm()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -43,7 +103,64 @@
               Nuevo gasto
             </button>
           </div>
+
+          <!-- Panel de filtros (dentro del table-header para position absolute) -->
+          @if(showFilters) {
+            <div class="filters-panel" (click)="$event.stopPropagation()">
+              <div class="filters-content">
+                <h3>Filtros</h3>
+
+                <div class="filter-group">
+                  <label>Actividad</label>
+                  <select [(ngModel)]="filterActivityId" class="filter-select">
+                    <option [value]="null">Todas las actividades</option>
+                    @for(activity of activities; track activity.id) {
+                      <option [value]="activity.id">{{ activity.name }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label>Monto mínimo</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="filterMinAmount"
+                    placeholder="$0"
+                    min="0"
+                    step="0.01"
+                    class="filter-input"
+                  />
+                </div>
+
+                <div class="filter-group">
+                  <label>Monto máximo</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="filterMaxAmount"
+                    placeholder="$0"
+                    min="0"
+                    step="0.01"
+                    class="filter-input"
+                  />
+                </div>
+
+                <div class="filter-actions">
+                  <button class="btn-clear" (click)="clearFilters()">
+                    Limpiar
+                  </button>
+                  <button class="btn-apply" (click)="applyFilters()">
+                    Aplicar filtros
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
         </div>
+
+        <!-- Overlay para cerrar filtros al hacer clic fuera (fuera del header para cubrir toda la pantalla) -->
+        @if(showFilters) {
+          <div class="filters-overlay" (click)="toggleFilters()"></div>
+        }
 
         <div class="table-wrapper">
           <table class="expenses-table">
@@ -53,28 +170,40 @@
                 <th>Actividad</th>
                 <th>Participantes</th>
                 <th>Monto</th>
+                <th style="width: 60px;"></th>
               </tr>
             </thead>
             <tbody>
               @if(expenses.length === 0) {
                 <tr>
-                  <td colspan="4" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.5);">
+                  <td colspan="5" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.5);">
                     No hay gastos registrados. Creá uno nuevo para comenzar.
                   </td>
                 </tr>
               }
               @for(expense of expenses; track expense.id) {
-                <tr (click)="viewExpenseDetails(expense)" style="cursor: pointer;">
-                  <td>{{ expense.name }}</td>
-                  <td>{{ expense.activityName }}</td>
-                  <td>
+                <tr>
+                  <td (click)="viewExpenseDetails(expense)" style="cursor: pointer;">{{ expense.name }}</td>
+                  <td (click)="viewExpenseDetails(expense)" style="cursor: pointer;">{{ expense.activityName }}</td>
+                  <td (click)="viewExpenseDetails(expense)" style="cursor: pointer;">
                     <div class="participants">
                       @for(participant of expense.participants; track participant.id) {
                         <img [src]="participant.photoUrl" [alt]="'User ' + participant.id" />
                       }
                     </div>
                   </td>
-                  <td class="amount-cell">${{ expense.totalAmount | number:'1.2-2' }}</td>
+                  <td (click)="viewExpenseDetails(expense)" style="cursor: pointer;" class="amount-cell">${{ expense.totalAmount | number:'1.2-2' }}</td>
+                  <td class="actions-cell">
+                    <button
+                      class="delete-btn"
+                      (click)="deleteExpense(expense.id, $event)"
+                      title="Eliminar gasto"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
+                      </svg>
+                    </button>
+                  </td>
                 </tr>
               }
             </tbody>
@@ -277,4 +406,6 @@
       </div>
     </div>
   </div>
+  }
+
 </app-test>

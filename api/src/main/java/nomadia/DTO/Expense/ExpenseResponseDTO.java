@@ -32,6 +32,7 @@ public class ExpenseResponseDTO {
                     ExpenseParticipantDTO pDto = new ExpenseParticipantDTO();
                     pDto.setUserId(p.getUser().getId());
                     pDto.setAmountPaid(p.getAmountPaid());
+                    pDto.setAmountOwned(p.getAmountOwned());
                     return pDto;
                 }).toList()
         );
