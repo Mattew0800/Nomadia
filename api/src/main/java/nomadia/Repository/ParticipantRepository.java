@@ -37,4 +37,11 @@ WHERE p.expense.activity.id = :activityId
 """)
     int countParticipantsByActivity(@Param("activityId") Long activityId);
 
+    @Query("""
+    SELECT p
+    FROM Participant p
+    JOIN p.expense e
+    WHERE e.trip.id = :tripId
+""")
+    List<Participant> findByTripId(@Param("tripId") Long tripId);
 }

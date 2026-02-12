@@ -57,27 +57,4 @@ public class ActivityController {
         return ResponseEntity.ok(Map.of("message", "Actividad eliminada correctamente"));
     }
 
-    @PostMapping("/debts")//ARREGLAR Y MOVER A TRIPCONTROLLER
-    @PreAuthorize("hasRole('USER')")
-    public List<DebtDTO> getTripDebts(@RequestBody TripIdRequestDTO tripId,@AuthenticationPrincipal UserDetailsImpl me){
-        return activityService.getTripDebts(tripId, me.getId());
-    }
-
-    @PostMapping("/total-cost")//FUNCIONA (INCREIBLEMENTE)
-    @PreAuthorize("hasRole('USER')")
-    public BigDecimal getTotalTripCost(@RequestBody TripIdRequestDTO tripId, @AuthenticationPrincipal UserDetailsImpl me){
-        return activityService.getTotalTripCost(tripId,me.getId());
-    }
-
-    @PostMapping("/average-cost")//ARREGLAR
-    @PreAuthorize("hasRole('USER')")
-    public BigDecimal getAverageCostByActivity(@RequestBody ActivityIdRequestDTO activityId,@AuthenticationPrincipal UserDetailsImpl me){
-        return activityService.getAverageCostByActivity(activityId,me.getId());
-    }
-
-    @PostMapping("/summary")//agregar que sume a
-    @PreAuthorize("hasRole('USER')")
-    public ActivitySummaryDTO getActivitySummary(@RequestBody ActivityIdRequestDTO activityId, @AuthenticationPrincipal UserDetailsImpl me){
-        return activityService.getActivitySummary(activityId,me.getId());
-    }
 }

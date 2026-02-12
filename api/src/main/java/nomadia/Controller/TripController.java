@@ -3,6 +3,9 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Trip.*;
+import nomadia.DTO.UserBalance.DebtDTO;
+import nomadia.DTO.UserBalance.UserBalanceDTO;
+import nomadia.Service.ExpenseService;
 import nomadia.Service.TripService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("nomadia/trip")
@@ -18,31 +20,28 @@ import java.util.Map;
 public class TripController {
 
     private final TripService tripService;
+    private final ExpenseService expenseService;
 
-    public TripController(TripService tripService) {
+    public TripController(TripService tripService,ExpenseService expenseService) {
         this.tripService = tripService;
+        this.expenseService = expenseService;
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
-        TripResponseDTO created = tripService.createTrip(dto, me.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripCreateDTO dto,@AuthenticationPrincipal UserDetailsImpl me){
+        return ResponseEntity.ok(tripService.createTrip(dto, me.getId()));
     }
 
     @GetMapping("/my-trips")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<TripListDTO>> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl me) {
-        List<TripListDTO> trips = tripService.getMyTrips(me.getId());
-        if (trips.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
-        return ResponseEntity.ok(trips);
+    public ResponseEntity<List<TripListDTO>> lookMyTrips(@AuthenticationPrincipal UserDetailsImpl me){
+        return ResponseEntity.ok(tripService.getMyTrips(me.getId()));
     }
 
     @PostMapping("/view-trip")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<TripResponseDTO> viewTrip(@AuthenticationPrincipal UserDetailsImpl me,@RequestBody TripIdRequestDTO request) {
+    public ResponseEntity<TripResponseDTO> viewTrip(@AuthenticationPrincipal UserDetailsImpl me,@RequestBody TripIdRequestDTO request){
         return ResponseEntity.ok(tripService.viewTrip(request.getTripId(), me.getId()));
     }
 
@@ -62,7 +61,7 @@ public class TripController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> removeUser(@Valid @RequestBody TripAddUserByEmailDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
         tripService.removeUserFromTrip(dto.getTripId(), dto.getEmail(), me.getId());
-        return ResponseEntity.ok(Map.of("message", "Usuario removido con exito"));
+        return ResponseEntity.ok("Usuario removido con exito");
     }
 
     @DeleteMapping("/delete")
@@ -86,4 +85,11 @@ public class TripController {
         tripService.removeUserFromTrip(dto.getTripId(), me.getEmail(), me.getId());
         return ResponseEntity.ok("Te removiste con exito del viaje ");
     }
+
+    @PostMapping("/debts")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<DebtDTO>> getTripDebts(@Valid @RequestBody TripIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.ok(expenseService.calculateDebts(expenseService.getTripBalance(dto, me.getId())));
+    }
+
 }

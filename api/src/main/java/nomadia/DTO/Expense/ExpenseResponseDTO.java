@@ -1,4 +1,4 @@
-package nomadia.DTO.UserBalance;
+package nomadia.DTO.Expense;
 
 import lombok.Data;
 import nomadia.Model.Expense;
@@ -14,6 +14,7 @@ public class ExpenseResponseDTO {
     private String note;
     private BigDecimal totalAmount;
     private Long activityId;
+    private Long tripId;
     private List<ExpenseParticipantDTO> participants;
 
     public static ExpenseResponseDTO fromEntity(Expense expense) {
@@ -22,7 +23,10 @@ public class ExpenseResponseDTO {
         dto.setName(expense.getName());
         dto.setNote(expense.getNote());
         dto.setTotalAmount(expense.getTotalAmount());
-        dto.setActivityId(expense.getActivity().getId());
+        dto.setTripId(expense.getTrip().getId());
+        if (expense.getActivity() != null) {
+            dto.setActivityId(expense.getActivity().getId());
+        }
         dto.setParticipants(
                 expense.getParticipants().stream().map(p -> {
                     ExpenseParticipantDTO pDto = new ExpenseParticipantDTO();

@@ -45,7 +45,6 @@ public class UserService {
         if(findByEmail(user.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
         }
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -55,7 +54,6 @@ public class UserService {
         User me = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         validateRoleChange(me, dto);
-        validateAndProcessPasswordChange(me, dto);
         String oldEmail = me.getEmail();
         User updated = updateUser(me.getId(), dto, false);
 
@@ -74,6 +72,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tenés permisos para cambiar el rol de usuario.");
         }
     }
+
     private void validateAndProcessPasswordChange(User user, UserUpdateDTO dto) {
         boolean wantsPasswordChange = notBlank(dto.getOldPassword()) ||
                 notBlank(dto.getNewPassword()) ||
@@ -99,11 +98,11 @@ public class UserService {
         if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nueva contraseña no puede ser igual a la actual.");
         }
-        dto.setPassword(dto.getNewPassword());
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
     }
 
     private boolean notBlank(String value) {
-        return value != null && !value.trim().isEmpty();
+        return value != null && !value.isBlank();
     }
 
     @Transactional
@@ -115,6 +114,7 @@ public class UserService {
                 userRepository.existsByEmailIgnoreCaseAndIdNot(dto.getEmail().trim().toLowerCase(), id)) {
             throw new IllegalArgumentException("El email ya está en uso");
         }
+        validateAndProcessPasswordChange(existing, dto);
         dto.applyToEntity(existing, passwordEncoder, allowRoleChange);
         return userRepository.save(existing);
     }

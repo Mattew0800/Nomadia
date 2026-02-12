@@ -66,7 +66,6 @@ export class ExpensesPage implements OnInit {
     return this.expenseForm.get('totalAmount');
   }
 
-  // Agregar pagador
   addPayer(user: TravelerResponse): void {
     // Verificar que no esté ya agregado
     const exists = this.payers.controls.some(

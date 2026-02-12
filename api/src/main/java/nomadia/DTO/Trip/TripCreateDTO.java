@@ -6,11 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nomadia.DTO.Activity.ActivityCreateDTO;
-import nomadia.Enum.State;
 import nomadia.Enum.TripType;
 import nomadia.Model.Activity;
 import nomadia.Model.Trip;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,7 +25,6 @@ public class TripCreateDTO {
     private String name;
 
     @NotNull(message = "La fecha de inicio es obligatoria")
-    @FutureOrPresent(message = "La fecha de inicio debe ser hoy o futura")
     private LocalDate startDate;
 
     @NotNull(message = "La fecha de finalización es obligatoria")
@@ -35,8 +32,6 @@ public class TripCreateDTO {
 
     @Size(min = 2, max = 100, message = "La descripción debe tener entre 2 y 100 caracteres")
     private String description;
-
-    private State state;
 
     @NotNull(message = "El tipo es obligatorio")
     private TripType type;
@@ -46,17 +41,20 @@ public class TripCreateDTO {
 
     private List<ActivityCreateDTO> activities;
 
-    //NO SE USA
-    @AssertTrue(message = "La fecha de finalización debe ser posterior a la fecha de inicio")
-    public boolean isEndAfterStart() {
+    private static final int MAX_YEAR = 2200;
+
+    @AssertTrue(message = "Las fechas no pueden superar el año 2200")
+    private boolean isDateWithinAllowedRange() {
+        if (startDate == null || endDate == null) return true;
+
+        return startDate.getYear() <= MAX_YEAR
+                && endDate.getYear() <= MAX_YEAR;
+    }
+
+    @AssertTrue(message = "La fecha de finalización debe ser posterior a la de inicio")
+    public boolean isDateRangeValid() {
         if (startDate == null || endDate == null) return true;
         return endDate.isAfter(startDate);
-    }
-    //NO SE USA
-    @AssertTrue(message = "La fecha de inicio no puede ser anterior a hoy")
-    public boolean isStartTodayOrFuture() {
-        if (startDate == null) return true;
-        return !startDate.isBefore(LocalDate.now());
     }
 
     public Trip toEntity() {
@@ -65,7 +63,6 @@ public class TripCreateDTO {
         trip.setStartDate(this.startDate);
         trip.setEndDate(this.endDate);
         trip.setDescription(this.description);
-        trip.setState(this.state);
         trip.setType(this.type);
         trip.setBudget(this.budget);
 
@@ -89,4 +86,6 @@ public class TripCreateDTO {
 
         return trip;
     }
+
+
 }

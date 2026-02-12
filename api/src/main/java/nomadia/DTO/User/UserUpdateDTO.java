@@ -16,8 +16,6 @@ public class UserUpdateDTO {
     @Email(message = "Email inválido")
     private String email;
 
-    private String password;
-
     @Pattern(
             regexp = "^$|^\\+?[0-9\\s-]{10,13}$",
             message = "El teléfono debe tener entre 10 y 13 dígitos"
@@ -56,16 +54,13 @@ public class UserUpdateDTO {
 
     public void applyToEntity(User user, PasswordEncoder passwordEncoder, boolean allowRoleChange){
         if (this.name != null && !this.name.isBlank()) user.setName(this.name.trim());
-        if (this.email != null && !this.email.isBlank()) user.setEmail(this.email.trim().toLowerCase());
+        if (this.email != null && !this.email.isBlank()) user.setEmail(this.email.trim());
         if (this.phone != null && !this.phone.isBlank()) user.setPhone(this.phone.trim());
         if (this.nick != null && !this.nick.isBlank()) user.setNick(this.nick.trim());
         if (this.about != null && !this.about.isBlank()) user.setAbout(this.about.trim());
-        if (this.photoUrl != null && !this.photoUrl.isBlank()) user.setPhotoUrl(this.photoUrl.trim());
+        if (this.photoUrl != null) user.setPhotoUrl(this.photoUrl.trim());
         if (this.birth != null) user.setBirth(this.birth);
         if (this.age != null) user.setAge(this.age);
-        if (this.newNewPassword != null && !this.newNewPassword.isBlank()) {
-            user.setPassword(passwordEncoder.encode(this.newNewPassword));
-        }
         if (this.role != null && allowRoleChange) {
             user.setRole(this.role);
         }
