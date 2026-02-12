@@ -1,6 +1,6 @@
 <app-test>
 
-  <div class="grid-container">
+  <div class="grid-container" [class.sidebar-visible]="showForm">
     <!-- Tarjetas superiores -->
     <div class="top-cards">
       <h3>Total gastado</h3>
@@ -20,192 +20,261 @@
       <h1 class="amount">$0</h1>
     </div>
 
-    <!-- Tabla de gastos (ocupa 2 columnas) -->
-    <div class="table-card">
-      <div class="table-header">
-        <h2>Gastos</h2>
-        <div class="table-controls">
-          <div class="search-box">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M14 14L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <input type="text" placeholder="Buscar" />
+    <!-- Contenedor de contenido (tabla + sidebar) -->
+    <div class="content-wrapper">
+      <!-- Tabla de gastos -->
+      <div class="table-card">
+        <div class="table-header">
+          <h2>Gastos</h2>
+          <div class="table-controls">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 14L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input type="text" placeholder="Buscar" />
+            </div>
+            <button class="filter-btn">Filtrar</button>
+            <button class="btn-add-expense" (click)="showCreateForm()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Nuevo gasto
+            </button>
           </div>
-          <button class="filter-btn">Filtrar Recientes</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="expenses-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Actividad</th>
+                <th>Participantes</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if(expenses.length === 0) {
+                <tr>
+                  <td colspan="4" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.5);">
+                    No hay gastos registrados. Creá uno nuevo para comenzar.
+                  </td>
+                </tr>
+              }
+              @for(expense of expenses; track expense.id) {
+                <tr (click)="viewExpenseDetails(expense)" style="cursor: pointer;">
+                  <td>{{ expense.name }}</td>
+                  <td>{{ expense.activityName }}</td>
+                  <td>
+                    <div class="participants">
+                      @for(participant of expense.participants; track participant.id) {
+                        <img [src]="participant.photoUrl" [alt]="'User ' + participant.id" />
+                      }
+                    </div>
+                  </td>
+                  <td class="amount-cell">${{ expense.totalAmount | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="table-wrapper">
-        <table class="expenses-table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Actividad</th>
-              <th>Participantes</th>
-              <th>Monto</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=1" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=2" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=3" alt="User 3" />
-                  <img src="https://i.pravatar.cc/40?img=4" alt="User 4" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=5" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=6" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=7" alt="User 3" />
-                  <img src="https://i.pravatar.cc/40?img=8" alt="User 4" />
-                  <img src="https://i.pravatar.cc/40?img=9" alt="User 5" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=10" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=11" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=12" alt="User 3" />
-                  <img src="https://i.pravatar.cc/40?img=13" alt="User 4" />
-                  <img src="https://i.pravatar.cc/40?img=14" alt="User 5" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=15" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=16" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=17" alt="User 3" />
-                  <img src="https://i.pravatar.cc/40?img=18" alt="User 4" />
-                  <img src="https://i.pravatar.cc/40?img=19" alt="User 5" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=20" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=21" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=22" alt="User 3" />
-                  <img src="https://i.pravatar.cc/40?img=23" alt="User 4" />
-                  <img src="https://i.pravatar.cc/40?img=24" alt="User 5" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=25" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=26" alt="User 2" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=27" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=28" alt="User 2" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=29" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=30" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=31" alt="User 3" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=32" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=33" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=34" alt="User 3" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=35" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=36" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=37" alt="User 3" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=38" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=39" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=40" alt="User 3" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-            <tr>
-              <td>Cena</td>
-              <td>Sin asignar</td>
-              <td>
-                <div class="participants">
-                  <img src="https://i.pravatar.cc/40?img=41" alt="User 1" />
-                  <img src="https://i.pravatar.cc/40?img=42" alt="User 2" />
-                  <img src="https://i.pravatar.cc/40?img=43" alt="User 3" />
-                </div>
-              </td>
-              <td class="amount-cell">$115.000</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <!-- Sidebar -->
+      <div class="sidebar-card" [class.visible]="showForm">
+        @if(showForm) {
+          <h2 class="sidebar-title">{{ selectedExpenseId ? 'Editar gasto' : 'Nuevo gasto' }}</h2>
 
-    <!-- Sidebar (ocupa 1 columna) -->
-    <div class="sidebar-card">
-      <p>Sidebar content</p>
+          <form [formGroup]="expenseForm" (ngSubmit)="onSubmit()" class="expense-form">
+            <!-- Nombre del gasto -->
+            <div class="form-group">
+              <label>Nombre del gasto</label>
+              <input
+                type="text"
+                formControlName="name"
+                placeholder="Ej: Cena en restaurante"
+                [class.invalid]="nameControl?.invalid && nameControl?.touched"
+              />
+              @if(nameControl?.touched && nameControl?.invalid) {
+                <span class="error-msg">El nombre es obligatorio (min. 2 caracteres)</span>
+              }
+            </div>
+
+            <!-- Nota -->
+            <div class="form-group">
+              <label>Nota</label>
+              <textarea
+                formControlName="note"
+                placeholder="Descripción o comentarios adicionales (opcional)"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <!-- Monto total -->
+            <div class="form-group">
+              <label>Monto total</label>
+              <input
+                type="number"
+                formControlName="totalAmount"
+                placeholder="0.00"
+                step="0.01"
+                (input)="onTotalAmountChange()"
+                [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
+              />
+              @if(totalAmountControl?.touched && totalAmountControl?.invalid) {
+                <span class="error-msg">Debe ser mayor a 0</span>
+              }
+            </div>
+
+            <!-- Tipo de división -->
+            <div class="form-group">
+              <label>Tipo de división</label>
+              <div class="division-type-buttons">
+                <button
+                  type="button"
+                  class="division-btn"
+                  [class.active]="divisionType === 'equal'"
+                  (click)="changeDivisionType('equal')"
+                >
+                  Partes iguales
+                </button>
+                <button
+                  type="button"
+                  class="division-btn"
+                  [class.active]="divisionType === 'custom'"
+                  (click)="changeDivisionType('custom')"
+                >
+                  Personalizada
+                </button>
+              </div>
+            </div>
+
+            <!-- Consumidores -->
+            <div class="form-group">
+              <label>Consumidores</label>
+              <p class="helper-text">Quiénes consumieron y cuánto debe cada uno</p>
+
+              @if(getAvailableSplits().length > 0) {
+                <select class="user-select" (change)="onSelectSplit($any($event.target).value); $any($event.target).value = ''">
+                  <option value="" disabled selected>+ Agregar consumidor</option>
+                  @for(user of getAvailableSplits(); track user.id) {
+                    <option [value]="user.id">{{ user.name }}</option>
+                  }
+                </select>
+              }
+
+              <div class="participants-list">
+                @for(splitControl of splits.controls; track $index) {
+                  <div class="participant-row">
+                    <img
+                      [src]="splitControl.get('userName')?.value | slice:0:1"
+                      [alt]="splitControl.get('userName')?.value"
+                      class="user-avatar"
+                      style="background: #4a5568; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;"
+                    />
+                    <span class="user-name">{{ splitControl.get('userName')?.value }}</span>
+
+                    @if(divisionType === 'custom') {
+                      <input
+                        type="number"
+                        [formControl]="$any(splitControl.get('amountOwed'))"
+                        placeholder="0.00"
+                        step="0.01"
+                        class="amount-input"
+                      />
+                    } @else {
+                      <span class="amount-display">${{ splitControl.get('amountOwed')?.value | number:'1.2-2' }}</span>
+                    }
+
+                    <button
+                      type="button"
+                      class="remove-btn"
+                      (click)="removeSplit($index)"
+                    >
+                      ×
+                    </button>
+                  </div>
+                }
+              </div>
+
+              @if(expenseForm.hasError('splitsTotal') && expenseForm.touched) {
+                <span class="error-msg">La suma de consumidores debe ser igual al monto total</span>
+              }
+            </div>
+
+            <!-- Pagadores -->
+            <div class="form-group">
+              <label>Pagadores</label>
+              <p class="helper-text">Quiénes pusieron el dinero físicamente</p>
+
+              @if(getAvailablePayers().length > 0) {
+                <select class="user-select" (change)="onSelectPayer($any($event.target).value); $any($event.target).value = ''">
+                  <option value="" disabled selected>+ Agregar pagador</option>
+                  @for(user of getAvailablePayers(); track user.id) {
+                    <option [value]="user.id">{{ user.name }}</option>
+                  }
+                </select>
+              }
+
+              <div class="participants-list">
+                @for(payerControl of payers.controls; track $index) {
+                  <div class="participant-row">
+                    <img
+                      [src]="'https://i.pravatar.cc/40?img=' + ($index + 1)"
+                      [alt]="payerControl.get('userName')?.value"
+                      class="user-avatar"
+                    />
+                    <span class="user-name">{{ payerControl.get('userName')?.value }}</span>
+
+                    <input
+                      type="number"
+                      [formControl]="$any(payerControl.get('amountPaid'))"
+                      placeholder="0.00"
+                      step="0.01"
+                      class="amount-input"
+                    />
+
+                    <button
+                      type="button"
+                      class="remove-btn"
+                      (click)="removePayer($index)"
+                    >
+                      ×
+                    </button>
+                  </div>
+                }
+              </div>
+
+              @if(expenseForm.hasError('payersTotal') && expenseForm.touched) {
+                <span class="error-msg">La suma de pagadores debe ser igual al monto total</span>
+              }
+            </div>
+
+            <!-- Actividad asignada -->
+            <div class="form-group">
+              <label>Actividad asignada (opcional)</label>
+              <select formControlName="activityId" class="activity-select">
+                <option [value]="null">Sin asignar</option>
+                @for(activity of activities; track activity.id) {
+                  <option [value]="activity.id">{{ activity.name }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+              <button type="button" class="btn-cancel" (click)="onCancel()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-save" [disabled]="expenseForm.invalid">
+                {{ selectedExpenseId ? 'Actualizar' : 'Guardar' }}
+              </button>
+            </div>
+          </form>
+        }
+      </div>
     </div>
   </div>
 </app-test>
