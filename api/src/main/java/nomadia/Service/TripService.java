@@ -1,6 +1,6 @@
 package nomadia.Service;
 
-import nomadia.Repository.ExpenseRepository;
+import nomadia.Repository.*;
 import org.springframework.transaction.annotation.Transactional;
 import nomadia.DTO.Trip.TripCreateDTO;
 import nomadia.DTO.Trip.TripListDTO;
@@ -10,9 +10,6 @@ import nomadia.DTO.User.UserResponseDTO;
 import nomadia.Enum.State;
 import nomadia.Model.Trip;
 import nomadia.Model.User;
-import nomadia.Repository.ActivityRepository;
-import nomadia.Repository.TripRepository;
-import nomadia.Repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,12 +25,14 @@ public class TripService {
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
     private final ExpenseRepository expenseRepository;
+    private final ParticipantRepository participantRepository;
 
-    public TripService(ActivityRepository activityRepository, TripRepository tripRepository, UserRepository userRepository, ExpenseRepository expenseRepository) {
+    public TripService(ActivityRepository activityRepository, TripRepository tripRepository, UserRepository userRepository, ExpenseRepository expenseRepository, ParticipantRepository participantRepository) {
         this.activityRepository = activityRepository;
         this.tripRepository = tripRepository;
         this.userRepository = userRepository;
         this.expenseRepository = expenseRepository;
+        this.participantRepository = participantRepository;
     }
 
     public boolean isMember(Long tripId,Long userId){
@@ -98,7 +97,7 @@ public class TripService {
         LocalDate today = LocalDate.now();
         if (trip.getEndDate().isBefore(today)) {
             trip.setState(State.FINALIZADO);
-        } else if (trip.getStartDate().isBefore(today)&&trip.getEndDate().isAfter(today)) {
+        } else if (!trip.getStartDate().isAfter(today)) {
             trip.setState(State.EN_CURSO);
         } else {
             trip.setState(State.CONFIRMADO);
@@ -108,8 +107,7 @@ public class TripService {
     @Transactional
     public TripResponseDTO createTrip(TripCreateDTO dto,Long userId){
         User user=userRepository.findById(userId)
-                .orElseThrow(()->new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,"Usuario no encontrado"));
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Usuario no encontrado"));
         Trip trip=dto.toEntity();
         calculateState(trip);
         trip.setCreatedBy(user);
@@ -151,32 +149,22 @@ public class TripService {
         return UserResponseDTO.fromEntity(user,false);
     }
 
+    private void validateParticipant(Long tripId,Long userId){
+        if (participantRepository.existsByUserIdAndExpenseTripId(userId,tripId)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede eliminar el viajero ya que tiene gastos asociados");
+        }
+    }
+
     @Transactional
-    public void removeUserFromTrip(Long tripId,String email,Long userId){
-        if (expenseRepository.existsExpenseByTripAndUser(tripId,userId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Los usuarios con gastos asociados no pueden salir del viaje ");
-        }
-        validateOwner(tripId,userId);
-        Trip trip=tripRepository.findById(tripId)
-                .orElseThrow(()->new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,"El viaje no existe"));
-        if (trip.getStartDate().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Los usuarios no pueden salir de viajes en curso"
-            );
-        }
-        User user=userRepository.findByEmail(email)
-                .orElseThrow(()->new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "No existe un usuario con ese email"));
-        if(!isMember(tripId,user.getId())){
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "El usuario no pertenece a este viaje");
-        }
-        user.getTrips().remove(trip);
-        trip.getUsers().remove(user);
+    public void removeUserFromTrip(Long tripId, String email, Long requesterId){
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El viaje no existe"));
+        validateOwner(tripId, requesterId);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No existe un usuario con ese email"));
+        getTripAndValidateMember(tripId, user.getId());
+        validateParticipant(tripId, user.getId());
+        removeUserRelation(trip,user.getId());
         tripRepository.save(trip);
     }
 
@@ -188,13 +176,40 @@ public class TripService {
         return tripRepository.findById(tripId).map(trip -> {
             dto.applyToEntity(trip);
             if (trip.getEndDate().isBefore(trip.getStartDate())) {
-                throw new IllegalArgumentException(
-                        "La fecha de finalización no puede ser anterior a la de inicio"
-                );
+                throw new IllegalArgumentException("La fecha de finalización no puede ser anterior a la de inicio");
             }
             calculateState(trip);
             Trip updated = tripRepository.save(trip);
             return TripResponseDTO.fromEntity(updated);
         });
+    }
+
+    private void removeUserRelation(Trip trip, Long userId) {
+        User user = trip.getUsers().stream()
+                .filter(u -> u.getId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Inconsistencia de datos"));
+        user.getTrips().remove(trip);
+        trip.getUsers().remove(user);
+    }
+
+    public void removeSelfFromTrip(Long tripId,Long userId){
+        Trip trip=getTripAndValidateMember(tripId,userId);
+        validateParticipant(tripId,userId);
+        if(!trip.getCreatedBy().getId().equals(userId)){
+            removeUserRelation(trip, userId);
+            tripRepository.save(trip);
+            return;
+        }
+        if (trip.getUsers().size() <= 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"No podés abandonar un viaje del que sos el único participante");
+        }
+        User newOwner = trip.getUsers().stream()
+                .filter(u -> !u.getId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No hay nuevo dueño"));
+        trip.setCreatedBy(newOwner);
+        removeUserRelation(trip, userId);
+        tripRepository.save(trip);
     }
 }

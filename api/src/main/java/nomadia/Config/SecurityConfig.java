@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors().and()
                 .authorizeHttpRequests(auth -> auth
-                        // Endpoints auth
+                        // Endpoints, dsps mi yo del futuro agrega los que faltan ok
                         .requestMatchers("/nomadia/auth/logout").hasRole("USER")
                         .requestMatchers("/nomadia/auth/register").permitAll()
                         .requestMatchers("/nomadia/auth/login").permitAll()
@@ -98,7 +98,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
