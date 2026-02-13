@@ -17,11 +17,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       const loginApiUrl = '/login';
 
-      // Errores de conexión: backend no disponible
-      // status 0 = no se pudo conectar al servidor
-      // 502 = Bad Gateway
-      // 503 = Service Unavailable
-      // 504 = Gateway Timeout
       if (error.status === 0 || error.status === 502 || error.status === 503 || error.status === 504) {
         console.error('Interceptor: Backend no disponible. Redirigiendo a página de error...');
         backendStatus.setBackendAvailable(false);
@@ -32,12 +27,25 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return EMPTY;
       }
 
-      // Token expirado o inválido
       if (error.status === 401 && !req.url.includes(loginApiUrl)) {
         localStorage.removeItem('token');
+        localStorage.removeItem('selectedTripId');
         console.error('Interceptor: Token expirado o inválido. Redirigiendo a /login...');
         router.navigate(['/login']);
         return EMPTY;
+      }
+
+      if (error.status === 403 && !req.url.includes(loginApiUrl)) {
+        const criticalEndpoints = ['/user/me', '/user/profile', '/user/get'];
+        const isCriticalEndpoint = criticalEndpoints.some(endpoint => req.url.includes(endpoint));
+
+        if (isCriticalEndpoint) {
+          console.error('Interceptor: Usuario no encontrado o sin permisos (403). Limpiando sesión y redirigiendo a /login...');
+          localStorage.removeItem('token');
+          localStorage.removeItem('selectedTripId');
+          router.navigate(['/login']);
+          return EMPTY;
+        }
       }
 
       return throwError(() => error);
