@@ -12,28 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TripRepository extends JpaRepository<Trip,Long> {
-    //no se usa
-    List<Trip> findByUsers_Id(Long userId);
-    //no se usa
-    Optional<Trip> findByNameIgnoreCaseAndUsers_Id(String name, Long userId);
 
     Optional<Trip> findById(Long id);
     @Query("SELECT t FROM Trip t JOIN t.users u WHERE u.id = :userId")
     List<Trip> findTripsByUserId(@Param("userId") Long userId);
-    //no se usa
-    @Query("select t.createdBy.id from Trip t where t.id = :tripId")
-    Optional<Long> findOwnerId(@Param("tripId") Long tripId);
-    @Query("""
-    SELECT COUNT(t) > 0
-    FROM Trip t
-    LEFT JOIN t.users u
-    WHERE t.id = :tripId AND (t.createdBy.id = :userId OR u.id = :userId)
-""")
-    //no se usa
-    boolean existsByIdAndUserId(
-            @Param("tripId") Long tripId,
-            @Param("userId") Long userId
-    );
 
         @Query("""
     SELECT COUNT(t)

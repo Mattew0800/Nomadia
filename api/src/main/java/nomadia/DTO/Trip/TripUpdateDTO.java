@@ -54,7 +54,6 @@ public class TripUpdateDTO {
         if (endDate != null) trip.setEndDate(endDate);
         if (description != null) trip.setDescription(description);
         if (type != null) trip.setType(type);
-        if (budget != null) trip.setBudget(budget);
         if (activities != null) {
             Map<Long, Activity> existing = trip.getActivities().stream()
                     .collect(Collectors.toMap(Activity::getId, a -> a));
