@@ -82,8 +82,8 @@ public class TripController {
     @PutMapping("/remove-self")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> removeSelf(@Valid @RequestBody TripIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me){
-        tripService.removeUserFromTrip(dto.getTripId(), me.getEmail(), me.getId());
-        return ResponseEntity.ok("Te removiste con exito del viaje ");
+        tripService.removeSelfFromTrip(dto.getTripId(), me.getId());
+        return ResponseEntity.ok(Map.of("message", "Has sido eliminado del viaje correctamente"));
     }
 
     @PostMapping("/debts")

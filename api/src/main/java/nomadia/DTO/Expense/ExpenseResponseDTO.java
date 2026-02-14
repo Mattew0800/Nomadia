@@ -24,7 +24,7 @@ public class ExpenseResponseDTO {
         dto.setNote(expense.getNote());
         dto.setTotalAmount(expense.getTotalAmount());
         dto.setTripId(expense.getTrip().getId());
-        if (expense.getActivity() != null) {
+        if (expense.getActivity()!= null) {
             dto.setActivityId(expense.getActivity().getId());
         }
         dto.setParticipants(
