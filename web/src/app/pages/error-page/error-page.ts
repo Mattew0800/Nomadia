@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackendStatusService } from '../../services/Backend-Status/backend-status.service';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-error-page',
@@ -10,11 +11,15 @@ import { CommonModule } from '@angular/common';
   styleUrl: './error-page.scss',
   standalone: true
 })
-export class ErrorPage implements OnInit {
+export class ErrorPage implements OnInit, OnDestroy {
   errorType: string = '404';
   errorTitle: string = '404';
   errorMessage: string = 'Esta no es la página que estás buscando...';
   showRetryButton: boolean = false;
+  showLoader: boolean = false;
+
+  private backendStatusSubscription?: Subscription;
+  private previousRoute: string = '/mainPage'; // Ruta a la que volver cuando el backend esté disponible
 
   constructor(
     private route: ActivatedRoute,
@@ -29,24 +34,47 @@ export class ErrorPage implements OnInit {
 
       if (type === 'backend-unavailable') {
         this.errorType = 'backend';
-        this.errorTitle = 'Servidor no disponible';
-        this.errorMessage = 'No se puede conectar con el servidor. Por favor, verifica que el backend esté iniciado e intenta nuevamente.';
-        this.showRetryButton = true;
+        this.errorTitle = 'Conexión perdida';
+        this.errorMessage = 'Intentando restablecer la conexión con el servidor...';
+        this.showRetryButton = false;
+        this.showLoader = true;
+
+        // Suscribirse al estado del backend
+        this.subscribeToBackendStatus();
       } else {
         this.errorType = '404';
         this.errorTitle = '404';
         this.errorMessage = 'Esta no es la página que estás buscando...';
         this.showRetryButton = false;
+        this.showLoader = false;
       }
     });
   }
 
-  retry(): void {
-    // Marcar backend como disponible nuevamente
-    this.backendStatus.setBackendAvailable(true);
+  private subscribeToBackendStatus(): void {
+    this.backendStatusSubscription = this.backendStatus.backendAvailable$.subscribe(available => {
+      if (available && this.errorType === 'backend') {
+        console.log('✅ Backend disponible nuevamente, redirigiendo...');
+        this.errorTitle = '¡Conexión restablecida!';
+        this.errorMessage = 'Redirigiendo...';
 
-    // Intentar volver a la página principal
-    this.router.navigate(['/mainPage']);
+        // Esperar un momento antes de redirigir para que el usuario vea el mensaje
+        setTimeout(() => {
+          this.router.navigate([this.previousRoute]);
+        }, 1000);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.backendStatusSubscription) {
+      this.backendStatusSubscription.unsubscribe();
+    }
+  }
+
+  retry(): void {
+    // Método legacy por si acaso se usa en otros contextos
+    this.backendStatus.forceHealthCheck();
   }
 
   goHome(): void {
