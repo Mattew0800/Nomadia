@@ -120,12 +120,12 @@ public class TripService {
     @Transactional
     public void deleteTrip(Long tripId,Long userId){
         validateOwner(tripId,userId);
-        if(!tripRepository.existsById(tripId)){
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,"El viaje no existe");
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El viaje no existe"));
+        for (User user : trip.getUsers()) {
+            user.getTrips().remove(trip);
         }
-        tripRepository.deleteRelations(tripId);
-        activityRepository.deleteByTripId(tripId);
+        trip.getUsers().clear();
         tripRepository.deleteById(tripId);
     }
 
