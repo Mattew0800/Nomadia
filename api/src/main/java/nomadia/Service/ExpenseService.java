@@ -209,7 +209,7 @@ public class ExpenseService {
     public BigDecimal getTotalTripCost(TripIdRequestDTO dto, Long userId) {
         tripService.getTripAndValidateMember(dto.getTripId(), userId);
         return activityRepository.getTotalActivityCostByTrip(dto.getTripId())
-                .add(expenseRepository.getTotalExpensesByTrip(dto.getTripId()));
+                .add(expenseRepository.getTotalByTrip(dto.getTripId()));
     }
 
     @Transactional

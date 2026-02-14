@@ -55,15 +55,5 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     """)
     BigDecimal getTotalActivityCostByTrip(@Param("tripId") Long tripId);
 
-    @Query("""
-SELECT a.id, p.user.id, COALESCE(SUM(p.amountPaid), 0)
-FROM Participant p
-JOIN p.expense e
-JOIN e.activity a
-JOIN a.trip t
-WHERE t.id = :tripId
-GROUP BY a.id, p.user.id
-""")
-    List<Object[]> findPaidByUserAndActivity(@Param("tripId") Long tripId);
 }
 
