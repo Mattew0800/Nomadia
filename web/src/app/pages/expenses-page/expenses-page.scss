@@ -783,6 +783,52 @@
         color: #ff6b6b;
         font-size: 12px;
       }
+
+      .total-amount-wrapper {
+        display: flex;
+        align-items: center;
+        min-height: 42px;
+      }
+
+      .total-amount-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px 12px;
+        color: white;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.2s;
+
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        &:focus {
+          background: rgba(255, 255, 255, 0.12);
+          border-color: #DCFC18;
+        }
+
+        &.invalid {
+          border-color: #ff6b6b;
+        }
+      }
+
+      .total-amount-display {
+        color: #DCFC18;
+        font-size: 20px;
+        font-weight: 600;
+        padding: 10px 12px;
+
+        &.clickable {
+          cursor: pointer;
+
+          &:hover {
+            opacity: 0.8;
+          }
+        }
+      }
     }
 
     .division-type-buttons {
@@ -849,6 +895,20 @@
           white-space: nowrap;
         }
 
+        .amount-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 4px;
+          width: 100px;
+
+          .input-error-msg {
+            color: #ff6b6b;
+            font-size: 11px;
+            white-space: nowrap;
+          }
+        }
+
         .amount-input {
           width: 100px;
           background: rgba(255, 255, 255, 0.08);
@@ -862,6 +922,10 @@
           &:focus {
             border-color: #DCFC18;
           }
+
+          &.invalid {
+            border-color: #ff6b6b;
+          }
         }
 
         .amount-display {
@@ -870,6 +934,14 @@
           color: #DCFC18;
           font-size: 14px;
           font-weight: 600;
+
+          &.clickable {
+            cursor: pointer;
+
+            &:hover {
+              opacity: 0.8;
+            }
+          }
         }
 
         .remove-btn {

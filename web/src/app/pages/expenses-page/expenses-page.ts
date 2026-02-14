@@ -36,6 +36,9 @@ export class ExpensesPage implements OnInit {
   allExpenses: any[] = [];
 
   divisionType: 'equal' | 'custom' = 'equal';
+  editingSplits = new Set<number>();
+  editingPayers = new Set<number>();
+  editingTotalAmount = false;
 
   showForm: boolean = false;
   showFilters: boolean = false;
@@ -285,6 +288,109 @@ export class ExpensesPage implements OnInit {
   }
 
 
+  // Helpers para modo edición de consumidores
+  private getSplitKey(index: number): number {
+    const control = this.splits.at(index);
+    return Number(control.get('userId')?.value ?? index);
+  }
+
+  isSplitEditing(index: number): boolean {
+    return this.editingSplits.has(this.getSplitKey(index));
+  }
+
+  startSplitEdit(index: number): void {
+    this.editingSplits.add(this.getSplitKey(index));
+    // Usar setTimeout para asegurar que el input esté renderizado antes de seleccionar
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('.participants-list .amount-input');
+      // Encontrar el input correcto basado en el índice
+      let splitInputIndex = 0;
+      for (let i = 0; i <= index && splitInputIndex < inputs.length; i++) {
+        if (this.isSplitEditing(i)) {
+          if (i === index) {
+            const input = inputs[splitInputIndex] as HTMLInputElement;
+            if (input) {
+              input.focus();
+              input.select();
+            }
+            break;
+          }
+          splitInputIndex++;
+        }
+      }
+    }, 0);
+  }
+
+  finishSplitEdit(index: number): void {
+    this.editingSplits.delete(this.getSplitKey(index));
+  }
+
+  // Helpers para modo edición de pagadores
+  private getPayerKey(index: number): number {
+    const control = this.payers.at(index);
+    return Number(control.get('userId')?.value ?? index);
+  }
+
+  isPayerEditing(index: number): boolean {
+    return this.editingPayers.has(this.getPayerKey(index));
+  }
+
+  startPayerEdit(index: number): void {
+    this.editingPayers.add(this.getPayerKey(index));
+    // Usar setTimeout para asegurar que el input esté renderizado antes de seleccionar
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('.participant-row .amount-input');
+      const input = inputs[index] as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  finishPayerEdit(index: number): void {
+    const control = this.payers.at(index);
+    const amountControl = control.get('amountPaid');
+    const currentValue = amountControl?.value;
+
+    // Si está vacío o null, establecer en 0
+    if (currentValue === null || currentValue === undefined || currentValue === '') {
+      amountControl?.setValue(0);
+    }
+
+    // Marcar como tocado para mostrar validación
+    amountControl?.markAsTouched();
+
+    this.editingPayers.delete(this.getPayerKey(index));
+  }
+
+  // Helpers para modo edición de monto total
+  startTotalAmountEdit(): void {
+    this.editingTotalAmount = true;
+    // Usar setTimeout para asegurar que el input esté renderizado antes de seleccionar
+    setTimeout(() => {
+      const input = document.querySelector('.total-amount-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  finishTotalAmountEdit(): void {
+    const currentValue = this.totalAmountControl?.value;
+
+    // Si está vacío o null, establecer en 0
+    if (currentValue === null || currentValue === undefined || currentValue === '') {
+      this.totalAmountControl?.setValue(0);
+    }
+
+    // Marcar como tocado para mostrar validación
+    this.totalAmountControl?.markAsTouched();
+
+    this.editingTotalAmount = false;
+  }
+
   private initForm(): void {
     this.expenseForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -336,10 +442,11 @@ export class ExpensesPage implements OnInit {
     const payerGroup = this.fb.group({
       userId: [user.id, Validators.required],
       userName: [user.name],
-      amountPaid: [0, [Validators.required, Validators.min(0)]]
+      amountPaid: [0, [Validators.required, Validators.min(0.01)]]
     });
 
     this.payers.push(payerGroup);
+    this.editingPayers.add(Number(user.id));
     console.log('Payer agregado. Total payers:', this.payers.length);
   }
 
@@ -364,7 +471,9 @@ export class ExpensesPage implements OnInit {
 
   // Remover pagador
   removePayer(index: number): void {
+    const key = this.getPayerKey(index);
     this.payers.removeAt(index);
+    this.editingPayers.delete(key);
   }
 
   // Agregar consumidor
@@ -392,6 +501,7 @@ export class ExpensesPage implements OnInit {
     });
 
     this.splits.push(splitGroup);
+    this.editingSplits.add(Number(user.id));
     console.log('Split agregado. Total splits:', this.splits.length);
 
     if (this.divisionType === 'equal') {
@@ -419,7 +529,9 @@ export class ExpensesPage implements OnInit {
   }
 
   removeSplit(index: number): void {
+    const key = this.getSplitKey(index);
     this.splits.removeAt(index);
+    this.editingSplits.delete(key);
 
     if (this.divisionType === 'equal') {
       this.distributeEqually();
@@ -431,6 +543,7 @@ export class ExpensesPage implements OnInit {
 
     if (type === 'equal') {
       this.distributeEqually();
+      this.editingSplits.clear();
     }
   }
 
@@ -658,6 +771,9 @@ export class ExpensesPage implements OnInit {
     this.payers.clear();
     this.splits.clear();
     this.divisionType = 'equal';
+    this.editingSplits.clear();
+    this.editingPayers.clear();
+    this.editingTotalAmount = false;
     this.showForm = false;
     this.selectedExpenseId = null;
     this.selectedExpense = null;
@@ -739,6 +855,9 @@ export class ExpensesPage implements OnInit {
     this.payers.clear();
     this.splits.clear();
     this.divisionType = 'equal';
+    this.editingSplits.clear();
+    this.editingPayers.clear();
+    this.editingTotalAmount = true; // Activar edición automáticamente al crear
   }
 
   viewExpenseDetails(expense: any): void {
@@ -763,6 +882,8 @@ export class ExpensesPage implements OnInit {
 
         this.payers.clear();
         this.splits.clear();
+        this.editingPayers.clear();
+        this.editingSplits.clear();
 
         if (fullExpense.participants && fullExpense.participants.length > 0) {
 
@@ -775,7 +896,7 @@ export class ExpensesPage implements OnInit {
               const payerGroup = this.fb.group({
                 userId: [participant.userId, Validators.required],
                 userName: [user?.name],
-                amountPaid: [participant.amountPaid, [Validators.required, Validators.min(0)]]
+                amountPaid: [participant.amountPaid, [Validators.required, Validators.min(0.01)]]
               });
               this.payers.push(payerGroup);
             }

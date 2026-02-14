@@ -244,14 +244,23 @@
             <!-- Monto total -->
             <div class="form-group">
               <label>Monto total</label>
-              <input
-                type="number"
-                formControlName="totalAmount"
-                placeholder="0.00"
-                step="0.01"
-                (input)="onTotalAmountChange()"
-                [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
-              />
+              <div class="total-amount-wrapper">
+                @if(editingTotalAmount) {
+                  <input
+                    type="number"
+                    formControlName="totalAmount"
+                    placeholder="0.00"
+                    step="0.01"
+                    class="total-amount-input"
+                    [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
+                    (input)="onTotalAmountChange()"
+                    (blur)="finishTotalAmountEdit()"
+                    (keyup.enter)="finishTotalAmountEdit()"
+                  />
+                } @else {
+                  <span class="total-amount-display clickable" (click)="startTotalAmountEdit()">${{ totalAmountControl?.value | number:'1.2-2' }}</span>
+                }
+              </div>
               @if(totalAmountControl?.touched && totalAmountControl?.invalid) {
                 <span class="error-msg">Debe ser mayor a 0</span>
               }
@@ -305,16 +314,22 @@
                     />
                     <span class="user-name">{{ splitControl.get('userName')?.value }}</span>
 
-                    @if(divisionType === 'custom') {
+                    @if(divisionType === 'custom' && isSplitEditing($index)) {
                       <input
                         type="number"
                         [formControl]="$any(splitControl.get('amountOwed'))"
                         placeholder="0.00"
                         step="0.01"
                         class="amount-input"
+                        (blur)="finishSplitEdit($index)"
+                        (keyup.enter)="finishSplitEdit($index)"
                       />
                     } @else {
-                      <span class="amount-display">${{ splitControl.get('amountOwed')?.value | number:'1.2-2' }}</span>
+                      <span
+                        class="amount-display"
+                        [class.clickable]="divisionType === 'custom'"
+                        (click)="divisionType === 'custom' ? startSplitEdit($index) : null"
+                      >${{ splitControl.get('amountOwed')?.value | number:'1.2-2' }}</span>
                     }
 
                     <button
@@ -351,19 +366,32 @@
                 @for(payerControl of payers.controls; track $index) {
                   <div class="participant-row">
                     <img
-                      [src]="'https://i.pravatar.cc/40?img=' + ($index + 1)"
+                      [src]="payerControl.get('userName')?.value | slice:0:1"
                       [alt]="payerControl.get('userName')?.value"
                       class="user-avatar"
+                      style="background: #4a5568; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;"
                     />
                     <span class="user-name">{{ payerControl.get('userName')?.value }}</span>
 
-                    <input
-                      type="number"
-                      [formControl]="$any(payerControl.get('amountPaid'))"
-                      placeholder="0.00"
-                      step="0.01"
-                      class="amount-input"
-                    />
+                    <div class="amount-wrapper">
+                      @if(isPayerEditing($index)) {
+                        <input
+                          type="number"
+                          [formControl]="$any(payerControl.get('amountPaid'))"
+                          placeholder="0.00"
+                          step="0.01"
+                          class="amount-input"
+                          [class.invalid]="payerControl.get('amountPaid')?.invalid && payerControl.get('amountPaid')?.touched"
+                          (blur)="finishPayerEdit($index)"
+                          (keyup.enter)="finishPayerEdit($index)"
+                        />
+                      } @else {
+                        <span class="amount-display clickable" (click)="startPayerEdit($index)">${{ payerControl.get('amountPaid')?.value | number:'1.2-2' }}</span>
+                      }
+                      @if(payerControl.get('amountPaid')?.touched && payerControl.get('amountPaid')?.invalid) {
+                        <span class="input-error-msg">Debe ser mayor a 0</span>
+                      }
+                    </div>
 
                     <button
                       type="button"
