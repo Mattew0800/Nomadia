@@ -46,7 +46,6 @@ public class TripCreateDTO {
     @AssertTrue(message = "Las fechas no pueden superar el año 2200")
     private boolean isDateWithinAllowedRange() {
         if (startDate == null || endDate == null) return true;
-
         return startDate.getYear() <= MAX_YEAR
                 && endDate.getYear() <= MAX_YEAR;
     }
@@ -64,8 +63,6 @@ public class TripCreateDTO {
         trip.setEndDate(this.endDate);
         trip.setDescription(this.description);
         trip.setType(this.type);
-        trip.setBudget(this.budget);
-
         if (activities != null) {
             trip.setActivities(
                     activities.stream()

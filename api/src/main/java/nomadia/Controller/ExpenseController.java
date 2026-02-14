@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/nomadia/expense")
@@ -43,9 +44,9 @@ public class ExpenseController {
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> delete(@Valid @RequestBody ExpenseIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
+    public ResponseEntity<?> delete(@Valid @RequestBody ExpenseIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
         expenseService.deleteExpense(dto.getExpenseId(), me.getId());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(Map.of("message", "Gasto eliminado correctamente"));
     }
 
     @PostMapping("/by-trip")

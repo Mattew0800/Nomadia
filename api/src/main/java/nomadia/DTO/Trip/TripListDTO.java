@@ -36,7 +36,6 @@ public class TripListDTO {
                 .endDate(trip.getEndDate())
                 .state(trip.getState())
                 .type(trip.getType())
-                .budget(trip.getBudget())
                 .durationDays(trip.getDurationDays())
                 .activities(
                         trip.getActivities() != null

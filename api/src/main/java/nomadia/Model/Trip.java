@@ -48,12 +48,12 @@ public class Trip {
     @ManyToMany(mappedBy = "trips")
     private Set<User> users = new HashSet<>();
 
-    @Column(name = "budget", precision = 12, scale = 2)
-    private BigDecimal budget;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "created_by_id")
     private User createdBy;
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Expense> expenses;
 
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Activity> activities = new ArrayList<>();

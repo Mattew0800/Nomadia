@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Trip.*;
 import nomadia.DTO.UserBalance.DebtDTO;
-import nomadia.DTO.UserBalance.UserBalanceDTO;
 import nomadia.Service.ExpenseService;
 import nomadia.Service.TripService;
 import org.springframework.http.HttpStatus;
@@ -13,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("nomadia/trip")
@@ -82,8 +82,8 @@ public class TripController {
     @PutMapping("/remove-self")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> removeSelf(@Valid @RequestBody TripIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me){
-        tripService.removeUserFromTrip(dto.getTripId(), me.getEmail(), me.getId());
-        return ResponseEntity.ok("Te removiste con exito del viaje ");
+        tripService.removeSelfFromTrip(dto.getTripId(), me.getId());
+        return ResponseEntity.ok(Map.of("message", "Has sido eliminado del viaje correctamente"));
     }
 
     @PostMapping("/debts")
