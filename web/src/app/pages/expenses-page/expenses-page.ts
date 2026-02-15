@@ -40,6 +40,10 @@ export class ExpensesPage implements OnInit {
   editingPayers = new Set<number>();
   editingTotalAmount = false;
 
+  // Estados de edición para filtros
+  editingFilterMinAmount = false;
+  editingFilterMaxAmount = false;
+
   showForm: boolean = false;
   showFilters: boolean = false;
   selectedExpenseId: number | null = null;
@@ -198,7 +202,7 @@ export class ExpensesPage implements OnInit {
     this.isLoading = true;
 
     this.tripService.getTripById(this.tripId).subscribe({
-      next: (trip) => {
+      next: (_trip) => {
 
         this.getCurrentUserId();
 
@@ -547,6 +551,11 @@ export class ExpensesPage implements OnInit {
     }
   }
 
+  toggleDivisionType(): void {
+    const newType = this.divisionType === 'equal' ? 'custom' : 'equal';
+    this.changeDivisionType(newType);
+  }
+
   private distributeEqually(): void {
     const total = this.expenseForm.get('totalAmount')?.value || 0;
     const count = this.splits.length;
@@ -609,6 +618,52 @@ export class ExpensesPage implements OnInit {
     return this.tripMembers.filter(member =>
       !this.splits.controls.some(control => String(control.get('userId')?.value) === String(member.id))
     );
+  }
+
+  // Helper para obtener la URL de la foto de perfil del usuario
+  getUserPhotoUrl(userId: number | null | undefined): string {
+    if (!userId) {
+      return '/default-user-img.jpg';
+    }
+    const user = this.tripMembers.find(m => Number(m.id) === Number(userId));
+    return user?.photoUrl || '/default-user-img.jpg';
+  }
+
+  // Helpers para edición de filtros de monto
+  startFilterMinAmountEdit(): void {
+    this.editingFilterMinAmount = true;
+    setTimeout(() => {
+      const input = document.querySelector('.filter-min-amount-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  finishFilterMinAmountEdit(): void {
+    if (this.filterMinAmount === null || this.filterMinAmount === undefined || (this.filterMinAmount as any) === '') {
+      this.filterMinAmount = null;
+    }
+    this.editingFilterMinAmount = false;
+  }
+
+  startFilterMaxAmountEdit(): void {
+    this.editingFilterMaxAmount = true;
+    setTimeout(() => {
+      const input = document.querySelector('.filter-max-amount-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  finishFilterMaxAmountEdit(): void {
+    if (this.filterMaxAmount === null || this.filterMaxAmount === undefined || (this.filterMaxAmount as any) === '') {
+      this.filterMaxAmount = null;
+    }
+    this.editingFilterMaxAmount = false;
   }
 
   onTotalAmountChange(): void {
