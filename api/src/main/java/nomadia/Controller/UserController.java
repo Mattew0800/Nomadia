@@ -40,13 +40,6 @@ public class UserController {
         return ResponseEntity.ok(userService.updateSelf(principal.getId(), dto));
     }
 
-    @PostMapping("/create") // esto dsps se va, solo para prueba
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
-        var saved = userService.createUser(dto.toEntity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDTO.fromEntity(saved,true));
-    }
-
     @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponseDTO> getAllUsers() {
