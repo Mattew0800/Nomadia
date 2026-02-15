@@ -6,7 +6,6 @@ import nomadia.Enum.Role;
 import nomadia.Model.User;
 import java.time.LocalDate;
 
-
 @Data
 public class UserResponseDTO {
 

@@ -1,6 +1,9 @@
 package nomadia.Service;
 
 import jakarta.transaction.Transactional;
+import nomadia.DTO.Login.LoginRequestDTO;
+import nomadia.DTO.Login.LoginResponseDTO;
+import nomadia.DTO.Login.RegisterRequestDTO;
 import nomadia.DTO.User.UserResponseDTO;
 import nomadia.DTO.User.UserUpdateDTO;
 import nomadia.Enum.Role;
@@ -38,15 +41,6 @@ public class UserService {
 
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
-    }
-
-    @Transactional
-    public User createUser(User user) {
-        if(findByEmail(user.getEmail()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
-        }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
     }
 
     @Transactional
@@ -115,7 +109,7 @@ public class UserService {
             throw new IllegalArgumentException("El email ya está en uso");
         }
         validateAndProcessPasswordChange(existing, dto);
-        dto.applyToEntity(existing, passwordEncoder, allowRoleChange);
+        dto.applyToEntity(existing, allowRoleChange);
         return userRepository.save(existing);
     }
 

@@ -52,7 +52,7 @@ public class UserUpdateDTO {
 
     private Role role;
 
-    public void applyToEntity(User user, PasswordEncoder passwordEncoder, boolean allowRoleChange){
+    public void applyToEntity(User user, boolean allowRoleChange){
         if (this.name != null && !this.name.isBlank()) user.setName(this.name.trim());
         if (this.email != null && !this.email.isBlank()) user.setEmail(this.email.trim());
         if (this.phone != null && !this.phone.isBlank()) user.setPhone(this.phone.trim());

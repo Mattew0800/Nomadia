@@ -9,10 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nomadia.DTO.Login.RegisterRequestDTO;
 import nomadia.Enum.Role;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,8 +38,8 @@ public class User {
     private Role role;
 
     @Pattern(
-            regexp = "^$|^[\\S\\s]{3,10}$",
-            message = "El sobre mi debe tener entre 3 y 10 caracteres si se proporciona"
+            regexp = "^$|^[\\S\\s]{3,100}$",
+            message = "El sobre mi debe tener entre 3 y 100 caracteres"
     )
     @Column(nullable = true)
     private String about;
@@ -52,7 +52,7 @@ public class User {
 
     @Pattern(
             regexp = "^$|^[\\S\\s]{3,10}$",
-            message = "El apodo debe tener entre 3 y 10 caracteres si se proporciona"
+            message = "El apodo debe tener entre 3 y 10 caracteres"
     )
     @Column(nullable = true)
     private String nick;
@@ -82,18 +82,21 @@ public class User {
 //    private Set<Calification> califications = new HashSet<>();
 
 
-    public User toEntity() {
+    public static User fromRegisterDTO(RegisterRequestDTO dto, PasswordEncoder encoder) {
         User user = new User();
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setRole(role);
-        user.setPhone(phone);
-        user.setAge(age);
-        user.setAbout(about);
-        user.setPhotoUrl(photoUrl);
-        user.setNick(nick);
-        user.setBirth(birth);
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(encoder.encode(dto.getPassword()));
+        user.setRole(Role.USER);
+        return user;
+    }
+
+    public static User adminRegisterDTO(RegisterRequestDTO dto, PasswordEncoder encoder) {
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(encoder.encode(dto.getPassword()));
+        user.setRole(Role.ADMIN);
         return user;
     }
 
