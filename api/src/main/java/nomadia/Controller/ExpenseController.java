@@ -25,12 +25,12 @@ public class ExpenseController {
         this.expenseService = expenseService;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/create")//funciona
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ExpenseResponseDTO> createExpense(@Valid @RequestBody CreateExpenseDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
         return ResponseEntity.ok(expenseService.createExpense(dto, me.getId()));
     }
-    @PostMapping("/total-cost")
+    @PostMapping("/total-cost")//toma solo el costo por actividad, falta agregar que sume el costo de los gastos
     @PreAuthorize("hasRole('USER')")
     public BigDecimal getTotalTripCost(@RequestBody TripIdRequestDTO tripId, @AuthenticationPrincipal UserDetailsImpl me){
         return expenseService.getTotalTripCost(tripId,me.getId());
