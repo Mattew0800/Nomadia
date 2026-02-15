@@ -9,8 +9,10 @@ import lombok.Data;
 @Data
 public class RegisterRequestDTO {
 
-    @Pattern(regexp = "/^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$/i\n",
-            message="Debe ingresar nombre y apellido validos")
+    @Pattern(
+            regexp = "^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$",
+            message = "Debe ingresar nombre y apellido validos"
+    )
     @NotBlank(message = "El nombre es requerido")
     @Size(min = 2, max = 50)
     private String name;
