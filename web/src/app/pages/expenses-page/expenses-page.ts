@@ -858,8 +858,6 @@ export class ExpensesPage implements OnInit {
 
     this.expenseService.deleteExpense(expenseId).subscribe({
       next: () => {
-        console.log('✅ Gasto eliminado exitosamente');
-
         this.allExpenses = this.allExpenses.filter(e => e.id !== expenseId);
 
         if (this.hasActiveFilters()) {

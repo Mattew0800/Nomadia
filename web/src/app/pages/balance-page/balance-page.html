@@ -1,0 +1,144 @@
+<app-test>
+  <div class="balance-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando información del balance...</p>
+      </div>
+    } @else {
+
+      <!-- Contenido principal -->
+      <div class="balance-content">
+        <!-- Sección principal: Deudas -->
+        <div class="main-section">
+          <div class="section-header">
+            <h2 class="section-title">División de Deudas</h2>
+            <span class="debts-count">{{ debts.length }} deuda(s)</span>
+          </div>
+
+          @if (debts.length === 0) {
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+              </svg>
+              <p class="empty-title">¡Todo saldado!</p>
+              <span class="empty-subtitle">No hay deudas pendientes</span>
+            </div>
+          } @else {
+            <div class="debts-list-compact">
+              <div class="debt-row-compact" *ngFor="let debt of debts; trackBy: trackByIndex">
+                <!-- Avatar deudor -->
+                <img
+                  [src]="getTraveler(debt.debtorId)?.photoUrl || 'default-user-img.jpg'"
+                  alt="Debtor"
+                  class="mini-avatar"
+                  (error)="$any($event.target).src='default-user-img.jpg'"
+                >
+
+                <!-- Texto descriptivo completo -->
+                <div class="debt-description">
+                  <span class="debtor-name">{{ getTraveler(debt.debtorId)?.name || debt.debtorEmail }}</span>
+                  @if (debt.debtorId === currentUserId) {
+                    <span class="you-badge-inline">Tú</span>
+                  }
+                  <span class="debt-text">debe pagar</span>
+                  <span class="debt-amount-inline">{{ formatCurrency(debt.amount) }}</span>
+                  <span class="debt-text">a</span>
+                  <span class="creditor-name">{{ getTraveler(debt.creditorId)?.name || debt.creditorEmail }}</span>
+                  @if (debt.creditorId === currentUserId) {
+                    <span class="you-badge-inline">Tú</span>
+                  }
+                </div>
+
+                <!-- Avatar acreedor -->
+                <img
+                  [src]="getTraveler(debt.creditorId)?.photoUrl || 'default-user-img.jpg'"
+                  alt="Creditor"
+                  class="mini-avatar"
+                  (error)="$any($event.target).src='default-user-img.jpg'"
+                >
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Aside: Balance detallado -->
+        <aside class="balance-aside">
+
+
+          <!-- Tu balance detallado -->
+          <div class="aside-card">
+            <h3 class="aside-title">Tu Balance Detallado</h3>
+
+            <div class="balance-detail">
+              <div class="detail-row">
+                <span class="detail-label">Pagaste</span>
+                <span class="detail-value paid-color">{{ formatCurrency(getUserBalance(currentUserId)?.paid || 0) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Debes</span>
+                <span class="detail-value owed-color">{{ formatCurrency(getUserBalance(currentUserId)?.owed || 0) }}</span>
+              </div>
+              <div class="detail-row total-row">
+                <span class="detail-label">Balance final</span>
+                <span class="detail-value" [ngClass]="getBalanceClass(getUserBalance(currentUserId)?.balance || 0)">
+
+                  {{ formatCurrency(getUserBalance(currentUserId)?.balance || 0) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfico -->
+          <div class="aside-card">
+            <h3 class="aside-title">Estado de Deudas</h3>
+            <div class="chart-wrapper">
+              <svg class="donut-chart" viewBox="0 0 200 200">
+                <!-- Segmento rojo (pendiente) - se dibuja primero, ocupa todo el círculo -->
+                <circle
+                  class="donut-segment-pending"
+                  cx="100"
+                  cy="100"
+                  r="70"
+                  fill="none"
+                  stroke="#ef4444"
+                  stroke-width="20"
+                  [style.stroke-dasharray]="getCircleCircumference()"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 100 100)"
+                />
+                <!-- Segmento verde (pagado) - se dibuja encima del rojo -->
+                <circle
+                  class="donut-segment-paid"
+                  cx="100"
+                  cy="100"
+                  r="70"
+                  fill="none"
+                  stroke="#10b981"
+                  stroke-width="20"
+                  [style.stroke-dasharray]="getPaidPercentageCircle()"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 100 100)"
+                />
+              </svg>
+              <div class="chart-center">
+                <span class="chart-percent">{{ getPaidPercentage() }}%</span>
+                <span class="chart-text">Saldado</span>
+              </div>
+            </div>
+            <div class="chart-legend-compact">
+              <div class="legend-row">
+                <div class="legend-dot green"></div>
+                <span>Pagado {{ getPaidPercentage() }}%</span>
+              </div>
+              <div class="legend-row">
+                <div class="legend-dot red"></div>
+                <span>Pendiente {{ getPendingPercentage() }}%</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    }
+  </div>
+</app-test>
