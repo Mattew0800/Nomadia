@@ -54,6 +54,7 @@ public class User {
             regexp = "^$|^[\\S\\s]{3,10}$",
             message = "El apodo debe tener entre 3 y 10 caracteres"
     )
+
     @Column(nullable = true)
     private String nick;
 
@@ -88,15 +89,6 @@ public class User {
         user.setEmail(dto.getEmail());
         user.setPassword(encoder.encode(dto.getPassword()));
         user.setRole(Role.USER);
-        return user;
-    }
-
-    public static User adminRegisterDTO(RegisterRequestDTO dto, PasswordEncoder encoder) {
-        User user = new User();
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPassword(encoder.encode(dto.getPassword()));
-        user.setRole(Role.ADMIN);
         return user;
     }
 
