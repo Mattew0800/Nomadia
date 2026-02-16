@@ -12,4 +12,5 @@ public class DebtDTO {
     private Long creditorId;
     private String creditorEmail;
     private BigDecimal amount;
+
 }

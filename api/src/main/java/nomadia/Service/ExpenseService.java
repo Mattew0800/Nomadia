@@ -4,13 +4,13 @@ package nomadia.Service;
 import nomadia.DTO.Activity.ActivityIdRequestDTO;
 import nomadia.DTO.Expense.*;
 import nomadia.DTO.Trip.TripIdRequestDTO;
-import nomadia.DTO.User.UserResponseDTO;
 import nomadia.DTO.UserBalance.DebtDTO;
 import nomadia.DTO.UserBalance.UserBalanceDTO;
 import nomadia.Model.*;
 import nomadia.Repository.ActivityRepository;
 import nomadia.Repository.ExpenseRepository;
 import nomadia.Repository.ParticipantRepository;
+import nomadia.Repository.PaymentRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +27,15 @@ public class ExpenseService {
     private final TripService tripService;
     private final UserService userService;
     private final ParticipantRepository participantRepository;
+    private final PaymentRepository paymentRepository;
 
-    public ExpenseService(ExpenseRepository expenseRepository, ActivityRepository activityRepository,TripService tripService, UserService userService,ParticipantRepository participantRepository) {
+    public ExpenseService(ExpenseRepository expenseRepository, ActivityRepository activityRepository, TripService tripService, UserService userService, ParticipantRepository participantRepository, PaymentRepository paymentRepository) {
         this.expenseRepository = expenseRepository;
         this.activityRepository = activityRepository;
         this.tripService = tripService;
         this.userService = userService;
         this.participantRepository = participantRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     private static class BalanceNode {
@@ -51,13 +53,11 @@ public class ExpenseService {
     private void rebuildParticipantsFromPayersAndSplits(Expense expense,Trip trip,BigDecimal totalAmount,List<PayerDTO> payers,boolean customSplit,List<SplitDTO> splits,boolean clearBefore) {
 
         if (payers == null || payers.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Debe haber al menos un usuario que pague");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Debe haber al menos un usuario que pague");
         }
 
         if (totalAmount == null || totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "El monto total debe ser mayor a cero");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"El monto total debe ser mayor a cero");
         }
         if (clearBefore) {
             expense.getParticipants().clear();
@@ -269,9 +269,26 @@ public class ExpenseService {
         balances.values().forEach(b ->
                 b.setBalance(b.getPaid().subtract(b.getOwed()))
         );
+        applyPayments(trip.getId(),balances);
         return new ArrayList<>(balances.values());
     }
 
+    public void applyPayments(Long tripId, Map<Long, UserBalanceDTO> balances) {
+        List<Payment> payments = paymentRepository.findByTripId(tripId);
+        for (Payment p : payments) {
+            Long fromId = p.getFromUser().getId();
+            Long toId = p.getToUser().getId();
+            BigDecimal amount = p.getAmount();
+            UserBalanceDTO fromBalance = balances.get(fromId);
+            UserBalanceDTO toBalance = balances.get(toId);
+            if (fromBalance != null) {
+                fromBalance.setBalance(fromBalance.getBalance().add(amount));
+            }
+            if (toBalance != null) {
+                toBalance.setBalance(toBalance.getBalance().subtract(amount));
+            }
+        }
+    }
     public List<DebtDTO> calculateDebts(List<UserBalanceDTO> balances) {
         List<BalanceNode> creditors = balances.stream()
                 .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) > 0)
@@ -296,29 +313,5 @@ public class ExpenseService {
             if (creditor.amount.compareTo(BigDecimal.ZERO) == 0) j++;
         }
         return debts;
-    }
-    //no se usa
-    @Transactional(readOnly = true)
-    public List<DebtDTO> getTripDebts(TripIdRequestDTO tripId, Long userId) {
-        tripService.getTripAndValidateMember(tripId.getTripId(),userId);
-        return calculateDebts(getUserBalancesByTrip(tripId.getTripId(), userId));
-    }
-
-    @Transactional(readOnly = true)
-    public List<UserBalanceDTO> getUserBalancesByTrip(Long tripId, Long requesterId) {
-        tripService.getTripAndValidateMember(tripId,requesterId);
-        Map<Long, UserBalanceDTO> balances = new HashMap<>();
-        for (UserResponseDTO user : tripService.getTravelers(tripId, requesterId)) {
-            balances.put(user.getId(),new UserBalanceDTO(user.getId(),user.getEmail(),BigDecimal.ZERO,BigDecimal.ZERO,BigDecimal.ZERO));
-        }
-        for (Participant p : participantRepository.findByTripId(tripId)) {
-            UserBalanceDTO dto = balances.get(p.getUser().getId());
-            dto.setPaid(dto.getPaid().add(p.getAmountPaid()));
-            dto.setOwed(dto.getOwed().add(p.getAmountOwned()));
-        }
-        balances.values().forEach(b ->
-                b.setBalance(b.getPaid().subtract(b.getOwed()))
-        );
-        return new ArrayList<>(balances.values());
     }
 }
