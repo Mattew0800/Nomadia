@@ -152,10 +152,6 @@ export class BalancePage implements OnInit {
     return 'neutral';
   }
 
-  abs(value: number): number {
-    return Math.abs(value);
-  }
-
 
   trackByIndex(index: number): number {
     return index;
