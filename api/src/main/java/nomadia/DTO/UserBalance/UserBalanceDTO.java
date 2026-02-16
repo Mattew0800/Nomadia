@@ -11,7 +11,6 @@ public class UserBalanceDTO {
 
     private Long userId;
     private String email;
-
     private BigDecimal paid;
     private BigDecimal owed;
     private BigDecimal balance;
