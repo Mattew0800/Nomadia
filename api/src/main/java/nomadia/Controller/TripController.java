@@ -3,8 +3,10 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Trip.*;
+import nomadia.DTO.UserBalance.AutoSettleRequestDTO;
 import nomadia.DTO.UserBalance.DebtDTO;
 import nomadia.Service.ExpenseService;
+import nomadia.Service.PaymentService;
 import nomadia.Service.TripService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +23,12 @@ public class TripController {
 
     private final TripService tripService;
     private final ExpenseService expenseService;
+    private final PaymentService paymentService;
 
-    public TripController(TripService tripService,ExpenseService expenseService) {
+    public TripController(TripService tripService,ExpenseService expenseService,PaymentService paymentService) {
         this.tripService = tripService;
         this.expenseService = expenseService;
+        this.paymentService = paymentService;
     }
 
     @PostMapping("/create")
@@ -92,4 +96,11 @@ public class TripController {
         return ResponseEntity.ok(expenseService.calculateDebts(expenseService.getTripBalance(dto, me.getId())));
     }
 
+    @PostMapping    ("/settle-debt")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> settleDebt(@Valid @RequestBody AutoSettleRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
+        paymentService.settleAutomatically(dto, me.getId());
+        return ResponseEntity.ok().body(Map.of("message", "Deuda saldada correctamente")
+        );
+    }
 }
