@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Trip.*;
 import nomadia.DTO.UserBalance.AutoSettleRequestDTO;
-import nomadia.DTO.UserBalance.DebtDTO;
+import nomadia.DTO.UserBalance.UserDebtProgressDTO;
 import nomadia.Service.ExpenseService;
 import nomadia.Service.PaymentService;
 import nomadia.Service.TripService;
@@ -92,11 +92,11 @@ public class TripController {
 
     @PostMapping("/debts")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<DebtDTO>> getTripDebts(@Valid @RequestBody TripIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
-        return ResponseEntity.ok(expenseService.calculateDebts(expenseService.getTripBalance(dto, me.getId())));
+    public ResponseEntity<UserDebtProgressDTO> getTripDebts(@Valid @RequestBody TripIdRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.ok(expenseService.getTripDebts(expenseService.calculateDebts(expenseService.getTripBalance(dto,me.getId())),me.getId(),dto.getTripId()));
     }
 
-    @PostMapping    ("/settle-debt")
+    @PostMapping("/settle-debt")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> settleDebt(@Valid @RequestBody AutoSettleRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
         paymentService.settleAutomatically(dto, me.getId());

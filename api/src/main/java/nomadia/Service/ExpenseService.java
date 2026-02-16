@@ -5,6 +5,7 @@ import nomadia.DTO.Activity.ActivityIdRequestDTO;
 import nomadia.DTO.Expense.*;
 import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.DTO.UserBalance.DebtDTO;
+import nomadia.DTO.UserBalance.UserDebtProgressDTO;
 import nomadia.DTO.UserBalance.UserBalanceDTO;
 import nomadia.Model.*;
 import nomadia.Repository.ActivityRepository;
@@ -313,5 +314,13 @@ public class ExpenseService {
             if (creditor.amount.compareTo(BigDecimal.ZERO) == 0) j++;
         }
         return debts;
+    }
+
+    public UserDebtProgressDTO getTripDebts(List<DebtDTO> balances, Long userId, Long tripId) {
+        int pendingDebts=balances.size();
+        int settledDebts=paymentRepository.countByTripIdAndFromUserId(tripId,userId);
+        int totalDebts=settledDebts+pendingDebts;
+        double percentage=totalDebts==0?100:((double)settledDebts*100)/totalDebts;
+        return new UserDebtProgressDTO(balances,totalDebts,settledDebts,pendingDebts,percentage);
     }
 }
