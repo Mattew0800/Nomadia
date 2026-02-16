@@ -7,6 +7,7 @@ import {ExpenseResponseDTO} from '../../models/ExpenseResponseDTO';
 import {ExpenseUpdateDTO} from '../../models/ExpenseUpdateDTO';
 import {UserBalanceDTO} from '../../models/UserBalanceDTO';
 import {DebtDTO} from '../../models/DebtDTO';
+import {UserDebtProgressDTO} from '../../models/UserDebtProgressDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -75,8 +76,8 @@ export class ExpenseService {
     );
   }
 
-  getTripDebts(tripId: number): Observable<DebtDTO[]> {
-    return this.http.post<DebtDTO[]>(
+  getTripDebts(tripId: number): Observable<UserDebtProgressDTO> {
+    return this.http.post<UserDebtProgressDTO>(
       'http://localhost:8080/nomadia/trip/debts',
       { tripId },
       { headers: this.authService.authHeaders() }

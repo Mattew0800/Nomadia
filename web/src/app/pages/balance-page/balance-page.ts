@@ -21,6 +21,7 @@ export class BalancePage implements OnInit {
   tripId: string = '';
   balances: UserBalanceDTO[] = [];
   debts: DebtDTO[] = [];
+  debtProgress: { totalDebts: number, settledDebts: number, pendingDebts: number, percentage: number } | null = null;
   travelers: Map<number, TravelerResponse> = new Map();
   totalCost: number = 0;
   averageCost: number = 0;
@@ -98,8 +99,14 @@ export class BalancePage implements OnInit {
     });
 
     this.expenseService.getTripDebts(Number(this.tripId)).subscribe({
-      next: (debts) => {
-        this.debts = debts;
+      next: (debtProgressData) => {
+        this.debts = debtProgressData.debts;
+        this.debtProgress = {
+          totalDebts: debtProgressData.totalDebts,
+          settledDebts: debtProgressData.settledDebts,
+          pendingDebts: debtProgressData.pendingDebts,
+          percentage: debtProgressData.percentage
+        };
         checkIfAllLoaded();
       },
       error: (error) => {
@@ -159,9 +166,8 @@ export class BalancePage implements OnInit {
 
   // Métodos para el gráfico de torta
   getPaidPercentage(): number {
-    if (this.debts.length === 0) return 100;
-    const settledDebts = this.debts.filter(d => d.settled).length;
-    return Math.round((settledDebts / this.debts.length) * 100);
+    if (!this.debtProgress) return 100;
+    return Math.round(this.debtProgress.percentage);
   }
 
   getPendingPercentage(): number {
@@ -195,12 +201,6 @@ export class BalancePage implements OnInit {
       return;
     }
 
-    // Si ya está saldada, no hacer nada (no se puede "des-saldar")
-    if (debt.settled) {
-      console.warn('Esta deuda ya está saldada');
-      return;
-    }
-
     // Llamar al backend para registrar el pago
     this.tripService.settleDebt(Number(this.tripId), debt.creditorId).subscribe({
       next: (response) => {
@@ -217,10 +217,12 @@ export class BalancePage implements OnInit {
   }
 
   get pendingDebts(): DebtDTO[] {
-    return this.debts.filter(d => !d.settled);
+    // Todas las deudas en la lista son pendientes (no saldadas)
+    return this.debts || [];
   }
 
   get settledDebts(): DebtDTO[] {
-    return this.debts.filter(d => d.settled);
+    // Las deudas saldadas no se envían en la lista, solo se cuentan en debtProgress
+    return [];
   }
 }
