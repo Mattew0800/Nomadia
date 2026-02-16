@@ -687,15 +687,11 @@ export class ExpensesPage implements OnInit {
     const formValue = this.expenseForm.value;
 
     if (this.selectedExpenseId) {
-      let splitsToSend: any;
-      if (this.divisionType === 'custom') {
-        splitsToSend = formValue.splits.map((s: any) => ({
-          userId: Number(s.userId),
-          amountOwed: Number(s.amountOwed)
-        }));
-      } else {
-        splitsToSend = null;
-      }
+      // Siempre enviar los splits con los datos calculados, nunca null
+      const splitsToSend = formValue.splits.map((s: any) => ({
+        userId: Number(s.userId),
+        amountOwed: Number(s.amountOwed)
+      }));
 
       const updateDTO: ExpenseUpdateDTO = {
         expenseId: this.selectedExpenseId,
@@ -750,15 +746,11 @@ export class ExpensesPage implements OnInit {
         }
       });
     } else {
-      let splitsToSend: any;
-      if (this.divisionType === 'custom') {
-        splitsToSend = formValue.splits.map((s: any) => ({
-          userId: Number(s.userId),
-          amountOwed: Number(s.amountOwed)
-        }));
-      } else {
-        splitsToSend = null;
-      }
+      // Siempre enviar los splits con los datos calculados, nunca null
+      const splitsToSend = formValue.splits.map((s: any) => ({
+        userId: Number(s.userId),
+        amountOwed: Number(s.amountOwed)
+      }));
 
       const createDTO: CreateExpenseDTO = {
         tripId: Number(this.tripId),
@@ -774,6 +766,7 @@ export class ExpensesPage implements OnInit {
         customSplit: this.divisionType === 'custom'
       };
 
+      console.log('📤 DTO a crear:', JSON.stringify(createDTO, null, 2));
 
       const invalidPayers = createDTO.payers.filter(p =>
         !this.tripMembers.some(m => Number(m.id) === p.userId)

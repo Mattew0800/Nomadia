@@ -4,5 +4,6 @@ export interface DebtDTO {
   creditorId: number;
   creditorEmail: string;
   amount: number;
+  settled: boolean;
 }
 

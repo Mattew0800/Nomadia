@@ -160,9 +160,8 @@ export class BalancePage implements OnInit {
   // Métodos para el gráfico de torta
   getPaidPercentage(): number {
     if (this.debts.length === 0) return 100;
-    // Por simplicidad, asumimos que todas las deudas están pendientes
-    // En una implementación real, tendrías un campo "isPaid" en DebtDTO
-    return 0;
+    const settledDebts = this.debts.filter(d => d.settled).length;
+    return Math.round((settledDebts / this.debts.length) * 100);
   }
 
   getPendingPercentage(): number {
@@ -180,5 +179,48 @@ export class BalancePage implements OnInit {
   getCircleCircumference(): string {
     const circumference = 2 * Math.PI * 70; // radio = 70
     return `${circumference} 0`;
+  }
+
+  toggleDebtStatus(index: number) {
+    if (!this.debts[index]) {
+      return;
+    }
+
+    const debt = this.debts[index];
+
+    // Solo permitir marcar como saldado si el usuario actual es el deudor
+    // (el que debe pagar)
+    if (debt.debtorId !== this.currentUserId) {
+      console.error('Solo el deudor puede marcar la deuda como saldada');
+      return;
+    }
+
+    // Si ya está saldada, no hacer nada (no se puede "des-saldar")
+    if (debt.settled) {
+      console.warn('Esta deuda ya está saldada');
+      return;
+    }
+
+    // Llamar al backend para registrar el pago
+    this.tripService.settleDebt(Number(this.tripId), debt.creditorId).subscribe({
+      next: (response) => {
+        console.log('Deuda saldada exitosamente:', response);
+        // Recargar los datos para obtener el estado actualizado
+        this.loadBalanceData();
+      },
+      error: (error) => {
+        console.error('Error completo al saldar la deuda:', error);
+        const errorMessage = error.error?.message || error.message || 'Error desconocido';
+        alert(`Error al saldar la deuda: ${errorMessage}`);
+      }
+    });
+  }
+
+  get pendingDebts(): DebtDTO[] {
+    return this.debts.filter(d => !d.settled);
+  }
+
+  get settledDebts(): DebtDTO[] {
+    return this.debts.filter(d => d.settled);
   }
 }

@@ -4,7 +4,6 @@ import {Observable} from 'rxjs';
 import {AuthService} from '../Auth/auth-service';
 import {TripResponse} from '../../models/TripResponse';
 import {TripCreate} from '../../models/TripCreate';
-import {User} from '../../models/User';
 import {TravelerResponse} from '../../models/TravelerResponse';
 
 
@@ -85,9 +84,13 @@ export class TripService {
       {headers: this.authService.authHeaders()});
   }
 
+  settleDebt(tripId: number, creditorId: number): Observable<any> {
+    const body = {tripId: tripId, creditorId: creditorId};
 
-
-
-
+    return this.http.post(
+      `${this.API_URL}/settle-debt`,
+      body,
+      {headers: this.authService.authHeaders()});
+  }
 
 }
