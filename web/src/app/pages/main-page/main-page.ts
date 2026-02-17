@@ -235,8 +235,10 @@ export class MainPage implements OnInit {
         const pad = (n: number) => String(n).padStart(2, '0');
         const selectedStr = `${y}-${pad(m)}-${pad(d)}`;
 
-        if(!list){
+        if (!list || list.length === 0) {
           this.emptyActivitiesList = true;
+        } else {
+          this.emptyActivitiesList = false;
         }
 
         const sameDay = list.filter(a => (a.date ?? '').startsWith(selectedStr));

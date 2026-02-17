@@ -15,6 +15,7 @@ import {TripEdit} from './pages/edit-trip/edit-trip';
 import {ActivityListComponent} from './pages/activity-list/activity-list';
 import {ExpensesPage} from './pages/expenses-page/expenses-page';
 import {BalancePage} from './pages/balance-page/balance-page';
+import {MessagesPage} from './pages/messages-page/messages-page';
 
 export const routes: Routes = [
     {path: 'landing', component: LandingPage, canActivate: [PublicGuard]},
@@ -29,6 +30,8 @@ export const routes: Routes = [
     {path: "activities", component: ActivityListComponent, canActivate: [AuthGuard]},
     {path: 'expenses', component: ExpensesPage, canActivate: [AuthGuard]},
     {path: 'balance', component: BalancePage, canActivate: [AuthGuard]},
+    {path: 'messages', component: MessagesPage, canActivate: [AuthGuard]},
+
     {path: 'test', component: Test},
     {path: 'error', component: ErrorPage},
     {path: '', redirectTo: 'landing', pathMatch: 'full'},
