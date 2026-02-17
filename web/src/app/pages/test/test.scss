@@ -2,6 +2,10 @@
 @use '../../styles/base';
 @use '../../styles/scrollbar-styling';
 
+:root {
+  --right-col-w: 20rem;
+}
+
 .app-container {
   display: flex;
   height: 100vh;
@@ -144,29 +148,36 @@
   overflow-y: auto;
 }
 
-/* Top Header */
 .top-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr var(--right-col-w);
+  gap: 22px;
   align-items: center;
-  justify-content: space-between;
   padding: 1rem 3rem;
   background-color: #141627;
   border-bottom: 1px solid rgba(95, 100, 126, 0.1);
 }
 
 .search-container {
+  grid-column: 1;
+  width: 98%;
+  max-width: none;
+  margin-right: 0;
   flex: 1;
   display: flex;
   align-items: center;
   background-color: #1c1f37;
   border-radius: 14px;
-  padding: 10px 20px;
-  max-width: 70%;
-  margin-right: 30px;
+  padding: 0.5rem 1.5rem;
+
+
 }
+
+
 
 .search-input {
   flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
   color: #5f647e;
@@ -183,12 +194,13 @@
 }
 
 
-/* User Profile Header */
 .user-profile {
+  grid-column: 2;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 1rem;
-
+  padding-right: 2.5rem;
 }
 
 .notification-icon {
@@ -199,7 +211,6 @@
   align-items: center;
   border-radius: 50%; /* hace que la sombra siga la forma circular */
   transition: all 0.3s ease;
-  margin-right: 2.5rem;
 
 }
 
@@ -312,6 +323,7 @@
   background: rgba(209, 243, 102, .12);
   color: var(--accent-lime, #d1f366);
   border-radius: 12px;
+  cursor: pointer;
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -428,7 +440,9 @@
   }
 
   .filters-btn {
-    padding: 6px 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0.3rem 0.6rem;
     font-size: 12px;
   }
 
@@ -497,7 +511,7 @@
 
 
 .search-container {
-  position: relative; /* Importante para posicionar el dropdown de sugerencias */
+  position: relative;
 }
 
 .search-suggestions {

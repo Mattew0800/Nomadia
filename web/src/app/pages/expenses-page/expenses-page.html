@@ -79,13 +79,7 @@
         <div class="table-header">
           <h2>Gastos</h2>
           <div class="table-controls">
-            <div class="search-box">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 14L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <input type="text" placeholder="Buscar" />
-            </div>
+
             <button class="filter-btn" (click)="toggleFilters()" [class.active]="showFilters || hasActiveFilters()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"></path>
@@ -122,26 +116,46 @@
 
                 <div class="filter-group">
                   <label>Monto mínimo</label>
-                  <input
-                    type="number"
-                    [(ngModel)]="filterMinAmount"
-                    placeholder="$0"
-                    min="0"
-                    step="0.01"
-                    class="filter-input"
-                  />
+                  <div class="filter-amount-wrapper">
+                    @if(editingFilterMinAmount) {
+                      <input
+                        type="number"
+                        [(ngModel)]="filterMinAmount"
+                        placeholder="$0"
+                        min="0"
+                        step="0.01"
+                        class="filter-min-amount-input"
+                        (blur)="finishFilterMinAmountEdit()"
+                        (keyup.enter)="finishFilterMinAmountEdit()"
+                      />
+                    } @else {
+                      <span class="filter-amount-display clickable" (click)="startFilterMinAmountEdit()">
+                        {{ filterMinAmount !== null ? ('$' + (filterMinAmount | number:'1.2-2')) : '$0.00' }}
+                      </span>
+                    }
+                  </div>
                 </div>
 
                 <div class="filter-group">
                   <label>Monto máximo</label>
-                  <input
-                    type="number"
-                    [(ngModel)]="filterMaxAmount"
-                    placeholder="$0"
-                    min="0"
-                    step="0.01"
-                    class="filter-input"
-                  />
+                  <div class="filter-amount-wrapper">
+                    @if(editingFilterMaxAmount) {
+                      <input
+                        type="number"
+                        [(ngModel)]="filterMaxAmount"
+                        placeholder="$0"
+                        min="0"
+                        step="0.01"
+                        class="filter-max-amount-input"
+                        (blur)="finishFilterMaxAmountEdit()"
+                        (keyup.enter)="finishFilterMaxAmountEdit()"
+                      />
+                    } @else {
+                      <span class="filter-amount-display clickable" (click)="startFilterMaxAmountEdit()">
+                        {{ filterMaxAmount !== null ? ('$' + (filterMaxAmount | number:'1.2-2')) : '$0.00' }}
+                      </span>
+                    }
+                  </div>
                 </div>
 
                 <div class="filter-actions">
@@ -163,58 +177,83 @@
         }
 
         <div class="table-wrapper">
-          <table class="expenses-table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Actividad</th>
-                <th>Participantes</th>
-                <th>Monto</th>
-                <th style="width: 60px;"></th>
-              </tr>
-            </thead>
-            <tbody>
-              @if(expenses.length === 0) {
-                <tr>
-                  <td colspan="5" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.5);">
-                    No hay gastos registrados. Creá uno nuevo para comenzar.
-                  </td>
-                </tr>
-              }
+          @if(expenses.length === 0) {
+            <div class="empty-expenses-state">
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="6" width="18" height="15" rx="2"/>
+                <path d="M3 10h18"/>
+                <path d="M7 15h.01"/>
+                <path d="M11 15h2"/>
+              </svg>
+              <h3>No hay gastos registrados</h3>
+              <p>Creá uno nuevo para comenzar a gestionar tus finanzas</p>
+            </div>
+          } @else {
+            <div class="expenses-list">
               @for(expense of expenses; track expense.id) {
-                <tr>
-                  <td (click)="viewExpenseDetails(expense)" style="cursor: pointer;">{{ expense.name }}</td>
-                  <td (click)="viewExpenseDetails(expense)" style="cursor: pointer;">{{ expense.activityName }}</td>
-                  <td (click)="viewExpenseDetails(expense)" style="cursor: pointer;">
-                    <div class="participants">
-                      @for(participant of expense.participants; track participant.id) {
-                        <img [src]="participant.photoUrl" [alt]="'User ' + participant.id" />
-                      }
+                <div class="expense-item" [class.selected]="selectedExpenseId === expense.id" (click)="viewExpenseDetails(expense)">
+                  <div class="expense-left">
+                    <div class="expense-main-info">
+                      <h3 class="expense-name">{{ expense.name }}</h3>
+                      <span class="expense-activity">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                          <line x1="16" y1="2" x2="16" y2="6"/>
+                          <line x1="8" y1="2" x2="8" y2="6"/>
+                          <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        {{ expense.activityName }}
+                      </span>
                     </div>
-                  </td>
-                  <td (click)="viewExpenseDetails(expense)" style="cursor: pointer;" class="amount-cell">${{ expense.totalAmount | number:'1.2-2' }}</td>
-                  <td class="actions-cell">
-                    <button
-                      class="delete-btn"
-                      (click)="deleteExpense(expense.id, $event)"
-                      title="Eliminar gasto"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
+
+                    <div class="expense-participants">
+                      <div class="participants-avatars">
+                        @for(participant of expense.participants; track participant.id; let idx = $index) {
+                          @if(idx < 4) {
+                            <img [src]="participant.photoUrl" [alt]="'Usuario ' + participant.id" class="participant-avatar" />
+                          }
+                        }
+                        @if(expense.participants.length > 4) {
+                          <div class="more-participants">+{{ expense.participants.length - 4 }}</div>
+                        }
+                      </div>
+                      <span class="participants-label">{{ expense.participants.length }} {{ expense.participants.length === 1 ? 'participante' : 'participantes' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="expense-right">
+                    <div class="expense-amount">${{ expense.totalAmount | number:'1.2-2' }}</div>
+                    <div class="expense-actions">
+                      <button type="button" class="delete-btn-list" (click)="deleteExpense(expense.id, $event)" title="Eliminar gasto">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+                        </svg>
+                      </button>
+                      <svg class="chevron-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"/>
                       </svg>
-                    </button>
-                  </td>
-                </tr>
+                    </div>
+                  </div>
+                </div>
               }
-            </tbody>
-          </table>
+            </div>
+          }
         </div>
       </div>
 
       <!-- Sidebar -->
       <div class="sidebar-card" [class.visible]="showForm">
         @if(showForm) {
-          <h2 class="sidebar-title">{{ selectedExpenseId ? 'Editar gasto' : 'Nuevo gasto' }}</h2>
+          <div class="sidebar-header">
+            <h2 class="sidebar-title">{{ selectedExpenseId ? 'Editar gasto' : 'Nuevo gasto' }}</h2>
+            @if(selectedExpenseId) {
+              <button type="button" class="delete-btn-sidebar" (click)="deleteExpense(selectedExpenseId, $event)" title="Eliminar gasto">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+                </svg>
+              </button>
+            }
+          </div>
 
           <form [formGroup]="expenseForm" (ngSubmit)="onSubmit()" class="expense-form">
             <!-- Nombre del gasto -->
@@ -244,14 +283,23 @@
             <!-- Monto total -->
             <div class="form-group">
               <label>Monto total</label>
-              <input
-                type="number"
-                formControlName="totalAmount"
-                placeholder="0.00"
-                step="0.01"
-                (input)="onTotalAmountChange()"
-                [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
-              />
+              <div class="total-amount-wrapper">
+                @if(editingTotalAmount) {
+                  <input
+                    type="number"
+                    formControlName="totalAmount"
+                    placeholder="0.00"
+                    step="0.01"
+                    class="total-amount-input"
+                    [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
+                    (input)="onTotalAmountChange()"
+                    (blur)="finishTotalAmountEdit()"
+                    (keyup.enter)="finishTotalAmountEdit()"
+                  />
+                } @else {
+                  <span class="total-amount-display clickable" (click)="startTotalAmountEdit()">${{ totalAmountControl?.value | number:'1.2-2' }}</span>
+                }
+              </div>
               @if(totalAmountControl?.touched && totalAmountControl?.invalid) {
                 <span class="error-msg">Debe ser mayor a 0</span>
               }
@@ -260,23 +308,26 @@
             <!-- Tipo de división -->
             <div class="form-group">
               <label>Tipo de división</label>
-              <div class="division-type-buttons">
-                <button
-                  type="button"
-                  class="division-btn"
-                  [class.active]="divisionType === 'equal'"
-                  (click)="changeDivisionType('equal')"
-                >
-                  Partes iguales
-                </button>
-                <button
-                  type="button"
-                  class="division-btn"
-                  [class.active]="divisionType === 'custom'"
-                  (click)="changeDivisionType('custom')"
-                >
-                  Personalizada
-                </button>
+              <div class="division-toggle-container">
+                <div class="division-toggle-track" (click)="toggleDivisionType()">
+                  <div class="division-toggle-slider" [class.right]="divisionType === 'custom'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                      @if(divisionType === 'equal') {
+                        <line x1="5" y1="9" x2="19" y2="9"/>
+                        <line x1="5" y1="15" x2="19" y2="15"/>
+                      } @else {
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      }
+                    </svg>
+                  </div>
+                  <span class="division-option left" [class.active]="divisionType === 'equal'">
+                    Partes iguales
+                  </span>
+                  <span class="division-option right" [class.active]="divisionType === 'custom'">
+                    Personalizada
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -298,23 +349,28 @@
                 @for(splitControl of splits.controls; track $index) {
                   <div class="participant-row">
                     <img
-                      [src]="splitControl.get('userName')?.value | slice:0:1"
+                      [src]="getUserPhotoUrl(splitControl.get('userId')?.value)"
                       [alt]="splitControl.get('userName')?.value"
                       class="user-avatar"
-                      style="background: #4a5568; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;"
                     />
                     <span class="user-name">{{ splitControl.get('userName')?.value }}</span>
 
-                    @if(divisionType === 'custom') {
+                    @if(divisionType === 'custom' && isSplitEditing($index)) {
                       <input
                         type="number"
                         [formControl]="$any(splitControl.get('amountOwed'))"
                         placeholder="0.00"
                         step="0.01"
                         class="amount-input"
+                        (blur)="finishSplitEdit($index)"
+                        (keyup.enter)="finishSplitEdit($index)"
                       />
                     } @else {
-                      <span class="amount-display">${{ splitControl.get('amountOwed')?.value | number:'1.2-2' }}</span>
+                      <span
+                        class="amount-display"
+                        [class.clickable]="divisionType === 'custom'"
+                        (click)="divisionType === 'custom' ? startSplitEdit($index) : null"
+                      >${{ splitControl.get('amountOwed')?.value | number:'1.2-2' }}</span>
                     }
 
                     <button
@@ -351,19 +407,31 @@
                 @for(payerControl of payers.controls; track $index) {
                   <div class="participant-row">
                     <img
-                      [src]="'https://i.pravatar.cc/40?img=' + ($index + 1)"
+                      [src]="getUserPhotoUrl(payerControl.get('userId')?.value)"
                       [alt]="payerControl.get('userName')?.value"
                       class="user-avatar"
                     />
                     <span class="user-name">{{ payerControl.get('userName')?.value }}</span>
 
-                    <input
-                      type="number"
-                      [formControl]="$any(payerControl.get('amountPaid'))"
-                      placeholder="0.00"
-                      step="0.01"
-                      class="amount-input"
-                    />
+                    <div class="amount-wrapper">
+                      @if(isPayerEditing($index)) {
+                        <input
+                          type="number"
+                          [formControl]="$any(payerControl.get('amountPaid'))"
+                          placeholder="0.00"
+                          step="0.01"
+                          class="amount-input"
+                          [class.invalid]="payerControl.get('amountPaid')?.invalid && payerControl.get('amountPaid')?.touched"
+                          (blur)="finishPayerEdit($index)"
+                          (keyup.enter)="finishPayerEdit($index)"
+                        />
+                      } @else {
+                        <span class="amount-display clickable" (click)="startPayerEdit($index)">${{ payerControl.get('amountPaid')?.value | number:'1.2-2' }}</span>
+                      }
+                      @if(payerControl.get('amountPaid')?.touched && payerControl.get('amountPaid')?.invalid) {
+                        <span class="input-error-msg">Debe ser mayor a 0</span>
+                      }
+                    </div>
 
                     <button
                       type="button"

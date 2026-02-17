@@ -32,5 +32,12 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("SELECT e FROM Expense e WHERE e.activity.id = :activityId")
     List<Expense> findByActivityId(@Param("activityId")Long activityId);
 
+    @Query("""
+        SELECT COUNT(e) > 0
+        FROM Expense e
+        WHERE e.trip.id = :tripId
+    """)
+    boolean existsByTripId(@Param("tripId") Long tripId);
+
 }
 

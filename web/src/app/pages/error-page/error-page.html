@@ -6,27 +6,49 @@
     <img src="blur.png" alt="Fondo difuminado">
 </div>
 
-<div class="container">
-    <div class="hero">
-        <div class="hero-content">
-            <div class="logo">
-                <img src="nomadia-logo.png" alt="Nomadia Logo">
-            </div>
-            <h1 class="hero-title">{{ errorTitle }}</h1>
-            <p class="hero-subtitle">{{ errorMessage }}</p>
+<div class="error-container">
+    <div class="floating-logo">
+        <img src="nomadia-logo.png" alt="Nomadia Logo">
+    </div>
 
-            <div class="action-buttons">
-                <button *ngIf="showRetryButton" class="retry-btn" (click)="retry()">
-                    Reintentar conexión
-                </button>
-                <button class="home-btn" (click)="goHome()">
-                    Volver al inicio
-                </button>
+    <div class="error-content">
+        <div class="title-glass">
+            <h1 class="error-title">{{ errorTitle }}</h1>
+        </div>
+
+        <p class="error-message">{{ errorMessage }}</p>
+
+        <div *ngIf="showLoader" class="loader-section">
+            <div class="loader-wrapper">
+                <div class="loader-spinner"></div>
+                <div class="loader-glow"></div>
             </div>
+            <p class="loader-status">Reintentando conexión...</p>
+        </div>
+
+        <div class="action-buttons" *ngIf="!showLoader || showRetryButton">
+            <button *ngIf="showRetryButton" class="btn-glass btn-retry" (click)="retry()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                </svg>
+                Reintentar conexión
+            </button>
+            <button *ngIf="!showLoader" class="btn-glass btn-home" (click)="goHome()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Volver al inicio
+            </button>
         </div>
     </div>
 
-    <div class="hero-images">
-        <img src="nomadia-penguin.png" alt="Nomadia Penguin">
+    <div class="penguin-support">
+        <div class="support-bubble">
+            <p>Si el error continúa, contactanos en <a href="mailto:nomadia.soporte@gmail.com">nomadia.soporte&#64;gmail.com</a></p>
+        </div>
+        <div class="floating-penguin">
+            <img src="nomadia-penguin.png" alt="Nomadia Penguin">
+        </div>
     </div>
 </div>

@@ -119,14 +119,35 @@ public class TripService {
 
     @Transactional
     public void deleteTrip(Long tripId,Long userId){
+        System.out.println("=== INICIO deleteTrip - tripId: " + tripId + ", userId: " + userId);
         validateOwner(tripId,userId);
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El viaje no existe"));
+
+        boolean hasExpenses = expenseRepository.existsByTripId(tripId);
+        System.out.println("=== Tiene gastos: " + hasExpenses);
+
+        if (hasExpenses) {
+            System.out.println("=== Lanzando excepción de gastos asociados");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No se puede eliminar el viaje porque tiene gastos registrados. Por favor, eliminá todos los gastos antes de eliminar el viaje.");
+        }
+
+        // Eliminar todas las actividades asociadas
+        System.out.println("=== Eliminando actividades...");
+        activityRepository.deleteAll(trip.getActivities());
+
+        // Limpiar las relaciones con usuarios
+        System.out.println("=== Limpiando relaciones con usuarios...");
         for (User user : trip.getUsers()) {
             user.getTrips().remove(trip);
         }
         trip.getUsers().clear();
+
+        System.out.println("=== Eliminando viaje...");
         tripRepository.deleteById(tripId);
+        System.out.println("=== FIN deleteTrip exitoso");
     }
 
     @Transactional

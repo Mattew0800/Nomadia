@@ -18,8 +18,8 @@ import { TripCreate } from '../../models/TripCreate';
 
 
 function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
-  const desde = group.get('startDate')?.value as string | null; // Corregido el nombre del control
-  const hasta = group.get('endDate')?.value as string | null;   // Corregido el nombre del control
+  const desde = group.get('startDate')?.value as string | null;
+  const hasta = group.get('endDate')?.value as string | null;
   if (!desde || !hasta) return null;
   const d = new Date(desde);
   const h = new Date(hasta);
@@ -141,10 +141,6 @@ export class NewTravel {
       today.setHours(0, 0, 0, 0);
       inputDate.setHours(0, 0, 0, 0);
 
-      // Para viajes, la fecha NO debe ser anterior a hoy
-      if (inputDate < today) {
-        return { pastDate: true };
-      }
 
       return null;
     };
