@@ -125,6 +125,15 @@
                   </button>
                 </div>
                 <ul class="agenda" id="agenda-list">
+
+                  <!-- Mensaje cuando no hay actividades -->
+                  <li *ngIf="agenda?.length === 0" class="event no-activities" tabindex="0">
+                    <div class="details">
+                      <div class="label">No hay actividades</div>
+                      <div class="desc">Todavía no hay actividades para el día seleccionado. Usa el botón + para crear una.</div>
+                    </div>
+                  </li>
+
                   <li *ngFor="let ev of agenda; let i = index"
                       class="event"
                       [ngClass]="ev.color"
@@ -163,27 +172,34 @@
             <button class="share-btn" (click)="addUser(String(currentTrip.id),(String(email.value)))">Invitar</button>
 
           </div>
-          <p *ngIf="msgInviteOk" class="error">{{ msgInviteOk }}</p>
+          <p *ngIf="msgInviteOk" class="msgOk">{{ msgInviteOk }}</p>
           <p *ngIf="msgInviteError" class="error">{{ msgInviteError }}</p>
           <h3>Miembros actuales</h3>
           <ul class="member-list">
             @for(user of this.tService.users; track $index){
 
             <li>
-              <div class="avatar" style="background-color: #5C6BC0;">MO</div>
-              <div class="member-info">
-                <p>{{user.name}}</p>
-                <span>{{user.email}}</span>
+              <div class="avatar" [attr.title]="user.name">
+                <!-- Mostrar imagen si existe la URL y no falló al cargar; si falla o no hay URL, mostrar iniciales -->
+                <img *ngIf="user.photoUrl && !avatarLoadError[(user.email || user.id || user.name)]"
+                     [src]="getSafePhotoUrl(user.photoUrl)"
+                     alt="{{user.name}}"
+                     (error)="onAvatarError($event, user)" />
+                <img *ngIf="!user.photoUrl || avatarLoadError[(user.email || user.id || user.name)]" src="/default-user-img.jpg" alt="Avatar por defecto" />
               </div>
+               <div class="member-info">
+                 <p>{{user.name}}</p>
+                 <span>{{user.email}}</span>
+               </div>
 
-              @if($index !== 0) {
-                <button class="remove-member-btn" (click)="removeMember(user.email); $event.stopPropagation()" title="Eliminar miembro">
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
-              }
-            </li>
-            }
-          </ul>
+               @if($index !== 0) {
+                 <button class="remove-member-btn" (click)="removeMember(user.email); $event.stopPropagation()" title="Eliminar miembro">
+                   <i class="fa-solid fa-xmark"></i>
+                 </button>
+               }
+             </li>
+             }
+           </ul>
         </div>
       </div>
     </div>

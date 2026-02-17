@@ -10,6 +10,7 @@ import {User} from '../../models/User';
 import {TravelerResponse} from '../../models/TravelerResponse';
 import {ActivityResponseDTO} from '../../models/ActivityResponse';
 import {ActivityCreateDTO} from '../../models/ActivityCreate';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 
 type AgendaItem = {
   time: string;
@@ -111,9 +112,41 @@ export class MainPage implements OnInit {
 
   public currentTrip: TripResponse | null = null;
 
+  // mapa para trackear imágenes que fallaron al cargar (clave: email o id)
+  avatarLoadError: Record<string, boolean> = {};
 
-  constructor(private router: Router, public tService: TripService, private fb: FormBuilder, private activityApi: ActivityService) {
+  constructor(private router: Router, public tService: TripService, private fb: FormBuilder, private activityApi: ActivityService, private sanitizer: DomSanitizer) {
     this.renderCalendar(this.currentMonth, this.currentYear);
+  }
+
+  /** Normaliza photoUrl: acepta http(s), rutas relativas, data: y base64 puro (lo convierte en data:png). Retorna SafeUrl para evitar sanitización removals */
+  getSafePhotoUrl(photo?: string): SafeUrl | null {
+    if (!photo) return null;
+    const trimmed = photo.trim();
+    if (trimmed.startsWith('data:') || trimmed.startsWith('http') || trimmed.startsWith('/')) {
+      return this.sanitizer.bypassSecurityTrustUrl(trimmed);
+    }
+
+    // Si parece base64 (solo chars base64 y bastante largo), añadimos prefijo data:image/png;base64,
+    const base64Like = /^[A-Za-z0-9+/=\s]+$/.test(trimmed) && trimmed.length > 100;
+    if (base64Like) {
+      return this.sanitizer.bypassSecurityTrustUrl('data:image/png;base64,' + trimmed.replace(/\s+/g, ''));
+    }
+
+    // Fallback: devolver tal cual (sanitizado)
+    return this.sanitizer.bypassSecurityTrustUrl(trimmed);
+  }
+
+  onAvatarError(event: Event, user: any) {
+    const key = user?.email || user?.id || user?.name || Math.random().toString(36).slice(2,7);
+    this.avatarLoadError[key] = true;
+    // esconder la imagen fallida si aún está en el DOM
+    const img = event.target as HTMLImageElement | null;
+    if (img) img.style.display = 'none';
+  }
+
+  avatarKey(user: any): string {
+    return (user?.email || user?.id || user?.name || '').toString();
   }
 
   ngOnInit() {
@@ -657,7 +690,7 @@ export class MainPage implements OnInit {
 
     this.activityApi.updateActivity(this.editingTripId, this.editingActivityId, payload).subscribe({
       next: () => {
-        this.loadAgendaForSelectedDay(); // recarga el día actual
+        this.loadAgendaForSelectedDay(); // recarga el día currentTrip
         this.msgEditOk = 'Actividad actualizada con éxito.';
         this.msgEditError = '';
         this.closeEditPanel();
@@ -681,6 +714,9 @@ export class MainPage implements OnInit {
   getTravelers(tripId: string) {
     return this.tService.getUsers(tripId).subscribe({
       next: (users: TravelerResponse[]) => {
+        console.log('Travelers received:', users);
+        // Loguear photoUrl para depuración
+        users.forEach(u => console.log('traveler', u.email || u.id, 'photoUrl:', u.photoUrl ? (u.photoUrl.length > 200 ? u.photoUrl.slice(0, 200) + '... (len ' + u.photoUrl.length + ')' : u.photoUrl) : '(no photo)'));
         this.tService.users = users;
       },
       error: (e) => {
@@ -693,4 +729,3 @@ export class MainPage implements OnInit {
 
   protected readonly String = String;
 }
-
