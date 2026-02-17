@@ -14,7 +14,12 @@ export class TripList implements OnInit {
 
   isLoading: boolean = true;
   showingActiveTrips: boolean = true;
-  msgError?: string;
+
+  // Nuevo estado para el modal de borrado
+  showDeleteModal: boolean = false;
+  tripToDelete: string | null = null;
+  tripNameToDelete: string | null = null; // para mostrar en el modal
+  isDeleting: boolean = false; // evita doble envío
 
   constructor(public tService: TripService, private router: Router) {
 
@@ -77,20 +82,13 @@ export class TripList implements OnInit {
     return filtered;
   }
 
+
+
   deleteTrip(id: string, event: Event) {
     event.stopPropagation();
-    if (confirm('¿Seguro que querés eliminar este viaje?')) {
-      this.tService.deleteTrip(id).subscribe({
-        next: () => {
-          this.tService.trips = this.tService.trips.filter(trip => trip.id !== id);
-          this.getTrips()
-        },
-        error: (err) => {
-          console.error('Error al eliminar viaje', err);
-          alert(err.error);
-        }
-      });
-    }
+    this.tripToDelete = id;
+    this.tripNameToDelete = this.tService.trips?.find(t => String(t.id) === String(id))?.name ?? null;
+        this.showDeleteModal = true;
   }
 
   editTrip(id: string, event: Event) {
@@ -98,6 +96,69 @@ export class TripList implements OnInit {
     // Guardar el ID en localStorage y también pasarlo como state
     localStorage.setItem('editTripId', id);
     this.router.navigate(['/editTrip'], { state: { tripId: id } });
+  }
+
+  // Cancela el modal sin hacer nada
+  cancelDelete() {
+    // Si ya se está borrando, ignorar la acción para evitar inconsistencias
+    if (this.isDeleting) return;
+
+    this.showDeleteModal = false;
+    this.tripToDelete = null;
+    this.tripNameToDelete = null;
+  }
+
+  confirmDelete() {
+    const id = this.tripToDelete;
+    if (!id) return;
+
+    this.isDeleting = true;
+
+    this.tService.deleteTrip(id).subscribe({
+      next: () => {
+        // actualizar lista local
+        this.tService.trips = this.tService.trips.filter(trip => String(trip.id) !== String(id));
+        // cerrar modal y resetear estados
+        this.showDeleteModal = false;
+        this.tripToDelete = null;
+        this.tripNameToDelete = null;
+        this.isDeleting = false;
+        // opcional: volver a pedir trips para garantizar consistencia
+        this.getTrips();
+      },
+      error: (err) => {
+        console.error('Error al eliminar viaje', err);
+        console.log('Error status:', err?.status);
+        console.log('Error error:', err?.error);
+        console.log('Error error type:', typeof err?.error);
+        this.isDeleting = false;
+
+        // Priorizar el mensaje del servidor
+        let msg: string;
+
+        if (err?.error && typeof err.error === 'string') {
+          msg = err.error;
+        } else if (err?.error?.message) {
+          msg = err.error.message;
+        } else {
+          switch (err?.status) {
+            case 409:
+              msg = 'No se puede eliminar el viaje porque tiene gastos o deudas asociadas..';
+              break;
+            case 403:
+              msg = 'No tenés permiso para eliminar este viaje.';
+              break;
+            case 404:
+              msg = 'El viaje ya no existe.';
+              break;
+            default:
+              msg = 'Error al eliminar el viaje.';
+          }
+        }
+
+        alert(msg);
+      }
+    });
   }
 
   protected readonly String = String;

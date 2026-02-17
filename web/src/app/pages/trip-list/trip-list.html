@@ -1,5 +1,34 @@
 <app-test>
 
+    @if(showDeleteModal) {
+      <div class="delete-modal-overlay" (click)="cancelDelete()">
+        <div class="delete-modal" (click)="$event.stopPropagation()">
+          <div class="modal-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </div>
+          <h3>¿Eliminar viaje?</h3>
+          <p>Esta acción no se puede deshacer</p>
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel-modal" (click)="$event.stopPropagation(); cancelDelete()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              Cancelar
+            </button>
+            <button type="button" class="btn-confirm-delete" (click)="$event.stopPropagation(); confirmDelete()" [disabled]="isDeleting">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
     <div class="travel-tabs-container">
         <button class="tab-button" [class.active]="showingActiveTrips === true" (click)="setFilter(true)">
             Viajes Activos
@@ -30,9 +59,9 @@
                         <h3 class="activity-title">{{ trip.name }}</h3>
                         <p class="activity-location">{{ trip.type }}</p>
 
-                      <button (click)="deleteTrip(trip.id, $event)"><i class="fa-solid fa-trash delete-btn"></i></button>
+                      <button type="button" (click)="deleteTrip(trip.id, $event)"><i class="fa-solid fa-trash delete-btn"></i></button>
 
-                      <button (click)="editTrip(trip.id, $event)"><i class="fa-solid fa-pen trip-edit-btn"></i></button>
+                      <button type="button" (click)="editTrip(trip.id, $event)"><i class="fa-solid fa-pen trip-edit-btn"></i></button>
 
 
                     </div>
