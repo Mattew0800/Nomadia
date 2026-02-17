@@ -65,7 +65,7 @@ public class TripController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> removeUser(@Valid @RequestBody TripAddUserByEmailDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
         tripService.removeUserFromTrip(dto.getTripId(), dto.getEmail(), me.getId());
-        return ResponseEntity.ok("Usuario removido con exito");
+        return ResponseEntity.ok(Map.of("message", "Usuario removido con exito!"));
     }
 
     @DeleteMapping("/delete")

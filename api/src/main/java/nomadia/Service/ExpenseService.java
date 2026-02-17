@@ -117,9 +117,7 @@ public class ExpenseService {
                             "Monto del split inválido");
                 }
                 if (owedMap.putIfAbsent(user.getId(), split.getAmountOwed()) != null) {
-                    throw new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Split duplicado para el mismo usuario");
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Split duplicado para el mismo usuario");
                 }
                 involvedUsers.add(user.getId());
                 totalOwed = totalOwed.add(split.getAmountOwed());
@@ -218,6 +216,9 @@ public class ExpenseService {
         Expense expense = expenseRepository.findByIdWithTrip(expenseId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gasto no encontrado"));
         tripService.getTripAndValidateMember(expense.getTrip().getId(), userId);
+        if(paymentRepository.existsByTripId(expense.getTrip().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"No se pueden eliminar gastos de un viaje cuando existen pagos registrados");
+        }
         expenseRepository.delete(expense);
     }
 
@@ -290,6 +291,7 @@ public class ExpenseService {
             }
         }
     }
+
     public List<DebtDTO> calculateDebts(List<UserBalanceDTO> balances) {
         List<BalanceNode> creditors = balances.stream()
                 .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) > 0)
