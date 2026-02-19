@@ -282,6 +282,7 @@
   background: linear-gradient(135deg, #ec502c 0%, #d64a2c 100%);
   color: #ffffff;
   box-shadow: 0 4px 15px rgba(214, 74, 44, 0.4);
+
 }
 
 .edit-btn:hover {
@@ -345,6 +346,12 @@
 
 .share-btn:hover {
   opacity: 0.9;
+}
+
+.correo{
+  color: var(--text-muted);
+  height: 3.3rem;
+  margin-top: 0.6rem;
 }
 
 
@@ -517,7 +524,7 @@
 }
 
 .msgOk{
-  color: var(--accent-green);
+  color: #aae941;
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }

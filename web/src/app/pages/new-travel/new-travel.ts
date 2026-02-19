@@ -136,14 +136,61 @@ export class NewTravel {
       }
 
       const inputDate = new Date(dateValue);
-      const today = new Date();
 
-      today.setHours(0, 0, 0, 0);
-      inputDate.setHours(0, 0, 0, 0);
+      // Si la fecha no es válida, marcar como inválida
+      if (isNaN(inputDate.getTime())) {
+        return { invalidDate: true };
+      }
 
+      // Comprobación explícita por año: si el año es menor a 1901, marcar error
+      const year = inputDate.getFullYear();
+      if (year < 1901) {
+        return { pastDate: true };
+      }
+
+      // Validar que el año no tenga más de 4 dígitos
+      if (year > 9999) {
+        return { invalidYear: true };
+      }
 
       return null;
     };
+  }
+
+  /**
+   * Limita el año en un input de tipo date a 4 dígitos
+   * @param event Evento del input
+   * @param controlName Nombre del control del formulario
+   */
+  limitDateYear(event: Event, controlName: 'startDate' | 'endDate'): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    if (!value) return;
+
+    // Validar el formato yyyy-mm-dd
+    const parts = value.split('-');
+    if (parts.length === 3) {
+      let [year, month, day] = parts;
+
+      // Limitar el año a 4 dígitos
+      if (year.length > 4) {
+        year = year.substring(0, 4);
+        value = `${year}-${month}-${day}`;
+        input.value = value;
+      }
+
+      // Validar que el año esté en el rango permitido
+      const yearNum = parseInt(year, 10);
+      if (yearNum > 2100) {
+        // Si es mayor a 9999, establecer 9999
+        value = `2100-${month}-${day}`;
+        input.value = value;
+      }
+
+      // Actualizar el control del formulario
+      this.form.get(controlName)?.setValue(value);
+    }
   }
 
 

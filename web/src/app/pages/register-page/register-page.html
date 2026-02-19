@@ -48,9 +48,18 @@
                             <p class="formError">Campo obligatorio.</p>
                         }
 
-                        @if(nameC?.invalid && !nameC?.hasError("required")){
+                        @if(nameC?.hasError("pattern")){
                             <p class="formError">El nombre es invalido.</p>
                         }
+
+                        @if(nameC?.hasError('maxlength')) {
+                          <p class="formError">El nombre es demasiado largo.</p>
+                        }
+
+                        @if(nameC?.hasError('maxWords')){
+                          <p class="formError">El nombre no puede tener más de 5 palabras.</p>
+                        }
+
                     }
 
                 </div>
@@ -72,10 +81,7 @@
                             <p class="formError">El email es invalido.</p>
                         }
                     }
-                  @if(errorMsg){
-                    <p class="formError">{{errorMsg}}</p>
 
-                  }
                 </div>
 
                 <div class="input-group">
@@ -86,16 +92,27 @@
                         'input-invalid': passwordC?.invalid && submitted
                     }">
 
+
+                    @if(errorMsg){
+                      <p class="formError">{{errorMsg}}</p>
+                    }
+
                     @if(submitted){
                         @if(passwordC?.hasError("required")){
                             <p class="formError">Campo obligatorio.</p>
                         }
 
-                        @if(passwordC?.invalid && !passwordC?.hasError("required")){
+                        @if(passwordC?.hasError("minlength")){
                             <p class="formError">La contraseña es muy corta.</p>
+                        }
+
+                        @if(passwordC?.hasError("pattern")){
+                            <p class="formError">La contraseña no puede contener solo espacios.</p>
                         }
                     }
                 </div>
+
+
 
                 <div class="terms-checkbox" [ngClass]="{'underline': termsC?.invalid && submitted}">
                     <input type="checkbox" id="terms" required formControlName="terms" [ngClass]="{'check-color': termsC?.invalid && submitted}">
@@ -107,12 +124,15 @@
 
 
                 <button type="submit" class="btn-login">Registrarme</button>
+
+
             </form>
 
 
             <div class="signup-link">
                 ¿Ya tenés cuenta? <a routerLink="/login">Iniciá sesión</a>
             </div>
+
         </div>
     </div>
 </div>

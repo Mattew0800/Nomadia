@@ -91,6 +91,10 @@ export class TripEdit implements OnInit {
       next: () => {
         this.msgOk = 'Nombre actualizado con éxito.';
         if (this.trip) this.trip.name = newName;
+
+        setTimeout(() => {
+          this.router.navigate(['/tripList']);
+        }, 2000);
       },
       error: (err) => {
         const backend = err?.error;

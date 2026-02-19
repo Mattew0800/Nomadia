@@ -343,6 +343,10 @@ triggerFileInput() {
           if (res.newToken) {
             this.authService.setToken(res.newToken);
           }
+
+          setTimeout(() => {
+            this.router.navigate(['/profile']);
+          }, 2000);
         },
         error: (err) => {
 

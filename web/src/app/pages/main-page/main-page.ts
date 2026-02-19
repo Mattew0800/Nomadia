@@ -81,11 +81,11 @@ export class MainPage implements OnInit {
   @ViewChild('costInput') costInput!: ElementRef<HTMLInputElement>;
   @ViewChild('descInput') descInput!: ElementRef<HTMLInputElement>;
 
-  weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  weekDays = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
 
   get weekDaysView(): string[] {
     return this.startWeekOnMonday
-      ? ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+      ? ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM']
       : this.weekDays;
   }
 
@@ -100,8 +100,8 @@ export class MainPage implements OnInit {
   selectedDayTitle = 'Today';
 
   monthNames: string[] = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
   years: number[] = [];
 
@@ -513,6 +513,7 @@ export class MainPage implements OnInit {
         this.tService.users = [...this.tService.users, traveler];
         this.msgInviteOk = "Usuario invitado con exito.";
         this.msgInviteError = "";
+
       },
       error: (e: any) => {
         console.log(e);
