@@ -43,6 +43,9 @@ export class UserProfileEdit {
   errorMessages: string = "";
   user?: User;
   DEFAULT_PHOTO = 'default-user-img.jpg';
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
 
 
 
@@ -282,6 +285,18 @@ triggerFileInput() {
     const newPass = this.form.get('newPass')?.value;
     const confirm = this.form.get('confirmPass')?.value;
     return !newPass || !confirm || newPass === confirm;
+  }
+
+  toggleCurrentPasswordVisibility() {
+    this.showCurrentPassword = !this.showCurrentPassword;
+  }
+
+  toggleNewPasswordVisibility() {
+    this.showNewPassword = !this.showNewPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   save() {
