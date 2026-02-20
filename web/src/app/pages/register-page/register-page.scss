@@ -95,6 +95,10 @@
   border-color: #a3e635 !important;
 }
 
+.input-invalid {
+  border-color: red !important;
+}
+
 #registerMsg {
   color: #a3e635;
   margin-bottom: 1rem;
@@ -119,9 +123,9 @@
 }
 
 .formError {
-  color: rgb(211, 25, 25);
+  color: rgb(250, 30, 30);
   margin-top: 0.3rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 
 }
 

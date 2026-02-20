@@ -1,6 +1,14 @@
 import { NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/Auth/auth-service';
 
@@ -17,6 +25,7 @@ export class RegisterPage implements OnInit {
   registerMsg?:string;
   errorMsg?:string;
   loading = true;
+  invalidCredentials = false;
 
   private imagesToPreload = [
     'coliseo-romano.jpg',
@@ -28,14 +37,26 @@ export class RegisterPage implements OnInit {
       this.registerForm = new FormGroup({
 
           name: new FormControl('', [Validators.required,
-            Validators.pattern(/^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$/i)
+            Validators.pattern(/^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$/i),
             // Solo letras (con tildes/ñ), al menos dos palabras (espacio en medio)
             // Permite "de", "del", "la", "los", "san" | Sin simbolos o espacios extra.
+            Validators.maxLength(50),
+            this.maxWordsValidator(5)
+
           ]),
 
-          email: new FormControl('', [Validators.required, Validators.email]),
+          email: new FormControl('', [
+            Validators.required,
+            Validators.pattern(/^(?!.*\.{2})[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/),
+            Validators.maxLength(254)
+            //Prohíbe puntos consecutivos
+            //Exige que el local-part no empiece/termine con punto
+            //Controla que los guiones en el dominio no estén al inicio/final
+            //Requiere TLD de al menos 2 letras
+            //Permite subdominios
+          ]),
 
-          password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+          password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.pattern(/\S/)]),
 
           terms: new FormControl(false, [Validators.requiredTrue])
       });
@@ -104,6 +125,7 @@ export class RegisterPage implements OnInit {
         if (e.status === 409) {
           this.errorMsg = "El usuario ya existe.";
         } else {
+          alert(e.error);
           this.errorMsg = "Ocurrió un error inesperado.";
         }
       }
@@ -113,6 +135,14 @@ export class RegisterPage implements OnInit {
       console.log('Formulario inválido');
       return;
     }
+  }
+
+  maxWordsValidator(max: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value || '';
+      const words = value.trim().split(/\s+/).filter((w: string) => w.length > 0);
+      return words.length > max ? { maxWords: { requiredMax: max, actual: words.length } } : null;
+    };
   }
 
 }

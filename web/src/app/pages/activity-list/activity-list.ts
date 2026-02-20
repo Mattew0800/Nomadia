@@ -58,6 +58,39 @@ export class ActivityListComponent implements OnInit {
     });
   }
 
+  limitDateYear(event: Event, controlName: 'fromDate' | 'toDate'): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    if (!value) return;
+
+    const parts = value.split('-');
+    if (parts.length === 3) {
+      let [year, month, day] = parts;
+
+      // Limitar año a 4 dígitos
+      if (year.length > 4) {
+        year = year.substring(0, 4);
+        value = `${year}-${month}-${day}`;
+        input.value = value;
+      }
+
+      const yearNum = parseInt(year, 10);
+      // Si el año supera 2100, fijarlo a 2100
+      if (yearNum > 2100) {
+        value = `2100-${month}-${day}`;
+        input.value = value;
+      }
+
+      // Actualizar la propiedad correspondiente
+      if (controlName === 'fromDate') {
+        this.fromDate = value;
+      } else {
+        this.toDate = value;
+      }
+    }
+  }
+
   fetch(searchTerm?: string): void {
     this.loading.set(true);
     this.errorMsg.set(null);

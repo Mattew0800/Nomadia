@@ -34,11 +34,15 @@
           <input id="nombreViaje"
                  type="text"
                  formControlName="name"
+                 maxlength="30"
                  placeholder="Ej: Vacaciones en Bariloche"
-                 [ngClass]="{'input-invalid': submitted && f['name']?.invalid}"/>
+                 [ngClass]="{'input-invalid': f['name']?.touched && f['name']?.invalid}"/>
           @if(submitted && f['name']?.invalid){
             <p class="formError">El nombre del viaje es obligatorio.</p>
           }
+          <div class="formError" *ngIf="f['name']?.touched && f['name']?.hasError('onlyWhitespace')">
+            El nombre no puede contener solo espacios.
+          </div>
         </div>
 
         <div>

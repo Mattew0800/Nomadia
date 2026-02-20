@@ -115,7 +115,7 @@
   <main class="main-content">
     <header class="top-header">
       <div class="search-container">
-        <input type="text" placeholder="Buscar actividad por nombre" class="search-input"
+        <input type="text" placeholder="Buscar actividad por nombre" class="search-input" maxlength="20"
                [(ngModel)]="searchQuery" (input)="onInputChange()" (keyup.enter)="onSearch()">
 
         @if (showSuggestions && filteredSuggestions.length > 0) {
@@ -166,7 +166,7 @@
             </button>
             <ul class="dropdown-menu" #userMenu [class.show]="showMenu" role="menu" aria-labelledby="userMenuBtn">
               <li><a class="dropdown-item" (click)="onSelect('profile')">Mi perfil</a></li>
-              <li><a class="dropdown-item" >Notificaciones</a></li>
+              <li><a class="dropdown-item" routerLink="/messages">Notificaciones</a></li>
               <li><a class="dropdown-item" href="mailto:nomadia.soporte@gmail.com">Ayuda y soporte</a></li>
               <li><a class="dropdown-item" (click)="logout()">Cerrar sesion</a></li>
 
