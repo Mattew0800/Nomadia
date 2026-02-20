@@ -138,7 +138,7 @@ export class Test implements OnInit{
     } else {
       console.warn('No hay un viaje seleccionado');
       // Opcional: redirigir a la lista de viajes
-      this.router.navigate(['/tripList']);
+      this.router.navigate(['/balance']);
     }
   }
 
@@ -148,7 +148,7 @@ export class Test implements OnInit{
       this.router.navigate(['/expenses'], { queryParams: { tripId } });
     } else {
       console.warn('No hay un viaje seleccionado');
-      this.router.navigate(['/tripList']);
+      this.router.navigate(['/expenses']);
     }
   }
 

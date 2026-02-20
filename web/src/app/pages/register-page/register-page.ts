@@ -26,6 +26,7 @@ export class RegisterPage implements OnInit {
   errorMsg?:string;
   loading = true;
   invalidCredentials = false;
+  showPassword = false;
 
   private imagesToPreload = [
     'coliseo-romano.jpg',
@@ -101,6 +102,10 @@ export class RegisterPage implements OnInit {
     get termsC() {
       return this.registerForm.get('terms');
     }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
 
   register() {

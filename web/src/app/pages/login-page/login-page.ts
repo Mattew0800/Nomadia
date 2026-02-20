@@ -16,6 +16,7 @@ export class LoginPage implements OnInit {
     loginError: string | null = null;
     invalidCredentials = false;
     loading = true;
+    showPassword = false;
 
     private imagesToPreload = [
       'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920',
@@ -63,8 +64,12 @@ export class LoginPage implements OnInit {
         .catch((error) => {
           console.warn('Error cargando imagen:', error);
           this.loading = false;
-        });
-    }
+    });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
 
   login() {
