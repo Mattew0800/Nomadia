@@ -372,3 +372,27 @@
     transform: scale(1) translateY(0);
   }
 }
+
+/* Badge "SELECCIONADO" */
+.selected-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: #aae941;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 30px;
+  z-index: 30;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Tarjeta seleccionada: borde resaltado */
+.activity-card.selected {
+  box-shadow: 0 0 0 3px #aae941, 0 15px 40px rgba(0, 0, 0, 0.4);
+  transform: translateY(-5px); /* Opcional: mantén el efecto hover */
+}

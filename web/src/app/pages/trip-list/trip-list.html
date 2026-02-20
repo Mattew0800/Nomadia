@@ -49,6 +49,9 @@
             @for (trip of filteredViajes; track trip.id) {
 
             <div class="activity-card" (click)="selectTrip(String(trip.id))">
+              @if (selectedTripId === String(trip.id)) {
+                <div class="selected-badge">SELECCIONADO</div>
+              }
                 <div class="card-image-wrapper">
 
                     <img class="card-image" [src]="'tripTypes/' + trip.type + '.webp'" alt="" loading="eager" fetchpriority="high">

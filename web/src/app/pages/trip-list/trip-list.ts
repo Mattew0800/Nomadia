@@ -161,5 +161,9 @@ export class TripList implements OnInit {
     });
   }
 
+  get selectedTripId(): string | null {
+    return localStorage.getItem('selectedTripId');
+  }
+
   protected readonly String = String;
 }
