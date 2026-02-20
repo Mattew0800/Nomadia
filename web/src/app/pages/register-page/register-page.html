@@ -102,6 +102,11 @@
                       <p class="formError">{{errorMsg}}</p>
                     }
 
+
+                    @if(errorMsg){
+                      <p class="formError">{{errorMsg}}</p>
+                    }
+
                     @if(submitted){
                         @if(passwordC?.hasError("required")){
                             <p class="formError">Campo obligatorio.</p>
