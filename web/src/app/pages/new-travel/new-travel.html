@@ -54,6 +54,9 @@
           <div class="formError" *ngIf="f['name'].touched && f['name'].hasError('minlength')">
             El nombre debe tener al menos 3 caracteres
           </div>
+          <div class="formError" *ngIf="f['name']?.touched && f['name']?.hasError('onlyWhitespace')">
+            El nombre no puede contener solo espacios.
+          </div>
         </div>
 
         <div>
@@ -125,11 +128,11 @@
             placeholder="Contanos sobre tu viaje, lugares que visitarás, actividades planeadas..."
             [class.input-invalid]="f['description'].touched && f['description'].invalid"
           ></textarea>
-          <div class="formError" *ngIf="f['description'].touched && f['description'].hasError('required')">
-            La descripción es obligatoria
-          </div>
           <div class="formError" *ngIf="f['description'].touched && f['description'].hasError('maxlength')">
             La descripción no puede superar los 100 caracteres
+          </div>
+          <div class="formError" *ngIf="f['description']?.touched && f['description']?.hasError('onlyWhitespace')">
+            La descripción no puede contener solo espacios.
           </div>
         </div>
 

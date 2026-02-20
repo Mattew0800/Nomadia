@@ -56,11 +56,11 @@ export class NewTravel {
 
   // --- FORMULARIO CORREGIDO SIN 'budget' ---
   form = new FormGroup({
-    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),
+    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3), this.notOnlyWhitespaceValidator()] }),
     type: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     startDate: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, this.pastDateValidator()]}),
     endDate: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    description: new FormControl<string>('', { validators: [Validators.maxLength(100)] }),
+    description: new FormControl<string>('', { validators: [Validators.maxLength(100), this.notOnlyWhitespaceValidator()] }),
   }, { validators: dateRangeValidator });
   // -------------------------------------------
 
@@ -131,26 +131,19 @@ export class NewTravel {
     return (control: AbstractControl): ValidationErrors | null => {
       const dateValue = control.value;
 
-      if (!dateValue) {
-        return null;
-      }
+      if (!dateValue) return null;
 
-      const inputDate = new Date(dateValue);
+      const parts = dateValue.split('-');
+      if (parts.length !== 3) return { invalidDate: true };
 
-      // Si la fecha no es válida, marcar como inválida
-      if (isNaN(inputDate.getTime())) {
-        return { invalidDate: true };
-      }
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const day = parseInt(parts[2], 10);
 
-      // Comprobación explícita por año: si el año es menor a 1901, marcar error
-      const year = inputDate.getFullYear();
-      if (year < 1901) {
+      if (isNaN(year) || isNaN(month) || isNaN(day)) return { invalidDate: true };
+
+      if (year <= 1900) {
         return { pastDate: true };
-      }
-
-      // Validar que el año no tenga más de 4 dígitos
-      if (year > 9999) {
-        return { invalidYear: true };
       }
 
       return null;
@@ -191,6 +184,24 @@ export class NewTravel {
       // Actualizar el control del formulario
       this.form.get(controlName)?.setValue(value);
     }
+  }
+
+  notOnlyWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      // Si es nulo, undefined o cadena vacía → válido (campo opcional)
+      if (value == null || value === '') {
+        return null;
+      }
+
+      // Si es string y después de quitar espacios queda vacío → error
+      if (typeof value === 'string' && value.trim().length === 0) {
+        return { onlyWhitespace: true };
+      }
+
+      return null;
+    };
   }
 
 
