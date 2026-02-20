@@ -48,7 +48,7 @@
                     <label for="password">Contraseña</label>
                     <div style="position: relative;">
                         <input [type]="showPassword ? 'text' : 'password'" id="password" placeholder="••••••••" required formControlName="password" [ngClass]="{'input-invalid': invalidCredentials}">
-                        <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                        <i [class]="showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
                            (click)="togglePasswordVisibility()"
                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
                     </div>

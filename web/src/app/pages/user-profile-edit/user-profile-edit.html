@@ -236,7 +236,7 @@
               <label>Contraseña actual</label>
               <div style="position: relative;">
                 <input [type]="showCurrentPassword ? 'text' : 'password'" formControlName="currentPass" placeholder="••••••••">
-                <i [class]="showCurrentPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                <i [class]="showCurrentPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
                    (click)="toggleCurrentPasswordVisibility()"
                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
               </div>
@@ -247,7 +247,7 @@
               <div style="position: relative;">
                 <input [type]="showNewPassword ? 'text' : 'password'" formControlName="newPass" placeholder="••••••••"
                        [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
-                <i [class]="showNewPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                <i [class]="showNewPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
                    (click)="toggleNewPasswordVisibility()"
                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
               </div>
@@ -261,7 +261,7 @@
               <div style="position: relative;">
                 <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPass" placeholder="••••••••"
                        [ngClass]="{'input-invalid': !passwordsMatch() && form.get('confirmPass')?.touched}">
-                <i [class]="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                <i [class]="showConfirmPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
                    (click)="toggleConfirmPasswordVisibility()"
                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
               </div>
