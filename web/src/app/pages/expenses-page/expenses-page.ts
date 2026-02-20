@@ -232,7 +232,6 @@ export class ExpensesPage implements OnInit {
           this.tripId = '';
           this.cdr.detectChanges();
 
-          alert('El viaje seleccionado ya no existe.');
         } else {
           console.error('Error inesperado al cargar el viaje');
           this.isLoading = false;
