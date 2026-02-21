@@ -79,10 +79,6 @@ public class User {
     )
     private Set<Trip> trips = new HashSet<>();
 
-//    @OneToMany(mappedBy = "user")
-//    private Set<Calification> califications = new HashSet<>();
-
-
     public static User fromRegisterDTO(RegisterRequestDTO dto, PasswordEncoder encoder) {
         User user = new User();
         user.setName(dto.getName());
