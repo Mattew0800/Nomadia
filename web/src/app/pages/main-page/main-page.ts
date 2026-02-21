@@ -644,7 +644,7 @@ export class MainPage implements OnInit {
     this.editForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120), this.notOnlyWhitespaceValidator()]],
       date: ['', Validators.required],          // 'YYYY-MM-DD'
-      description: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2000)]],
+      description: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2000), this.notOnlyWhitespaceValidator()]],
       cost: [0, [Validators.required, Validators.min(0)]],
       startTime: ['09:00', Validators.required], // 'HH:mm'
       endTime: ['10:00', Validators.required],   // 'HH:mm'
@@ -744,6 +744,14 @@ export class MainPage implements OnInit {
 
   public get descriptionControl() {
     return this.createForm.get('description')!;
+  }
+
+  public get editNameControl() {
+    return this.editForm.get('name')!;
+  }
+
+  public get editDescriptionControl() {
+    return this.editForm.get('description')!;
   }
 
   getTravelers(tripId: string) {

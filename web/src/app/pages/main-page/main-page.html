@@ -37,7 +37,7 @@
         <form [formGroup]="editForm" (ngSubmit)="submitEditActivity()">
 
           <div class="input-group" (click)="unlock('name')">
-            <input #nameInput type="text" formControlName="name" [readonly]="locks.name" placeholder="Nombre" />
+            <input #nameInput type="text" formControlName="name" [readonly]="locks.name" placeholder="Nombre" maxlength="12" />
           </div>
 
           <div class="input-group" (click)="unlock('date')">
@@ -54,12 +54,24 @@
           </div>
 
           <div class="input-group" (click)="unlock('description')">
-            <input #descInput type="text" formControlName="description" [readonly]="locks.description" placeholder="Descripción" />
+            <input #descInput type="text" formControlName="description" [readonly]="locks.description" placeholder="Descripción" maxlength="23" />
           </div>
 
           <button class="share-btn" type="submit">Guardar cambios</button>
 
           <button type="button" class="close-btn" (click)="closeEditPanel()">Cerrar</button>
+
+          @if(editNameControl.touched && editNameControl.invalid){
+            <p class="error">Nombre inválido.</p>
+          }
+
+          @if(editDescriptionControl.touched && editDescriptionControl.invalid){
+            <p class="error">Descripción inválida.</p>
+          }
+
+          @if(editCostControl.touched && editCostControl.hasError('required')){
+            <p class="error">El costo es obligatorio.</p>
+          }
 
           @if(editCostControl.touched && editCostControl.hasError('min')){
             <p class="error">El costo no puede ser negativo.</p>
