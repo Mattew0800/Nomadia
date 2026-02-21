@@ -22,6 +22,10 @@ import { forkJoin } from 'rxjs';
   styleUrl: './expenses-page.scss',
 })
 export class ExpensesPage implements OnInit {
+
+  readonly MAX_TOTAL_AMOUNT = 5000000; // 5.000.000
+
+
   expenseForm!: FormGroup;
 
   tripMembers: TravelerResponse[] = [];
@@ -398,7 +402,8 @@ export class ExpensesPage implements OnInit {
     this.expenseForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       note: ['', [Validators.maxLength(255)]],
-      totalAmount: [0, [Validators.required, Validators.min(0.01)]],
+      // Máximo permitido $5.000.000
+      totalAmount: [0, [Validators.required, Validators.min(0.01), Validators.max(5000000)]],
       activityId: [null],
       payers: this.fb.array([], [Validators.required, this.atLeastOneValidator()]),
       splits: this.fb.array([], [Validators.required, this.atLeastOneValidator()])
@@ -665,9 +670,37 @@ export class ExpensesPage implements OnInit {
     this.editingFilterMaxAmount = false;
   }
 
+
+
   onTotalAmountChange(): void {
+
     if (this.divisionType === 'equal') {
       this.distributeEqually();
+    }
+
+    const control = this.totalAmountControl;
+    if (!control) return;
+
+    let value = control.value;
+
+    if (value === null || value === undefined || value === '') return;
+
+    const numericValue = Number(value);
+
+    // Validar que sea un número
+    if (isNaN(numericValue)) {
+      control.setValue(null, { emitEvent: false });
+      return;
+    }
+
+    // Limitar al máximo permitido
+    if (numericValue > this.MAX_TOTAL_AMOUNT) {
+      // Forzar el valor al máximo
+      control.setValue(this.MAX_TOTAL_AMOUNT, { emitEvent: false });
+    }
+    // Opcional: evitar valores negativos
+    else if (numericValue < 0) {
+      control.setValue(0, { emitEvent: false });
     }
   }
 

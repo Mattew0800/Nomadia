@@ -272,7 +272,7 @@
 
             <!-- Nota -->
             <div class="form-group">
-              <label>Nota</label>
+              <label>Nota (opcional)</label>
               <textarea
                 formControlName="note"
                 placeholder="Descripción o comentarios adicionales (opcional)"
@@ -290,6 +290,7 @@
                     formControlName="totalAmount"
                     placeholder="0.00"
                     step="0.01"
+                    max="5000000"
                     class="total-amount-input"
                     [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
                     (input)="onTotalAmountChange()"
@@ -300,8 +301,8 @@
                   <span class="total-amount-display clickable" (click)="startTotalAmountEdit()">${{ totalAmountControl?.value | number:'1.2-2' }}</span>
                 }
               </div>
-              @if(totalAmountControl?.touched && totalAmountControl?.invalid) {
-                <span class="error-msg">Debe ser mayor a 0</span>
+              @if(totalAmountControl?.touched && totalAmountControl?.hasError('max')) {
+                <span class="error-msg">El monto máximo permitido es $5.000.000</span>
               }
             </div>
 
@@ -449,7 +450,6 @@
               }
             </div>
 
-            <!-- Actividad asignada -->
             <div class="form-group">
               <label>Actividad asignada (opcional)</label>
               <select formControlName="activityId" class="activity-select">
