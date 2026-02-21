@@ -18,7 +18,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("nomadia/trip")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080"})
 public class TripController {
 
     private final TripService tripService;
