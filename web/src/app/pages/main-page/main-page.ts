@@ -4,7 +4,15 @@ import {Router, RouterLink} from '@angular/router';
 import {Test} from '../test/test';
 import {TripService} from '../../services/Trip/trip-service';
 import {TripResponse} from '../../models/TripResponse';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule, ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import {ActivityService} from '../../services/Activity/activity-service';
 import {User} from '../../models/User';
 import {TravelerResponse} from '../../models/TravelerResponse';
@@ -324,7 +332,7 @@ export class MainPage implements OnInit {
 
   private initCreateForm() {
     this.createForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120), this.notOnlyWhitespaceValidator()]],
       date: ['', Validators.required],          // YYYY-MM-DD
       description: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2000)]],
       cost: [0, [Validators.required, Validators.min(0)]],
@@ -475,6 +483,32 @@ export class MainPage implements OnInit {
     return d.getTime() === end.getTime();
   }
 
+  public get costControl() {
+    return this.createForm.get('cost')!;
+  }
+
+  notOnlyWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      // Si es nulo, undefined o cadena vacía → válido (campo opcional)
+      if (value == null || value === '') {
+        return null;
+      }
+
+      // Si es string y después de quitar espacios queda vacío → error
+      if (typeof value === 'string' && value.trim().length === 0) {
+        return { onlyWhitespace: true };
+      }
+
+      return null;
+    };
+  }
+
+  public get editCostControl() {
+    return this.editForm.get('cost')!;
+  }
+
   /** si el año no está en el rango del selector, lo extiendo para que aparezca */
   private ensureYearInRange(year: number) {
     if (!this.years || this.years.length === 0) return;
@@ -608,7 +642,7 @@ export class MainPage implements OnInit {
 
   private initEditForm() {
     this.editForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120), this.notOnlyWhitespaceValidator()]],
       date: ['', Validators.required],          // 'YYYY-MM-DD'
       description: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2000)]],
       cost: [0, [Validators.required, Validators.min(0)]],
