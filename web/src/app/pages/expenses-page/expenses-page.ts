@@ -52,6 +52,7 @@ export class ExpensesPage implements OnInit {
   showFilters: boolean = false;
   selectedExpenseId: number | null = null;
   selectedExpense: any = null;
+  filterAmountRangeInvalid: boolean = false;
 
   showDeleteModal: boolean = false;
   expenseToDelete: number | null = null;
@@ -151,8 +152,13 @@ export class ExpensesPage implements OnInit {
 
   applyFilters(): void {
 
+  this.filterMinAmount = this.toNonNegativeOrNull(this.filterMinAmount);
+  this.filterMaxAmount = this.toNonNegativeOrNull(this.filterMaxAmount);
+  this.validateFilterAmountRange();
 
     let filtered = [...this.allExpenses];
+
+    if (this.filterAmountRangeInvalid) return;
 
     if (this.filterActivityId !== null) {
       filtered = filtered.filter(expense => expense.activityId === this.filterActivityId);
@@ -174,6 +180,7 @@ export class ExpensesPage implements OnInit {
     this.filterActivityId = null;
     this.filterMinAmount = null;
     this.filterMaxAmount = null;
+    this.filterAmountRangeInvalid = false;
     this.filteredExpenses = [...this.allExpenses];
     this.expenses = [...this.allExpenses];
   }
@@ -624,7 +631,6 @@ export class ExpensesPage implements OnInit {
     );
   }
 
-  // Helper para obtener la URL de la foto de perfil del usuario
   getUserPhotoUrl(userId: number | null | undefined): string {
     if (!userId) {
       return '/default-user-img.jpg';
@@ -633,7 +639,6 @@ export class ExpensesPage implements OnInit {
     return user?.photoUrl || '/default-user-img.jpg';
   }
 
-  // Helpers para edición de filtros de monto
   startFilterMinAmountEdit(): void {
     this.editingFilterMinAmount = true;
     setTimeout(() => {
@@ -646,10 +651,9 @@ export class ExpensesPage implements OnInit {
   }
 
   finishFilterMinAmountEdit(): void {
-    if (this.filterMinAmount === null || this.filterMinAmount === undefined || (this.filterMinAmount as any) === '') {
-      this.filterMinAmount = null;
-    }
-    this.editingFilterMinAmount = false;
+    this.filterMinAmount = this.toNonNegativeOrNull(this.filterMinAmount);
+      this.validateFilterAmountRange();
+      this.editingFilterMinAmount = false;
   }
 
   startFilterMaxAmountEdit(): void {
@@ -664,10 +668,9 @@ export class ExpensesPage implements OnInit {
   }
 
   finishFilterMaxAmountEdit(): void {
-    if (this.filterMaxAmount === null || this.filterMaxAmount === undefined || (this.filterMaxAmount as any) === '') {
-      this.filterMaxAmount = null;
-    }
-    this.editingFilterMaxAmount = false;
+   this.filterMaxAmount = this.toNonNegativeOrNull(this.filterMaxAmount);
+     this.validateFilterAmountRange();
+     this.editingFilterMaxAmount = false;
   }
 
 
@@ -687,18 +690,14 @@ export class ExpensesPage implements OnInit {
 
     const numericValue = Number(value);
 
-    // Validar que sea un número
     if (isNaN(numericValue)) {
       control.setValue(null, { emitEvent: false });
       return;
     }
 
-    // Limitar al máximo permitido
     if (numericValue > this.MAX_TOTAL_AMOUNT) {
-      // Forzar el valor al máximo
       control.setValue(this.MAX_TOTAL_AMOUNT, { emitEvent: false });
     }
-    // Opcional: evitar valores negativos
     else if (numericValue < 0) {
       control.setValue(0, { emitEvent: false });
     }
@@ -719,7 +718,6 @@ export class ExpensesPage implements OnInit {
     const formValue = this.expenseForm.value;
 
     if (this.selectedExpenseId) {
-      // Siempre enviar los splits con los datos calculados, nunca null
       const splitsToSend = formValue.splits.map((s: any) => ({
         userId: Number(s.userId),
         amountOwed: Number(s.amountOwed)
@@ -778,7 +776,6 @@ export class ExpensesPage implements OnInit {
         }
       });
     } else {
-      // Siempre enviar los splits con los datos calculados, nunca null
       const splitsToSend = formValue.splits.map((s: any) => ({
         userId: Number(s.userId),
         amountOwed: Number(s.amountOwed)
@@ -914,6 +911,58 @@ export class ExpensesPage implements OnInit {
     });
   }
 
+private toNonNegativeOrNull(value: any): number | null {
+  if (value === null || value === undefined || value === '') return null;
+
+  const n = Number(value);
+  if (Number.isNaN(n)) return null;
+
+  return n < 0 ? 0 : n;
+}
+
+onFilterMinAmountChange(value: any): void {
+  this.filterMinAmount = this.toNonNegativeOrNull(value);
+  this.validateFilterAmountRange();
+}
+
+onFilterMaxAmountChange(value: any): void {
+  this.filterMaxAmount = this.toNonNegativeOrNull(value);
+  this.validateFilterAmountRange();
+}
+
+blockNegativeKey(event: KeyboardEvent): void {
+  const blocked = ['-', 'e', 'E'];
+  if (blocked.includes(event.key)) {
+    event.preventDefault();
+  }
+}
+
+onPasteNonNegative(event: ClipboardEvent, target: 'min' | 'max'): void {
+  const text = event.clipboardData?.getData('text') ?? '';
+  const n = this.toNonNegativeOrNull(text);
+
+  if (n === null && text.trim() !== '') {
+    event.preventDefault();
+    return;
+  }
+
+  if (n !== null && n >= 0) {
+    return;
+  }
+
+  event.preventDefault();
+  if (target === 'min') this.filterMinAmount = 0;
+  else this.filterMaxAmount = 0;
+}
+
+private validateFilterAmountRange(): void {
+  if (this.filterMinAmount === null || this.filterMaxAmount === null) {
+    this.filterAmountRangeInvalid = false;
+    return;
+  }
+  this.filterAmountRangeInvalid = this.filterMaxAmount < this.filterMinAmount;
+}
+
   showCreateForm(): void {
     if (!this.expenseForm || this.noTripSelected) {
       console.warn('No se puede crear gasto: sin viaje seleccionado');
@@ -935,7 +984,7 @@ export class ExpensesPage implements OnInit {
     this.divisionType = 'equal';
     this.editingSplits.clear();
     this.editingPayers.clear();
-    this.editingTotalAmount = true; // Activar edición automáticamente al crear
+    this.editingTotalAmount = true;
   }
 
   viewExpenseDetails(expense: any): void {
