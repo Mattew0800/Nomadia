@@ -120,11 +120,15 @@
                     @if(editingFilterMinAmount) {
                       <input
                         type="number"
-                        [(ngModel)]="filterMinAmount"
+                        [ngModel]="filterMinAmount"
+                        (ngModelChange)="onFilterMinAmountChange($event)"
                         placeholder="$0"
                         min="0"
                         step="0.01"
                         class="filter-min-amount-input"
+                        [class.invalid]="filterAmountRangeInvalid"
+                        (keydown)="blockNegativeKey($event)"
+                        (paste)="onPasteNonNegative($event, 'min')"
                         (blur)="finishFilterMinAmountEdit()"
                         (keyup.enter)="finishFilterMinAmountEdit()"
                       />
@@ -142,11 +146,15 @@
                     @if(editingFilterMaxAmount) {
                       <input
                         type="number"
-                        [(ngModel)]="filterMaxAmount"
+                        [ngModel]="filterMaxAmount"
+                        (ngModelChange)="onFilterMaxAmountChange($event)"
                         placeholder="$0"
                         min="0"
                         step="0.01"
                         class="filter-max-amount-input"
+                        [class.invalid]="filterAmountRangeInvalid"
+                        (keydown)="blockNegativeKey($event)"
+                        (paste)="onPasteNonNegative($event, 'max')"
                         (blur)="finishFilterMaxAmountEdit()"
                         (keyup.enter)="finishFilterMaxAmountEdit()"
                       />
@@ -158,11 +166,15 @@
                   </div>
                 </div>
 
+                @if(filterAmountRangeInvalid) {
+                <span class="error-msg">El monto máximo debe ser mayor o igual al monto mínimo</span>
+                }
+
                 <div class="filter-actions">
                   <button class="btn-clear" (click)="clearFilters()">
                     Limpiar
                   </button>
-                  <button class="btn-apply" (click)="applyFilters()">
+                  <button class="btn-apply" (click)="applyFilters()" [disabled]="filterAmountRangeInvalid">
                     Aplicar filtros
                   </button>
                 </div>
@@ -263,11 +275,22 @@
                 type="text"
                 formControlName="name"
                 placeholder="Ej: Cena en restaurante"
-                [class.invalid]="nameControl?.invalid && nameControl?.touched"
+                [class.invalid]="nameControl?.invalid && (nameControl?.touched || nameControl?.dirty)"
               />
-              @if(nameControl?.touched && nameControl?.invalid) {
-                <span class="error-msg">El nombre es obligatorio (min. 2 caracteres)</span>
+
+              @if((nameControl?.touched || nameControl?.dirty) && nameControl?.hasError('whitespace')) {
+                <span class="error-msg">El nombre no puede contener solo espacios.</span>
               }
+              @if((nameControl?.touched || nameControl?.dirty) && nameControl?.hasError('required')) {
+                <span class="error-msg">El nombre del gasto es obligatorio</span>
+              }
+              @if((nameControl?.touched || nameControl?.dirty) && nameControl?.hasError('minlength')) {
+                <span class="error-msg">Nombre demasiado corto</span>
+              }
+              @if((nameControl?.touched || nameControl?.dirty) && nameControl?.hasError('maxlength')) {
+                <span class="error-msg">Nombre demasiado largo</span>
+              }
+
             </div>
 
             <!-- Nota -->
@@ -290,7 +313,7 @@
                     formControlName="totalAmount"
                     placeholder="0.00"
                     step="0.01"
-                    max="5000000"
+                    max="999999999.99"
                     class="total-amount-input"
                     [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
                     (input)="onTotalAmountChange()"
@@ -302,7 +325,7 @@
                 }
               </div>
               @if(totalAmountControl?.touched && totalAmountControl?.hasError('max')) {
-                <span class="error-msg">El monto máximo permitido es $5.000.000</span>
+                <span class="error-msg">El monto máximo permitido es $999,999,999.99</span>
               }
             </div>
 

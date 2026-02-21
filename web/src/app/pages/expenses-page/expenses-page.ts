@@ -1,7 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Test } from '../test/test';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl, ValidationErrors,
+  ValidatorFn
+} from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { TravelerResponse } from '../../models/TravelerResponse';
 import { ActivityResponseDTO } from '../../models/ActivityResponse';
@@ -23,7 +26,7 @@ import { forkJoin } from 'rxjs';
 })
 export class ExpensesPage implements OnInit {
 
-  readonly MAX_TOTAL_AMOUNT = 5000000; // 5.000.000
+  readonly MAX_TOTAL_AMOUNT = 999999999.99; // 999.999.999,99
 
 
   expenseForm!: FormGroup;
@@ -52,6 +55,7 @@ export class ExpensesPage implements OnInit {
   showFilters: boolean = false;
   selectedExpenseId: number | null = null;
   selectedExpense: any = null;
+  filterAmountRangeInvalid: boolean = false;
 
   showDeleteModal: boolean = false;
   expenseToDelete: number | null = null;
@@ -151,8 +155,13 @@ export class ExpensesPage implements OnInit {
 
   applyFilters(): void {
 
+  this.filterMinAmount = this.toNonNegativeOrNull(this.filterMinAmount);
+  this.filterMaxAmount = this.toNonNegativeOrNull(this.filterMaxAmount);
+  this.validateFilterAmountRange();
 
     let filtered = [...this.allExpenses];
+
+    if (this.filterAmountRangeInvalid) return;
 
     if (this.filterActivityId !== null) {
       filtered = filtered.filter(expense => expense.activityId === this.filterActivityId);
@@ -174,6 +183,7 @@ export class ExpensesPage implements OnInit {
     this.filterActivityId = null;
     this.filterMinAmount = null;
     this.filterMaxAmount = null;
+    this.filterAmountRangeInvalid = false;
     this.filteredExpenses = [...this.allExpenses];
     this.expenses = [...this.allExpenses];
   }
@@ -400,14 +410,65 @@ export class ExpensesPage implements OnInit {
 
   private initForm(): void {
     this.expenseForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), this.notOnlyWhitespaceValidator()]],
       note: ['', [Validators.maxLength(255)]],
       // Máximo permitido $5.000.000
-      totalAmount: [0, [Validators.required, Validators.min(0.01), Validators.max(5000000)]],
+      totalAmount: [0, [Validators.required, Validators.min(0.01), this.maxTotalValidator()]],
       activityId: [null],
       payers: this.fb.array([], [Validators.required, this.atLeastOneValidator()]),
       splits: this.fb.array([], [Validators.required, this.atLeastOneValidator()])
     }, { validators: [this.totalPayersValidator(), this.totalSplitsValidator()] });
+
+    // Suscribir cambios en el control 'name' para forzar el error 'whitespace' y marcar touched/dirty
+    const nameCtrl = this.expenseForm.get('name');
+    if (nameCtrl) {
+      nameCtrl.valueChanges.subscribe((val: any) => {
+        if (val === null || val === undefined) {
+          if (nameCtrl.hasError('whitespace')) {
+            const errors = { ...(nameCtrl.errors || {}) } as any;
+            delete errors['whitespace'];
+            const keys = Object.keys(errors);
+            nameCtrl.setErrors(keys.length > 0 ? errors : null);
+          }
+          return;
+        }
+
+        if (typeof val === 'string') {
+          const isOnlySpaces = val.length > 0 && val.trim().length === 0;
+          if (isOnlySpaces) {
+            const existing = nameCtrl.errors || {};
+            if (!existing['whitespace']) {
+              nameCtrl.setErrors({ ...existing, whitespace: true });
+            }
+            // Asegurar que el mensaje se muestre incluso mientras escribe
+            nameCtrl.markAsDirty();
+            nameCtrl.markAsTouched();
+          } else {
+            if (nameCtrl.hasError('whitespace')) {
+              const errors = { ...(nameCtrl.errors || {}) } as any;
+              delete errors['whitespace'];
+              const keys = Object.keys(errors);
+              nameCtrl.setErrors(keys.length > 0 ? errors : null);
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Validador personalizado para el máximo total (redondea a 2 decimales antes de comparar)
+  private maxTotalValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const raw = control.value;
+      if (raw === null || raw === undefined || raw === '') return null;
+      const num = Number(raw);
+      if (isNaN(num)) return null;
+      const rounded = Math.round(num * 100) / 100;
+      if (rounded > this.MAX_TOTAL_AMOUNT) {
+        return { max: { max: this.MAX_TOTAL_AMOUNT, actual: rounded } } as any;
+      }
+      return null;
+    };
   }
 
   get payers(): FormArray {
@@ -624,7 +685,6 @@ export class ExpensesPage implements OnInit {
     );
   }
 
-  // Helper para obtener la URL de la foto de perfil del usuario
   getUserPhotoUrl(userId: number | null | undefined): string {
     if (!userId) {
       return '/default-user-img.jpg';
@@ -633,7 +693,6 @@ export class ExpensesPage implements OnInit {
     return user?.photoUrl || '/default-user-img.jpg';
   }
 
-  // Helpers para edición de filtros de monto
   startFilterMinAmountEdit(): void {
     this.editingFilterMinAmount = true;
     setTimeout(() => {
@@ -646,10 +705,9 @@ export class ExpensesPage implements OnInit {
   }
 
   finishFilterMinAmountEdit(): void {
-    if (this.filterMinAmount === null || this.filterMinAmount === undefined || (this.filterMinAmount as any) === '') {
-      this.filterMinAmount = null;
-    }
-    this.editingFilterMinAmount = false;
+    this.filterMinAmount = this.toNonNegativeOrNull(this.filterMinAmount);
+      this.validateFilterAmountRange();
+      this.editingFilterMinAmount = false;
   }
 
   startFilterMaxAmountEdit(): void {
@@ -664,10 +722,9 @@ export class ExpensesPage implements OnInit {
   }
 
   finishFilterMaxAmountEdit(): void {
-    if (this.filterMaxAmount === null || this.filterMaxAmount === undefined || (this.filterMaxAmount as any) === '') {
-      this.filterMaxAmount = null;
-    }
-    this.editingFilterMaxAmount = false;
+   this.filterMaxAmount = this.toNonNegativeOrNull(this.filterMaxAmount);
+     this.validateFilterAmountRange();
+     this.editingFilterMaxAmount = false;
   }
 
 
@@ -685,20 +742,20 @@ export class ExpensesPage implements OnInit {
 
     if (value === null || value === undefined || value === '') return;
 
-    const numericValue = Number(value);
+    // Normalizar y redondear a 2 decimales para evitar problemas de precisión
+    const numericRaw = Number(String(value).replace(/,/g, ''));
+    const numericValue = isNaN(numericRaw) ? NaN : Math.round(numericRaw * 100) / 100;
 
-    // Validar que sea un número
     if (isNaN(numericValue)) {
       control.setValue(null, { emitEvent: false });
       return;
     }
 
-    // Limitar al máximo permitido
     if (numericValue > this.MAX_TOTAL_AMOUNT) {
-      // Forzar el valor al máximo
-      control.setValue(this.MAX_TOTAL_AMOUNT, { emitEvent: false });
+      // Forzar el valor al máximo redondeado a 2 decimales
+      const roundedMax = Math.round(this.MAX_TOTAL_AMOUNT * 100) / 100;
+      control.setValue(roundedMax, { emitEvent: false });
     }
-    // Opcional: evitar valores negativos
     else if (numericValue < 0) {
       control.setValue(0, { emitEvent: false });
     }
@@ -719,7 +776,6 @@ export class ExpensesPage implements OnInit {
     const formValue = this.expenseForm.value;
 
     if (this.selectedExpenseId) {
-      // Siempre enviar los splits con los datos calculados, nunca null
       const splitsToSend = formValue.splits.map((s: any) => ({
         userId: Number(s.userId),
         amountOwed: Number(s.amountOwed)
@@ -778,7 +834,6 @@ export class ExpensesPage implements OnInit {
         }
       });
     } else {
-      // Siempre enviar los splits con los datos calculados, nunca null
       const splitsToSend = formValue.splits.map((s: any) => ({
         userId: Number(s.userId),
         amountOwed: Number(s.amountOwed)
@@ -914,6 +969,58 @@ export class ExpensesPage implements OnInit {
     });
   }
 
+private toNonNegativeOrNull(value: any): number | null {
+  if (value === null || value === undefined || value === '') return null;
+
+  const n = Number(value);
+  if (Number.isNaN(n)) return null;
+
+  return n < 0 ? 0 : n;
+}
+
+onFilterMinAmountChange(value: any): void {
+  this.filterMinAmount = this.toNonNegativeOrNull(value);
+  this.validateFilterAmountRange();
+}
+
+onFilterMaxAmountChange(value: any): void {
+  this.filterMaxAmount = this.toNonNegativeOrNull(value);
+  this.validateFilterAmountRange();
+}
+
+blockNegativeKey(event: KeyboardEvent): void {
+  const blocked = ['-', 'e', 'E'];
+  if (blocked.includes(event.key)) {
+    event.preventDefault();
+  }
+}
+
+onPasteNonNegative(event: ClipboardEvent, target: 'min' | 'max'): void {
+  const text = event.clipboardData?.getData('text') ?? '';
+  const n = this.toNonNegativeOrNull(text);
+
+  if (n === null && text.trim() !== '') {
+    event.preventDefault();
+    return;
+  }
+
+  if (n !== null && n >= 0) {
+    return;
+  }
+
+  event.preventDefault();
+  if (target === 'min') this.filterMinAmount = 0;
+  else this.filterMaxAmount = 0;
+}
+
+private validateFilterAmountRange(): void {
+  if (this.filterMinAmount === null || this.filterMaxAmount === null) {
+    this.filterAmountRangeInvalid = false;
+    return;
+  }
+  this.filterAmountRangeInvalid = this.filterMaxAmount < this.filterMinAmount;
+}
+
   showCreateForm(): void {
     if (!this.expenseForm || this.noTripSelected) {
       console.warn('No se puede crear gasto: sin viaje seleccionado');
@@ -935,7 +1042,26 @@ export class ExpensesPage implements OnInit {
     this.divisionType = 'equal';
     this.editingSplits.clear();
     this.editingPayers.clear();
-    this.editingTotalAmount = true; // Activar edición automáticamente al crear
+    this.editingTotalAmount = true;
+  }
+
+  notOnlyWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      // Si es nulo, undefined o cadena vacía → válido (campo opcional)
+      if (value == null || value === '') {
+        return null;
+      }
+
+      // Si es string y después de quitar espacios queda vacío → error
+      if (typeof value === 'string' && value.trim().length === 0) {
+        // Devolver la clave 'whitespace' para que coincida con la plantilla
+        return { whitespace: true };
+      }
+
+      return null;
+    };
   }
 
   viewExpenseDetails(expense: any): void {
