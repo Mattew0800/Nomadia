@@ -66,7 +66,7 @@
             </svg>
             Nombre completo
           </label>
-          <input type="text" formControlName="name" placeholder="Ej: Juan Pérez"
+          <input type="text" formControlName="name" placeholder="Ej: Juan Pérez" maxlength="50"
                  [ngClass]="{'input-invalid': form.get('name')?.invalid && form.get('name')?.touched}">
 
           <div>
@@ -79,6 +79,12 @@
               <p class="formError">Debes ingresar un nombre y apellido válidos.</p>
             }
           </div>
+          <div>
+            @if(f['name'].touched && f['name'].hasError('maxWords')){
+              <p class="formError">Tu nombre no puede contener mas de 5 palabras.</p>
+            }
+          </div>
+
 
         </div>
 
@@ -179,6 +185,8 @@
             <p class="formError">Debes tener al menos 8 años.</p>
           }@else if(f['birth'].touched && f['birth'].hasError('isTooOld')){
             <p class="formError">La fecha de nacimiento es incorrecta.</p>
+          }@else if(f['birth'].touched && f['birth'].hasError('futureDate')){
+            <p class="formError">La fecha de nacimiento es futura.</p>
           }
 
         </div>

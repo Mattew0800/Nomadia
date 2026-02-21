@@ -164,7 +164,8 @@ export class ExpensesPage implements OnInit {
     if (this.filterAmountRangeInvalid) return;
 
     if (this.filterActivityId !== null) {
-      filtered = filtered.filter(expense => expense.activityId === this.filterActivityId);
+      const activityIdNum = Number(this.filterActivityId);
+      filtered = filtered.filter(expense => Number(expense.activityId) === activityIdNum);
     }
 
     if (this.filterMinAmount !== null && this.filterMinAmount > 0) {
@@ -976,6 +977,14 @@ private toNonNegativeOrNull(value: any): number | null {
   if (Number.isNaN(n)) return null;
 
   return n < 0 ? 0 : n;
+}
+
+onFilterActivityChange(value: any): void {
+  if (value === null || value === 'null' || value === '' || value === undefined) {
+    this.filterActivityId = null;
+  } else {
+    this.filterActivityId = Number(value);
+  }
 }
 
 onFilterMinAmountChange(value: any): void {
