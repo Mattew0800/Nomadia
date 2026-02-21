@@ -55,7 +55,8 @@ export class UserProfileEdit {
     this.form = new FormGroup({
       name: new FormControl('', [
         Validators.required,
-        Validators.pattern(/^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$/i)
+        Validators.pattern(/^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$/i),
+        this.maxWordsValidator(5)
       ]),
       nick: new FormControl('', Validators.maxLength(10)),
       email: new FormControl({ value: '', disabled: false }, [
@@ -67,7 +68,7 @@ export class UserProfileEdit {
         Validators.maxLength(13),
         Validators.pattern(/^[0-9]+$/)
       ]),
-      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.futureDateValidator(), this.ageValidator(8, 100)]),
+      birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.futureDateValidator(), this.ageValidator(8, 110)]),
       age: new FormControl(''),
       about: new FormControl('', [Validators.minLength(3), Validators.maxLength(200)]),
 
@@ -375,6 +376,14 @@ triggerFileInput() {
             (err.status === 401 ? 'Sesión expirada.' : 'Error al actualizar el perfil.');
         }
       });
+  }
+
+  maxWordsValidator(max: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value || '';
+      const words = value.trim().split(/\s+/).filter((w: string) => w.length > 0);
+      return words.length > max ? { maxWords: { requiredMax: max, actual: words.length } } : null;
+    };
   }
 
   cancel() {
