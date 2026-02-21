@@ -1,7 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Test } from '../test/test';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl, ValidationErrors,
+  ValidatorFn
+} from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { TravelerResponse } from '../../models/TravelerResponse';
 import { ActivityResponseDTO } from '../../models/ActivityResponse';
@@ -23,7 +26,7 @@ import { forkJoin } from 'rxjs';
 })
 export class ExpensesPage implements OnInit {
 
-  readonly MAX_TOTAL_AMOUNT = 5000000; // 5.000.000
+  readonly MAX_TOTAL_AMOUNT = 999999999.99; // 999.999.999,99
 
 
   expenseForm!: FormGroup;
@@ -407,14 +410,65 @@ export class ExpensesPage implements OnInit {
 
   private initForm(): void {
     this.expenseForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), this.notOnlyWhitespaceValidator()]],
       note: ['', [Validators.maxLength(255)]],
       // Máximo permitido $5.000.000
-      totalAmount: [0, [Validators.required, Validators.min(0.01), Validators.max(5000000)]],
+      totalAmount: [0, [Validators.required, Validators.min(0.01), this.maxTotalValidator()]],
       activityId: [null],
       payers: this.fb.array([], [Validators.required, this.atLeastOneValidator()]),
       splits: this.fb.array([], [Validators.required, this.atLeastOneValidator()])
     }, { validators: [this.totalPayersValidator(), this.totalSplitsValidator()] });
+
+    // Suscribir cambios en el control 'name' para forzar el error 'whitespace' y marcar touched/dirty
+    const nameCtrl = this.expenseForm.get('name');
+    if (nameCtrl) {
+      nameCtrl.valueChanges.subscribe((val: any) => {
+        if (val === null || val === undefined) {
+          if (nameCtrl.hasError('whitespace')) {
+            const errors = { ...(nameCtrl.errors || {}) } as any;
+            delete errors['whitespace'];
+            const keys = Object.keys(errors);
+            nameCtrl.setErrors(keys.length > 0 ? errors : null);
+          }
+          return;
+        }
+
+        if (typeof val === 'string') {
+          const isOnlySpaces = val.length > 0 && val.trim().length === 0;
+          if (isOnlySpaces) {
+            const existing = nameCtrl.errors || {};
+            if (!existing['whitespace']) {
+              nameCtrl.setErrors({ ...existing, whitespace: true });
+            }
+            // Asegurar que el mensaje se muestre incluso mientras escribe
+            nameCtrl.markAsDirty();
+            nameCtrl.markAsTouched();
+          } else {
+            if (nameCtrl.hasError('whitespace')) {
+              const errors = { ...(nameCtrl.errors || {}) } as any;
+              delete errors['whitespace'];
+              const keys = Object.keys(errors);
+              nameCtrl.setErrors(keys.length > 0 ? errors : null);
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Validador personalizado para el máximo total (redondea a 2 decimales antes de comparar)
+  private maxTotalValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const raw = control.value;
+      if (raw === null || raw === undefined || raw === '') return null;
+      const num = Number(raw);
+      if (isNaN(num)) return null;
+      const rounded = Math.round(num * 100) / 100;
+      if (rounded > this.MAX_TOTAL_AMOUNT) {
+        return { max: { max: this.MAX_TOTAL_AMOUNT, actual: rounded } } as any;
+      }
+      return null;
+    };
   }
 
   get payers(): FormArray {
@@ -688,7 +742,9 @@ export class ExpensesPage implements OnInit {
 
     if (value === null || value === undefined || value === '') return;
 
-    const numericValue = Number(value);
+    // Normalizar y redondear a 2 decimales para evitar problemas de precisión
+    const numericRaw = Number(String(value).replace(/,/g, ''));
+    const numericValue = isNaN(numericRaw) ? NaN : Math.round(numericRaw * 100) / 100;
 
     if (isNaN(numericValue)) {
       control.setValue(null, { emitEvent: false });
@@ -696,7 +752,9 @@ export class ExpensesPage implements OnInit {
     }
 
     if (numericValue > this.MAX_TOTAL_AMOUNT) {
-      control.setValue(this.MAX_TOTAL_AMOUNT, { emitEvent: false });
+      // Forzar el valor al máximo redondeado a 2 decimales
+      const roundedMax = Math.round(this.MAX_TOTAL_AMOUNT * 100) / 100;
+      control.setValue(roundedMax, { emitEvent: false });
     }
     else if (numericValue < 0) {
       control.setValue(0, { emitEvent: false });
@@ -985,6 +1043,25 @@ private validateFilterAmountRange(): void {
     this.editingSplits.clear();
     this.editingPayers.clear();
     this.editingTotalAmount = true;
+  }
+
+  notOnlyWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      // Si es nulo, undefined o cadena vacía → válido (campo opcional)
+      if (value == null || value === '') {
+        return null;
+      }
+
+      // Si es string y después de quitar espacios queda vacío → error
+      if (typeof value === 'string' && value.trim().length === 0) {
+        // Devolver la clave 'whitespace' para que coincida con la plantilla
+        return { whitespace: true };
+      }
+
+      return null;
+    };
   }
 
   viewExpenseDetails(expense: any): void {
