@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
 
-    @Query("select distinct p from Participant p join p.expense e where e.trip.id = :tripId")
-    List<Participant> findByTripId(Long tripId);
+    @Query("select p from Participant p where p.expense.trip.id = :tripId")
+    List<Participant> findByTripId(@Param("tripId") Long tripId);
     boolean existsByUserIdAndExpenseTripId(Long userId, Long tripId);
 }

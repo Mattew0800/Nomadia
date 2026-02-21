@@ -30,11 +30,6 @@ public class ExpenseController {
     public ResponseEntity<ExpenseResponseDTO> createExpense(@Valid @RequestBody CreateExpenseDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
         return ResponseEntity.ok(expenseService.createExpense(dto, me.getId()));
     }
-    @PostMapping("/total-cost")
-    @PreAuthorize("hasRole('USER')")
-    public BigDecimal getTotalTripCost(@RequestBody TripIdRequestDTO tripId, @AuthenticationPrincipal UserDetailsImpl me){
-        return expenseService.getTotalTripCost(tripId,me.getId());
-    }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
