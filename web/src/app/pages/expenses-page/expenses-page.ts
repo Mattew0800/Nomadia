@@ -36,6 +36,13 @@ export class ExpensesPage implements OnInit {
   allExpenses: any[] = [];
 
   divisionType: 'equal' | 'custom' = 'equal';
+  editingSplits = new Set<number>();
+  editingPayers = new Set<number>();
+  editingTotalAmount = false;
+
+  // Estados de edición para filtros
+  editingFilterMinAmount = false;
+  editingFilterMaxAmount = false;
 
   showForm: boolean = false;
   showFilters: boolean = false;
@@ -195,7 +202,7 @@ export class ExpensesPage implements OnInit {
     this.isLoading = true;
 
     this.tripService.getTripById(this.tripId).subscribe({
-      next: (trip) => {
+      next: (_trip) => {
 
         this.getCurrentUserId();
 
@@ -225,7 +232,6 @@ export class ExpensesPage implements OnInit {
           this.tripId = '';
           this.cdr.detectChanges();
 
-          alert('El viaje seleccionado ya no existe.');
         } else {
           console.error('Error inesperado al cargar el viaje');
           this.isLoading = false;
@@ -285,6 +291,109 @@ export class ExpensesPage implements OnInit {
   }
 
 
+  // Helpers para modo edición de consumidores
+  private getSplitKey(index: number): number {
+    const control = this.splits.at(index);
+    return Number(control.get('userId')?.value ?? index);
+  }
+
+  isSplitEditing(index: number): boolean {
+    return this.editingSplits.has(this.getSplitKey(index));
+  }
+
+  startSplitEdit(index: number): void {
+    this.editingSplits.add(this.getSplitKey(index));
+    // Usar setTimeout para asegurar que el input esté renderizado antes de seleccionar
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('.participants-list .amount-input');
+      // Encontrar el input correcto basado en el índice
+      let splitInputIndex = 0;
+      for (let i = 0; i <= index && splitInputIndex < inputs.length; i++) {
+        if (this.isSplitEditing(i)) {
+          if (i === index) {
+            const input = inputs[splitInputIndex] as HTMLInputElement;
+            if (input) {
+              input.focus();
+              input.select();
+            }
+            break;
+          }
+          splitInputIndex++;
+        }
+      }
+    }, 0);
+  }
+
+  finishSplitEdit(index: number): void {
+    this.editingSplits.delete(this.getSplitKey(index));
+  }
+
+  // Helpers para modo edición de pagadores
+  private getPayerKey(index: number): number {
+    const control = this.payers.at(index);
+    return Number(control.get('userId')?.value ?? index);
+  }
+
+  isPayerEditing(index: number): boolean {
+    return this.editingPayers.has(this.getPayerKey(index));
+  }
+
+  startPayerEdit(index: number): void {
+    this.editingPayers.add(this.getPayerKey(index));
+    // Usar setTimeout para asegurar que el input esté renderizado antes de seleccionar
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('.participant-row .amount-input');
+      const input = inputs[index] as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  finishPayerEdit(index: number): void {
+    const control = this.payers.at(index);
+    const amountControl = control.get('amountPaid');
+    const currentValue = amountControl?.value;
+
+    // Si está vacío o null, establecer en 0
+    if (currentValue === null || currentValue === undefined || currentValue === '') {
+      amountControl?.setValue(0);
+    }
+
+    // Marcar como tocado para mostrar validación
+    amountControl?.markAsTouched();
+
+    this.editingPayers.delete(this.getPayerKey(index));
+  }
+
+  // Helpers para modo edición de monto total
+  startTotalAmountEdit(): void {
+    this.editingTotalAmount = true;
+    // Usar setTimeout para asegurar que el input esté renderizado antes de seleccionar
+    setTimeout(() => {
+      const input = document.querySelector('.total-amount-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  finishTotalAmountEdit(): void {
+    const currentValue = this.totalAmountControl?.value;
+
+    // Si está vacío o null, establecer en 0
+    if (currentValue === null || currentValue === undefined || currentValue === '') {
+      this.totalAmountControl?.setValue(0);
+    }
+
+    // Marcar como tocado para mostrar validación
+    this.totalAmountControl?.markAsTouched();
+
+    this.editingTotalAmount = false;
+  }
+
   private initForm(): void {
     this.expenseForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -336,10 +445,11 @@ export class ExpensesPage implements OnInit {
     const payerGroup = this.fb.group({
       userId: [user.id, Validators.required],
       userName: [user.name],
-      amountPaid: [0, [Validators.required, Validators.min(0)]]
+      amountPaid: [0, [Validators.required, Validators.min(0.01)]]
     });
 
     this.payers.push(payerGroup);
+    this.editingPayers.add(Number(user.id));
     console.log('Payer agregado. Total payers:', this.payers.length);
   }
 
@@ -364,7 +474,9 @@ export class ExpensesPage implements OnInit {
 
   // Remover pagador
   removePayer(index: number): void {
+    const key = this.getPayerKey(index);
     this.payers.removeAt(index);
+    this.editingPayers.delete(key);
   }
 
   // Agregar consumidor
@@ -392,6 +504,7 @@ export class ExpensesPage implements OnInit {
     });
 
     this.splits.push(splitGroup);
+    this.editingSplits.add(Number(user.id));
     console.log('Split agregado. Total splits:', this.splits.length);
 
     if (this.divisionType === 'equal') {
@@ -419,7 +532,9 @@ export class ExpensesPage implements OnInit {
   }
 
   removeSplit(index: number): void {
+    const key = this.getSplitKey(index);
     this.splits.removeAt(index);
+    this.editingSplits.delete(key);
 
     if (this.divisionType === 'equal') {
       this.distributeEqually();
@@ -431,7 +546,13 @@ export class ExpensesPage implements OnInit {
 
     if (type === 'equal') {
       this.distributeEqually();
+      this.editingSplits.clear();
     }
+  }
+
+  toggleDivisionType(): void {
+    const newType = this.divisionType === 'equal' ? 'custom' : 'equal';
+    this.changeDivisionType(newType);
   }
 
   private distributeEqually(): void {
@@ -498,6 +619,52 @@ export class ExpensesPage implements OnInit {
     );
   }
 
+  // Helper para obtener la URL de la foto de perfil del usuario
+  getUserPhotoUrl(userId: number | null | undefined): string {
+    if (!userId) {
+      return '/default-user-img.jpg';
+    }
+    const user = this.tripMembers.find(m => Number(m.id) === Number(userId));
+    return user?.photoUrl || '/default-user-img.jpg';
+  }
+
+  // Helpers para edición de filtros de monto
+  startFilterMinAmountEdit(): void {
+    this.editingFilterMinAmount = true;
+    setTimeout(() => {
+      const input = document.querySelector('.filter-min-amount-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  finishFilterMinAmountEdit(): void {
+    if (this.filterMinAmount === null || this.filterMinAmount === undefined || (this.filterMinAmount as any) === '') {
+      this.filterMinAmount = null;
+    }
+    this.editingFilterMinAmount = false;
+  }
+
+  startFilterMaxAmountEdit(): void {
+    this.editingFilterMaxAmount = true;
+    setTimeout(() => {
+      const input = document.querySelector('.filter-max-amount-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  finishFilterMaxAmountEdit(): void {
+    if (this.filterMaxAmount === null || this.filterMaxAmount === undefined || (this.filterMaxAmount as any) === '') {
+      this.filterMaxAmount = null;
+    }
+    this.editingFilterMaxAmount = false;
+  }
+
   onTotalAmountChange(): void {
     if (this.divisionType === 'equal') {
       this.distributeEqually();
@@ -519,15 +686,11 @@ export class ExpensesPage implements OnInit {
     const formValue = this.expenseForm.value;
 
     if (this.selectedExpenseId) {
-      let splitsToSend: any;
-      if (this.divisionType === 'custom') {
-        splitsToSend = formValue.splits.map((s: any) => ({
-          userId: Number(s.userId),
-          amountOwed: Number(s.amountOwed)
-        }));
-      } else {
-        splitsToSend = null;
-      }
+      // Siempre enviar los splits con los datos calculados, nunca null
+      const splitsToSend = formValue.splits.map((s: any) => ({
+        userId: Number(s.userId),
+        amountOwed: Number(s.amountOwed)
+      }));
 
       const updateDTO: ExpenseUpdateDTO = {
         expenseId: this.selectedExpenseId,
@@ -582,15 +745,11 @@ export class ExpensesPage implements OnInit {
         }
       });
     } else {
-      let splitsToSend: any;
-      if (this.divisionType === 'custom') {
-        splitsToSend = formValue.splits.map((s: any) => ({
-          userId: Number(s.userId),
-          amountOwed: Number(s.amountOwed)
-        }));
-      } else {
-        splitsToSend = null;
-      }
+      // Siempre enviar los splits con los datos calculados, nunca null
+      const splitsToSend = formValue.splits.map((s: any) => ({
+        userId: Number(s.userId),
+        amountOwed: Number(s.amountOwed)
+      }));
 
       const createDTO: CreateExpenseDTO = {
         tripId: Number(this.tripId),
@@ -606,6 +765,7 @@ export class ExpensesPage implements OnInit {
         customSplit: this.divisionType === 'custom'
       };
 
+      console.log('📤 DTO a crear:', JSON.stringify(createDTO, null, 2));
 
       const invalidPayers = createDTO.payers.filter(p =>
         !this.tripMembers.some(m => Number(m.id) === p.userId)
@@ -658,6 +818,9 @@ export class ExpensesPage implements OnInit {
     this.payers.clear();
     this.splits.clear();
     this.divisionType = 'equal';
+    this.editingSplits.clear();
+    this.editingPayers.clear();
+    this.editingTotalAmount = false;
     this.showForm = false;
     this.selectedExpenseId = null;
     this.selectedExpense = null;
@@ -687,8 +850,6 @@ export class ExpensesPage implements OnInit {
 
     this.expenseService.deleteExpense(expenseId).subscribe({
       next: () => {
-        console.log('✅ Gasto eliminado exitosamente');
-
         this.allExpenses = this.allExpenses.filter(e => e.id !== expenseId);
 
         if (this.hasActiveFilters()) {
@@ -739,6 +900,9 @@ export class ExpensesPage implements OnInit {
     this.payers.clear();
     this.splits.clear();
     this.divisionType = 'equal';
+    this.editingSplits.clear();
+    this.editingPayers.clear();
+    this.editingTotalAmount = true; // Activar edición automáticamente al crear
   }
 
   viewExpenseDetails(expense: any): void {
@@ -763,6 +927,8 @@ export class ExpensesPage implements OnInit {
 
         this.payers.clear();
         this.splits.clear();
+        this.editingPayers.clear();
+        this.editingSplits.clear();
 
         if (fullExpense.participants && fullExpense.participants.length > 0) {
 
@@ -775,7 +941,7 @@ export class ExpensesPage implements OnInit {
               const payerGroup = this.fb.group({
                 userId: [participant.userId, Validators.required],
                 userName: [user?.name],
-                amountPaid: [participant.amountPaid, [Validators.required, Validators.min(0)]]
+                amountPaid: [participant.amountPaid, [Validators.required, Validators.min(0.01)]]
               });
               this.payers.push(payerGroup);
             }

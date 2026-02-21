@@ -137,6 +137,15 @@
   gap: 8px;
 }
 
+.days {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr; // cada fila ocupa la misma altura
+  gap: 8px;
+}
+
+
 .weekdays span {
   color: #7F8AAF;
   font-size: 11px;
@@ -145,21 +154,23 @@
 }
 
 .day, .days span {
-  display: grid;
-  place-items: center;
-  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; // ocupar toda la celda
   border-radius: 10px;
   font-size: 13px;
   background: #0F1628;
   color: #DDE6FF;
   border: 1px solid rgba(255, 255, 255, .05);
-  position: relative;
+  // sin height fijo
 }
 
 .day {
   appearance: none;
   border: 1px solid rgba(255, 255, 255, .05);
   cursor: pointer;
+
 }
 
 .days span.muted {
@@ -271,6 +282,7 @@
   background: linear-gradient(135deg, #ec502c 0%, #d64a2c 100%);
   color: #ffffff;
   box-shadow: 0 4px 15px rgba(214, 74, 44, 0.4);
+
 }
 
 .edit-btn:hover {
@@ -282,6 +294,7 @@
   background: #a83318;
   box-shadow: 0 2px 8px rgba(236, 80, 44, 0.3);
 }
+
 
 
 .close-button {
@@ -335,6 +348,12 @@
   opacity: 0.9;
 }
 
+.correo{
+  color: var(--text-muted);
+  height: 3.3rem;
+  margin-top: 0.6rem;
+}
+
 
 .member-list {
   list-style: none;
@@ -361,6 +380,15 @@
   font-weight: bold;
   font-size: 0.9rem;
   flex-shrink: 0;
+  overflow: hidden; /* asegurar que la img se recorte dentro del círculo */
+  background-color: #5C6BC0; /* color de fallback cuando no hay imagen */
+}
+
+.member-list .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .member-list .member-info {
@@ -478,6 +506,10 @@
   overflow: visible;
   grid-column: 2;
   grid-row: 1;
+  height: 20rem;
+  display: flex;
+  flex-direction: column;
+
 }
 
 .calendar .month-select:active,
@@ -489,6 +521,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.msgOk{
+  color: #aae941;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 }
 
 .calendar .cal-head .more {
@@ -782,4 +820,3 @@
     width: 100vw;
   }
 }
-

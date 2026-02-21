@@ -56,7 +56,7 @@
         <span>Actividades</span>
       </div>
 
-      <div class="nav-item" routerLinkActive="active">
+      <div class="nav-item" routerLink="/messages" routerLinkActive="active">
         <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path
             d="M17.1283 19.8972H6.87169C5.57962 19.8972 4.34046 19.384 3.42684 18.4703C2.51323 17.5567 2 16.3175 2 15.0255V8.87169C2 7.57962 2.51323 6.34046 3.42684 5.42684C4.34046 4.51323 5.57966 4 6.87169 4H17.1283C18.4204 4 19.6595 4.51323 20.5732 5.42684C21.4868 6.34046 22 7.57966 22 8.87169V15.0255C22 16.3176 21.4868 17.5567 20.5732 18.4703C19.6595 19.384 18.4203 19.8972 17.1283 19.8972ZM6.87169 5.53862C5.98845 5.5412 5.1423 5.89336 4.51765 6.51782C3.89317 7.1423 3.54117 7.98862 3.53845 8.87187V15.0257C3.5412 15.9089 3.89318 16.7552 4.51765 17.3797C5.1423 18.0042 5.98845 18.3564 6.87169 18.3589H17.1283C18.0116 18.3563 18.8577 18.0042 19.4823 17.3797C20.1068 16.7552 20.4588 15.9089 20.4616 15.0257V8.87187C20.4588 7.98862 20.1068 7.1423 19.4823 6.51782C18.8577 5.89335 18.0116 5.54117 17.1283 5.53862H6.87169Z"
@@ -68,13 +68,21 @@
         <span>Mensajes</span>
       </div>
 
-      <div class="nav-item" routerLink="/expenses" routerLinkActive="active" [ngClass]="{ 'active': isRouteActive('/expenses')}">
+      <div class="nav-item" (click)="navigateToExpenses()" [ngClass]="{ 'active': isRouteActive('/expenses')}">
         <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path
             d="M17.1283 4H6.87169C5.57962 4 4.34046 4.51323 3.42684 5.42684C2.51323 6.34046 2 7.57966 2 8.87169V15.0255C2 16.3176 2.51323 17.5567 3.42684 18.4703C4.34046 19.384 5.57966 19.8972 6.87169 19.8972H17.1283C18.4204 19.8972 19.6595 19.384 20.5732 18.4703C21.4868 17.5567 22 16.3175 22 15.0255V8.87169C22 7.57962 21.4868 6.34046 20.5732 5.42684C19.6595 4.51323 18.4203 4 17.1283 4ZM3.53854 10.6663H6.87178C7.32989 10.6663 7.75314 10.9106 7.98219 11.3075C8.21107 11.7041 8.21107 12.1928 7.98219 12.5894C7.75314 12.9862 7.32989 13.2305 6.87178 13.2305H3.53854V10.6663ZM20.4615 15.0253C20.4587 15.9086 20.1067 16.7549 19.4823 17.3794C18.8576 18.0038 18.0115 18.356 17.1282 18.3586H6.87161C5.98836 18.356 5.14221 18.0038 4.51756 17.3794C3.89308 16.7549 3.54109 15.9086 3.53836 15.0253V14.769H6.87161C7.87933 14.769 8.81045 14.2314 9.31422 13.3586C9.81817 12.486 9.81817 11.4108 9.31422 10.5382C8.81045 9.66549 7.87929 9.12787 6.87161 9.12787H3.53836V8.87152C3.54111 7.98827 3.8931 7.14195 4.51756 6.51747C5.14221 5.89299 5.98836 5.54082 6.87161 5.53827H17.1282C18.0115 5.54085 18.8576 5.89301 19.4823 6.51747C20.1067 7.14195 20.4587 7.98827 20.4615 8.87152V15.0253Z"
           />
         </svg>
         <span>Gastos</span>
+      </div>
+
+      <div class="nav-item" (click)="navigateToBalance()" [ngClass]="{ 'active': isRouteActive('/balance')}">
+        <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z" fill="currentColor"/>
+          <circle cx="16" cy="12" r="1.5" fill="currentColor"/>
+        </svg>
+        <span>Balance</span>
       </div>
 
       <div class="nav-item" tabindex="0" [routerLink]="['/profile']" [ngClass]="{ 'active': isRouteActive('/profile') || isRouteActive('/editProfile') }">
@@ -107,7 +115,7 @@
   <main class="main-content">
     <header class="top-header">
       <div class="search-container">
-        <input type="text" placeholder="Buscar actividad por nombre" class="search-input"
+        <input type="text" placeholder="Buscar actividad por nombre" class="search-input" maxlength="20"
                [(ngModel)]="searchQuery" (input)="onInputChange()" (keyup.enter)="onSearch()">
 
         @if (showSuggestions && filteredSuggestions.length > 0) {
@@ -158,15 +166,15 @@
             </button>
             <ul class="dropdown-menu" #userMenu [class.show]="showMenu" role="menu" aria-labelledby="userMenuBtn">
               <li><a class="dropdown-item" (click)="onSelect('profile')">Mi perfil</a></li>
-              <li><a class="dropdown-item" >Notificaciones</a></li>
-              <li><a class="dropdown-item" >Ayuda y soporte</a></li>
+              <li><a class="dropdown-item" routerLink="/messages">Notificaciones</a></li>
+              <li><a class="dropdown-item" href="mailto:nomadia.soporte@gmail.com">Ayuda y soporte</a></li>
               <li><a class="dropdown-item" (click)="logout()">Cerrar sesion</a></li>
 
             </ul>
           </div>
         </div>
 
-        <div class="notification-icon">
+        <div class="notification-icon" routerLink="/messages">
           <svg width="56" height="58" viewBox="0 0 56 58" fill="none">
             <circle cx="28" cy="30" r="28" fill="#1C1F37" />
             <circle cx="40" cy="6" r="6" fill="#EC502C" />

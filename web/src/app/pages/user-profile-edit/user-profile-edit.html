@@ -234,13 +234,23 @@
           <div class="form-grid" style="grid-template-columns:1fr 1fr;">
             <div>
               <label>Contraseña actual</label>
-              <input type="password" formControlName="currentPass" placeholder="••••••••">
+              <div style="position: relative;">
+                <input [type]="showCurrentPassword ? 'text' : 'password'" formControlName="currentPass" placeholder="••••••••">
+                <i [class]="showCurrentPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                   (click)="toggleCurrentPasswordVisibility()"
+                   style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+              </div>
             </div>
 
             <div>
               <label>Nueva contraseña</label>
-              <input type="password" formControlName="newPass" placeholder="••••••••"
-                     [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
+              <div style="position: relative;">
+                <input [type]="showNewPassword ? 'text' : 'password'" formControlName="newPass" placeholder="••••••••"
+                       [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
+                <i [class]="showNewPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                   (click)="toggleNewPasswordVisibility()"
+                   style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+              </div>
               <div *ngIf="newPassControl?.touched && newPassControl?.hasError('minlength')">
                 <p class="formError">La contraseña debe tener al menos 6 caracteres.</p>
               </div>
@@ -248,8 +258,13 @@
 
             <div style="grid-column:1/3;">
               <label>Confirmar nueva contraseña</label>
-              <input type="password" formControlName="confirmPass" placeholder="••••••••"
-                     [ngClass]="{'input-invalid': !passwordsMatch() && form.get('confirmPass')?.touched}">
+              <div style="position: relative;">
+                <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPass" placeholder="••••••••"
+                       [ngClass]="{'input-invalid': !passwordsMatch() && form.get('confirmPass')?.touched}">
+                <i [class]="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                   (click)="toggleConfirmPasswordVisibility()"
+                   style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+              </div>
               <p *ngIf="!passwordsMatch()" class="formError" style="margin-top:.25rem;">
                 Las contraseñas no coinciden.
               </p>

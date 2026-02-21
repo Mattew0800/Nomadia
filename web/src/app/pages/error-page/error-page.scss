@@ -1,121 +1,482 @@
-
+// Fondos - ahora más visibles
 .background-image,
 .background-blur {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
   overflow: hidden;
   z-index: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
 }
 
-.background-image img,
-.background-blur img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  pointer-events: none;
-}
-
-.container {
-  position: relative;
+.background-blur {
   z-index: 1;
-  max-width: 100%;
+  opacity: 0.6; // Más transparente para ver mejor la naturaleza
+}
+
+// Contenedor principal - diseño abierto
+.error-container {
+  position: relative;
+  z-index: 2;
   min-height: 100vh;
-  padding: 0 clamp(1rem, 5%, 5rem);
-  display: flex;
-  align-items: center;
-}
-
-
-.hero-title {
-  font-size: clamp(28px, 5vw, 56px);
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: fadeInUp 0.8s ease 0.2s both;
-  color: #ec502c !important;
-}
-
-.hero-subtitle {
-  font-size: clamp(16px, 3vw, 24px);
-  color: #ec502c;
-  font-weight: 500;
-  animation: fadeInUp 0.8s ease 0.3s both;
-  margin-bottom: 2rem;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  animation: fadeInUp 0.8s ease 0.4s both;
-}
-
-.retry-btn,
-.home-btn {
-  padding: 0.75rem 1.5rem;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.retry-btn {
-  background: linear-gradient(135deg, #ec502c 0%, #d43d1f 100%);
-  color: white;
-}
-
-.retry-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(236, 80, 44, 0.3);
-}
-
-.home-btn {
-  background: white;
-  color: #ec502c;
-  border: 2px solid #ec502c;
-}
-
-.home-btn:hover {
-  background: #ec502c;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(236, 80, 44, 0.2);
-}
-
-
-.hero {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: clamp(2rem, 5vw, 10rem);
-  align-items: center;
-  width: 100%;
-  position: relative;
-  min-height: 80vh;
-}
-
-.hero-content {
-  margin-left: 50%;
-}
-
-
-.hero-images {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  animation: fadeIn 1s ease 0.7s both;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
+  padding: 2rem;
+}
+
+// Logo flotante en esquina superior izquierda
+.floating-logo {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  animation: fadeInLeft 0.8s ease;
+
+  img {
+    width: 180px;
+    height: auto;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 40px rgba(220, 252, 24, 0.3));
+  }
+}
+
+// Contenido principal sin card opaca - glassmorphism
+.error-content {
+  max-width: 700px;
+  width: 100%;
+  text-align: center;
+  animation: fadeInUp 0.8s ease 0.2s both;
+  position: relative;
+  z-index: 10;
+}
+
+// Título con efecto glassmorphism
+.title-glass {
+  background: rgba(28, 31, 55, 0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 28px;
+  padding: 2rem 3rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(220, 252, 24, 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 60px rgba(220, 252, 24, 0.15);
+  animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+}
+
+.error-title {
+  font-size: clamp(42px, 7vw, 72px);
+  font-weight: 800;
+  color: #DCFC18;
+  margin: 0;
+  text-shadow:
+    0 0 40px rgba(220, 252, 24, 0.6),
+    0 4px 20px rgba(0, 0, 0, 0.5);
+  letter-spacing: -1px;
+}
+
+// Mensaje con glassmorphism sutil
+.error-message {
+  font-size: clamp(18px, 3vw, 24px);
+  color: white;
+  font-weight: 500;
+  line-height: 1.6;
+  margin: 0 0 3rem 0;
+  padding: 1.5rem 2rem;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.8s ease 0.6s both;
+}
+
+// Sección del loader con glassmorphism
+.loader-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin: 3rem 0;
+  animation: fadeIn 0.8s ease 0.7s both;
+}
+
+.loader-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.loader-spinner {
+  width: 100px;
+  height: 100px;
+  border: 6px solid rgba(220, 252, 24, 0.2);
+  border-top: 6px solid #DCFC18;
+  border-radius: 50%;
+  animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+  position: relative;
+  z-index: 2;
+}
+
+.loader-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(220, 252, 24, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse-glow 2s ease-in-out infinite;
   z-index: 1;
 }
+
+.loader-status {
+  font-size: 18px;
+  color: #DCFC18;
+  font-weight: 600;
+  margin: 0;
+  padding: 1rem 2rem;
+  background: rgba(220, 252, 24, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(220, 252, 24, 0.3);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+// Botones con glassmorphism
+.action-buttons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+  animation: fadeIn 0.8s ease 0.8s both;
+}
+
+.btn-glass {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  font-size: 17px;
+  font-weight: 600;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+
+  svg {
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+
+    svg {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1);
+  }
+}
+
+.btn-retry {
+  background: rgba(220, 252, 24, 0.25);
+  color: #DCFC18;
+  border-color: rgba(220, 252, 24, 0.4);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+
+  &:hover {
+    background: rgba(220, 252, 24, 0.35);
+    box-shadow:
+      0 12px 35px rgba(0, 0, 0, 0.4),
+      0 0 30px rgba(220, 252, 24, 0.4);
+  }
+}
+
+.btn-home {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+// Pingüino con mensaje de soporte en esquina inferior derecha
+.penguin-support {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  animation: fadeInRight 0.8s ease;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.floating-penguin {
+  flex-shrink: 0;
+
+  img {
+    width: 140px;
+    height: auto;
+    filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
+  }
+}
+
+.support-bubble {
+  position: relative;
+  background: rgba(255, 255, 255, 0.98);
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 200px;
+  animation: bubbleFloat 3s ease-in-out infinite;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 8px 0 8px;
+    border-color: rgba(255, 255, 255, 0.98) transparent transparent transparent;
+  }
+
+  p {
+    margin: 0;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: #1c1f37;
+    font-weight: 500;
+    text-align: center;
+
+    a {
+      color: #6b8e23;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+      text-shadow: none;
+      display: block;
+      margin-top: 2px;
+
+      &:hover {
+        color: #556b2f;
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Animaciones
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes bubbleFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .floating-logo {
+    top: 1rem;
+    left: 1rem;
+
+    img {
+      width: 120px;
+    }
+  }
+
+  .title-glass {
+    padding: 1.5rem 2rem;
+    border-radius: 20px;
+  }
+
+  .error-message {
+    padding: 1rem 1.5rem;
+  }
+
+  .penguin-support {
+    bottom: 0.8rem;
+    right: 0.8rem;
+  }
+
+  .floating-penguin {
+    img {
+      width: 100px;
+    }
+  }
+
+  .support-bubble {
+    max-width: 160px;
+    padding: 10px 12px;
+
+    p {
+      font-size: 10px;
+    }
+
+    &::after {
+      bottom: -6px;
+      border-width: 6px 6px 0 6px;
+    }
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+
+    .btn-glass {
+      width: 100%;
+    }
+  }
+
+  .loader-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .loader-spinner {
+    width: 80px;
+    height: 80px;
+  }
+
+  .loader-glow {
+    width: 100px;
+    height: 100px;
+  }
+}
+

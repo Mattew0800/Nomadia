@@ -98,10 +98,7 @@ public class ExpenseService {
         if (totalPaid.compareTo(totalAmount) != 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La suma de los pagos no coincide con el total");
         }
-        if (customSplit) {
-            if (splits == null || splits.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Split personalizado requerido");
-            }
+        if (splits != null && !splits.isEmpty()) {
             for (SplitDTO split : splits) {
                 User user = userService.findById(split.getUserId())
                         .orElseThrow(() -> new ResponseStatusException(
@@ -127,6 +124,8 @@ public class ExpenseService {
                         HttpStatus.BAD_REQUEST,
                         "La suma del split no coincide con el total");
             }
+        } else if (customSplit) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Split personalizado requerido");
         } else {
             BigDecimal base = totalAmount.divide(BigDecimal.valueOf(involvedUsers.size()),2,RoundingMode.DOWN);
             BigDecimal remainder = totalAmount.subtract(base.multiply(BigDecimal.valueOf(involvedUsers.size())));

@@ -131,7 +131,26 @@ export class Test implements OnInit{
     return this.router.url.includes(routePath);
   }
 
+  navigateToBalance() {
+    const tripId = localStorage.getItem('selectedTripId');
+    if (tripId) {
+      this.router.navigate(['/balance'], { queryParams: { tripId } });
+    } else {
+      console.warn('No hay un viaje seleccionado');
+      // Opcional: redirigir a la lista de viajes
+      this.router.navigate(['/balance']);
+    }
+  }
 
+  navigateToExpenses() {
+    const tripId = localStorage.getItem('selectedTripId');
+    if (tripId) {
+      this.router.navigate(['/expenses'], { queryParams: { tripId } });
+    } else {
+      console.warn('No hay un viaje seleccionado');
+      this.router.navigate(['/expenses']);
+    }
+  }
 
    logout() {
     localStorage.removeItem('token');

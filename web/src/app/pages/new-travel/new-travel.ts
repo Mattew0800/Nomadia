@@ -18,8 +18,8 @@ import { TripCreate } from '../../models/TripCreate';
 
 
 function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
-  const desde = group.get('startDate')?.value as string | null; // Corregido el nombre del control
-  const hasta = group.get('endDate')?.value as string | null;   // Corregido el nombre del control
+  const desde = group.get('startDate')?.value as string | null;
+  const hasta = group.get('endDate')?.value as string | null;
   if (!desde || !hasta) return null;
   const d = new Date(desde);
   const h = new Date(hasta);
@@ -56,11 +56,11 @@ export class NewTravel {
 
   // --- FORMULARIO CORREGIDO SIN 'budget' ---
   form = new FormGroup({
-    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),
+    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3), this.notOnlyWhitespaceValidator()] }),
     type: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     startDate: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, this.pastDateValidator()]}),
     endDate: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    description: new FormControl<string>('', { validators: [Validators.maxLength(100)] }),
+    description: new FormControl<string>('', { validators: [Validators.maxLength(100), this.notOnlyWhitespaceValidator()] }),
   }, { validators: dateRangeValidator });
   // -------------------------------------------
 
@@ -131,19 +131,73 @@ export class NewTravel {
     return (control: AbstractControl): ValidationErrors | null => {
       const dateValue = control.value;
 
-      if (!dateValue) {
+      if (!dateValue) return null;
+
+      const parts = dateValue.split('-');
+      if (parts.length !== 3) return { invalidDate: true };
+
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const day = parseInt(parts[2], 10);
+
+      if (isNaN(year) || isNaN(month) || isNaN(day)) return { invalidDate: true };
+
+      if (year <= 1900) {
+        return { pastDate: true };
+      }
+
+      return null;
+    };
+  }
+
+  /**
+   * Limita el año en un input de tipo date a 4 dígitos
+   * @param event Evento del input
+   * @param controlName Nombre del control del formulario
+   */
+  limitDateYear(event: Event, controlName: 'startDate' | 'endDate'): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    if (!value) return;
+
+    // Validar el formato yyyy-mm-dd
+    const parts = value.split('-');
+    if (parts.length === 3) {
+      let [year, month, day] = parts;
+
+      // Limitar el año a 4 dígitos
+      if (year.length > 4) {
+        year = year.substring(0, 4);
+        value = `${year}-${month}-${day}`;
+        input.value = value;
+      }
+
+      // Validar que el año esté en el rango permitido
+      const yearNum = parseInt(year, 10);
+      if (yearNum > 2100) {
+        // Si es mayor a 9999, establecer 9999
+        value = `2100-${month}-${day}`;
+        input.value = value;
+      }
+
+      // Actualizar el control del formulario
+      this.form.get(controlName)?.setValue(value);
+    }
+  }
+
+  notOnlyWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      // Si es nulo, undefined o cadena vacía → válido (campo opcional)
+      if (value == null || value === '') {
         return null;
       }
 
-      const inputDate = new Date(dateValue);
-      const today = new Date();
-
-      today.setHours(0, 0, 0, 0);
-      inputDate.setHours(0, 0, 0, 0);
-
-      // Para viajes, la fecha NO debe ser anterior a hoy
-      if (inputDate < today) {
-        return { pastDate: true };
+      // Si es string y después de quitar espacios queda vacío → error
+      if (typeof value === 'string' && value.trim().length === 0) {
+        return { onlyWhitespace: true };
       }
 
       return null;

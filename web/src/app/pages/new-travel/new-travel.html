@@ -54,6 +54,9 @@
           <div class="formError" *ngIf="f['name'].touched && f['name'].hasError('minlength')">
             El nombre debe tener al menos 3 caracteres
           </div>
+          <div class="formError" *ngIf="f['name']?.touched && f['name']?.hasError('onlyWhitespace')">
+            El nombre no puede contener solo espacios.
+          </div>
         </div>
 
         <div>
@@ -80,13 +83,14 @@
             id="desde"
             type="date"
             formControlName="startDate"
+            (input)="limitDateYear($event, 'startDate')"
             [class.input-invalid]="f['startDate'].touched && f['startDate'].invalid"
           />
           <div class="formError" *ngIf="f['startDate'].touched && f['startDate'].hasError('required')">
             La fecha de inicio es obligatoria
           </div>
           <div class="formError" *ngIf="f['startDate'].touched && f['startDate'].hasError('pastDate')">
-            La fecha de inicio debe ser hoy o futura
+            La fecha de inicio es demasiado antigua
           </div>
         </div>
 
@@ -96,10 +100,19 @@
             id="hasta"
             type="date"
             formControlName="endDate"
+            min="1901-01-01"
+            max="9999-12-31"
+            (input)="limitDateYear($event, 'endDate')"
             [class.input-invalid]="(f['endDate'].touched && f['endDate'].invalid) || (f['endDate'].touched && form.hasError('dateRange'))"
           />
           <div class="formError" *ngIf="f['endDate'].touched && f['endDate'].hasError('required')">
             La fecha de fin es obligatoria
+          </div>
+          <div class="formError" *ngIf="f['endDate'].touched && f['endDate'].hasError('pastDate')">
+            La fecha de fin no puede ser anterior al 01/01/1901
+          </div>
+          <div class="formError" *ngIf="f['endDate'].touched && f['endDate'].hasError('invalidYear')">
+            El año no puede tener más de 4 dígitos
           </div>
           <div class="formError" *ngIf="f['endDate'].touched && form.hasError('dateRange')">
             La fecha de fin debe ser posterior a la fecha de inicio
@@ -115,11 +128,11 @@
             placeholder="Contanos sobre tu viaje, lugares que visitarás, actividades planeadas..."
             [class.input-invalid]="f['description'].touched && f['description'].invalid"
           ></textarea>
-          <div class="formError" *ngIf="f['description'].touched && f['description'].hasError('required')">
-            La descripción es obligatoria
-          </div>
           <div class="formError" *ngIf="f['description'].touched && f['description'].hasError('maxlength')">
             La descripción no puede superar los 100 caracteres
+          </div>
+          <div class="formError" *ngIf="f['description']?.touched && f['description']?.hasError('onlyWhitespace')">
+            La descripción no puede contener solo espacios.
           </div>
         </div>
 

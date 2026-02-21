@@ -1,6 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Test } from '../test/test';
 import { TripService } from '../../services/Trip/trip-service';
@@ -23,7 +31,7 @@ export class TripEdit implements OnInit {
 
   // Sólo NAME editable
   public form = new FormGroup({
-    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3), Validators.maxLength(60)] })
+    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3), Validators.maxLength(60), this.notOnlyWhitespaceValidator()] })
   });
 
   submitted = false;
@@ -68,6 +76,25 @@ export class TripEdit implements OnInit {
     });
   }
 
+
+  notOnlyWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      // Si es nulo, undefined o cadena vacía → válido (campo opcional)
+      if (value == null || value === '') {
+        return null;
+      }
+
+      // Si es string y después de quitar espacios queda vacío → error
+      if (typeof value === 'string' && value.trim().length === 0) {
+        return { onlyWhitespace: true };
+      }
+
+      return null;
+    };
+  }
+
   get f() { return this.form.controls; }
 
   save() {
@@ -76,7 +103,7 @@ export class TripEdit implements OnInit {
     this.msgError = undefined;
 
     if (this.form.invalid) {
-      this.msgError = 'Revisá el nombre (mínimo 3 caracteres).';
+      this.msgError = 'Nombre inválido.';
       return;
     }
 
@@ -91,6 +118,10 @@ export class TripEdit implements OnInit {
       next: () => {
         this.msgOk = 'Nombre actualizado con éxito.';
         if (this.trip) this.trip.name = newName;
+
+        setTimeout(() => {
+          this.router.navigate(['/tripList']);
+        }, 2000);
       },
       error: (err) => {
         const backend = err?.error;

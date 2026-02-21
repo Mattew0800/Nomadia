@@ -43,6 +43,9 @@ export class UserProfileEdit {
   errorMessages: string = "";
   user?: User;
   DEFAULT_PHOTO = 'default-user-img.jpg';
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
 
 
 
@@ -284,6 +287,18 @@ triggerFileInput() {
     return !newPass || !confirm || newPass === confirm;
   }
 
+  toggleCurrentPasswordVisibility() {
+    this.showCurrentPassword = !this.showCurrentPassword;
+  }
+
+  toggleNewPasswordVisibility() {
+    this.showNewPassword = !this.showNewPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
   save() {
     this.submitted = true;
     this.msgError = undefined;
@@ -343,6 +358,10 @@ triggerFileInput() {
           if (res.newToken) {
             this.authService.setToken(res.newToken);
           }
+
+          setTimeout(() => {
+            this.router.navigate(['/profile']);
+          }, 2000);
         },
         error: (err) => {
 
