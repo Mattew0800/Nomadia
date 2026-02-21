@@ -25,15 +25,10 @@ public class ExpenseController {
         this.expenseService = expenseService;
     }
 
-    @PostMapping("/create")//funciona
+    @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ExpenseResponseDTO> createExpense(@Valid @RequestBody CreateExpenseDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
         return ResponseEntity.ok(expenseService.createExpense(dto, me.getId()));
-    }
-    @PostMapping("/total-cost")//toma solo el costo por actividad, falta agregar que sume el costo de los gastos
-    @PreAuthorize("hasRole('USER')")
-    public BigDecimal getTotalTripCost(@RequestBody TripIdRequestDTO tripId, @AuthenticationPrincipal UserDetailsImpl me){
-        return expenseService.getTotalTripCost(tripId,me.getId());
     }
 
     @PutMapping("/update")
@@ -51,26 +46,26 @@ public class ExpenseController {
 
     @PostMapping("/by-trip")
     @PreAuthorize("hasRole('USER')")
-    public List<ExpenseResponseDTO> getExpensesByTrip(@Valid @RequestBody TripIdRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me ) {
-        return expenseService.getExpensesByTrip(dto, me.getId());
+    public ResponseEntity<List<ExpenseResponseDTO>> getExpensesByTrip(@Valid @RequestBody TripIdRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me ) {
+        return ResponseEntity.ok(expenseService.getExpensesByTrip(dto, me.getId()));
     }
 
     @PostMapping("/by-activity")
     @PreAuthorize("hasRole('USER')")
-    public List<ExpenseResponseDTO> getExpensesByActivity(@Valid @RequestBody ActivityIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me ) {
-        return expenseService.getExpensesByActivity(dto, me.getId());
+    public ResponseEntity<List<ExpenseResponseDTO>> getExpensesByActivity(@Valid @RequestBody ActivityIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me ) {
+        return ResponseEntity.ok(expenseService.getExpensesByActivity(dto, me.getId()));
     }
 
     @PostMapping("/get")
     @PreAuthorize("hasRole('USER')")
-    public ExpenseResponseDTO getExpense(@Valid @RequestBody ExpenseIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
-        return expenseService.getExpense(dto, me.getId());
+    public ResponseEntity<ExpenseResponseDTO> getExpense(@Valid @RequestBody ExpenseIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.ok(expenseService.getExpense(dto, me.getId()));
     }
 
     @PostMapping("/balance")
     @PreAuthorize("hasRole('USER')")
-    public List<UserBalanceDTO> getTripBalance(@Valid @RequestBody TripIdRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
-        return expenseService.getTripBalance(dto, me.getId());
+    public ResponseEntity< List<UserBalanceDTO>> getTripBalance(@Valid @RequestBody TripIdRequestDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.ok(expenseService.getTripBalance(dto, me.getId()));
     }
 
 }

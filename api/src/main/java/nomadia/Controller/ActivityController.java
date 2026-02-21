@@ -3,6 +3,7 @@ package nomadia.Controller;
 import jakarta.validation.Valid;
 import nomadia.Config.UserDetailsImpl;
 import nomadia.DTO.Activity.*;
+import nomadia.DTO.Trip.TripIdRequestDTO;
 import nomadia.Service.ActivityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,4 +54,9 @@ public class ActivityController {
         return ResponseEntity.ok(Map.of("message", "Actividad eliminada correctamente"));
     }
 
+    @PostMapping("/get-by-trip")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<ActivityResponseDTO>> getAllByTrip(@Valid @RequestBody TripIdRequestDTO dto,@AuthenticationPrincipal UserDetailsImpl me) {
+        return ResponseEntity.ok(activityService.listByTrip(dto.getTripId(),me.getId()));
+    }
 }

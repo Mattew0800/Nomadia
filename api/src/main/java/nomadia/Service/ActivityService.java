@@ -71,12 +71,9 @@ public class ActivityService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Actividad no encontrada en este viaje"));
         activityRepository.delete(activity);
     }
-    //NO SE USA
-    public List<ActivityResponseDTO> listByTrip(Long tripId) {
-        if (!tripRepository.existsById(tripId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Viaje no encontrado");
-        }
+
+    public List<ActivityResponseDTO> listByTrip(Long tripId,Long userId) {
+        tripService.getTripAndValidateMember(tripId, userId);
         return activityRepository.findByTripId(tripId)
                 .stream()
                 .map(ActivityResponseDTO::fromEntity)
