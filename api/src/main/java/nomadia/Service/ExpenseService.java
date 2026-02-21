@@ -176,16 +176,21 @@ public class ExpenseService {
         expense.setNote(dto.getNote());
         expense.setTotalAmount(dto.getTotalAmount());
         expense.setTrip(trip);
-        if (dto.getActivityId() != null) {
-            Activity activity = activityRepository.findById(dto.getActivityId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada"));
-            if (!activity.getTrip().getId().equals(trip.getId())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La actividad no pertenece al viaje");
-            }
-            expense.setActivity(activity);
-        }
+        expense.setActivity(checkActivity(dto.getActivityId(),trip.getId()));
         rebuildParticipantsFromPayersAndSplits(expense,trip,dto.getTotalAmount(),dto.getPayers(),dto.isCustomSplit(),dto.getSplits(),false);
         return ExpenseResponseDTO.fromEntity(expenseRepository.save(expense));
+    }
+
+    public Activity checkActivity(Long activityId,Long tripId){
+        Activity activity=null;
+        if (activityId != null) {
+             activity = activityRepository.findById(activityId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada"));
+            if (!activity.getTrip().getId().equals(tripId)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La actividad no pertenece al viaje");
+            }
+        }
+        return activity;
     }
 
     @Transactional
@@ -199,15 +204,9 @@ public class ExpenseService {
         expense.setName(dto.getName());
         expense.setNote(dto.getNote());
         expense.setTotalAmount(dto.getTotalAmount());
+        expense.setActivity(checkActivity(dto.getActivityId(),trip.getId()));
         rebuildParticipantsFromPayersAndSplits(expense,trip,dto.getTotalAmount(),dto.getPayers(),dto.isCustomSplit(),dto.getSplits(),true);
         return ExpenseResponseDTO.fromEntity(expenseRepository.save(expense));
-    }
-
-    @Transactional(readOnly = true)
-    public BigDecimal getTotalTripCost(TripIdRequestDTO dto, Long userId) {
-        tripService.getTripAndValidateMember(dto.getTripId(), userId);
-        return activityRepository.getTotalActivityCostByTrip(dto.getTripId())
-                .add(expenseRepository.getTotalByTrip(dto.getTripId()));
     }
 
     @Transactional
@@ -234,7 +233,6 @@ public class ExpenseService {
         Activity activity = activityRepository.findById(dto.getActivityId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Actividad no encontrada"));
         Trip trip = activity.getTrip();
-
         if (trip.getUsers().stream().noneMatch(u -> u.getId().equals(userId))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No pertenecés al viaje");
         }
@@ -271,7 +269,9 @@ public class ExpenseService {
                 b.setBalance(b.getPaid().subtract(b.getOwed()))
         );
         applyPayments(trip.getId(),balances);
-        return new ArrayList<>(balances.values());
+        return balances.values().stream()
+                .sorted(Comparator.comparing(UserBalanceDTO::getUserId))
+                .toList();
     }
 
     public void applyPayments(Long tripId, Map<Long, UserBalanceDTO> balances) {
@@ -294,13 +294,17 @@ public class ExpenseService {
     public List<DebtDTO> calculateDebts(List<UserBalanceDTO> balances) {
         List<BalanceNode> creditors = balances.stream()
                 .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) > 0)
-                .map(b -> new BalanceNode(b.getUserId(),b.getEmail(),b.getBalance())).toList();
+                .map(b -> new BalanceNode(b.getUserId(), b.getEmail(), b.getBalance()))
+                .sorted(Comparator
+                        .comparing((BalanceNode n) -> n.amount).reversed()
+                        .thenComparing(n -> n.userId))
+                .toList();
         List<BalanceNode> debtors = balances.stream()
                 .filter(b -> b.getBalance().compareTo(BigDecimal.ZERO) < 0)
-                .map(b -> new BalanceNode(
-                        b.getUserId(),
-                        b.getEmail(),
-                        b.getBalance().abs()))
+                .map(b -> new BalanceNode(b.getUserId(), b.getEmail(), b.getBalance().abs()))
+                .sorted(Comparator
+                        .comparing((BalanceNode n) -> n.amount).reversed()
+                        .thenComparing(n -> n.userId))
                 .toList();
         List<DebtDTO> debts = new ArrayList<>();
         int i = 0, j = 0;
@@ -308,7 +312,9 @@ public class ExpenseService {
             BalanceNode debtor = debtors.get(i);
             BalanceNode creditor = creditors.get(j);
             BigDecimal amount = debtor.amount.min(creditor.amount);
-            debts.add(new DebtDTO(debtor.userId,debtor.email,creditor.userId,creditor.email,amount));
+            if (amount.compareTo(BigDecimal.ZERO) > 0) {
+                debts.add(new DebtDTO(debtor.userId, debtor.email, creditor.userId, creditor.email, amount));
+            }
             debtor.amount = debtor.amount.subtract(amount);
             creditor.amount = creditor.amount.subtract(amount);
             if (debtor.amount.compareTo(BigDecimal.ZERO) == 0) i++;
