@@ -67,7 +67,7 @@
     </div>
 
     <div class="top-cards">
-      <h3>Pasivos</h3>
+      <h3>Deudas Acumuladas</h3>
       <p class="subtitle">Debes saldar tu parte de algunos gastos</p>
       <h1 class="amount">${{ deudasPendientes | number:'1.2-2' }}</h1>
     </div>
@@ -128,6 +128,8 @@
                         (ngModelChange)="onFilterMinAmountChange($event)"
                         placeholder="$0"
                         min="0"
+                        max="999999999.99"
+                        maxlength="12"
                         step="0.01"
                         class="filter-min-amount-input"
                         [class.invalid]="filterAmountRangeInvalid"
@@ -135,6 +137,7 @@
                         (paste)="onPasteNonNegative($event, 'min')"
                         (blur)="finishFilterMinAmountEdit()"
                         (keyup.enter)="finishFilterMinAmountEdit()"
+                        (input)="limitInputLength($event, 12)"
                       />
                     } @else {
                       <span class="filter-amount-display clickable" (click)="startFilterMinAmountEdit()">
@@ -154,6 +157,8 @@
                         (ngModelChange)="onFilterMaxAmountChange($event)"
                         placeholder="$0"
                         min="0"
+                        max="999999999.99"
+                        maxlength="12"
                         step="0.01"
                         class="filter-max-amount-input"
                         [class.invalid]="filterAmountRangeInvalid"
@@ -161,6 +166,7 @@
                         (paste)="onPasteNonNegative($event, 'max')"
                         (blur)="finishFilterMaxAmountEdit()"
                         (keyup.enter)="finishFilterMaxAmountEdit()"
+                        (input)="limitInputLength($event, 12)"
                       />
                     } @else {
                       <span class="filter-amount-display clickable" (click)="startFilterMaxAmountEdit()">
@@ -279,6 +285,7 @@
                 type="text"
                 formControlName="name"
                 placeholder="Ej: Cena en restaurante"
+                maxlength="30"
                 [class.invalid]="nameControl?.invalid && (nameControl?.touched || nameControl?.dirty)"
               />
 
@@ -304,8 +311,18 @@
                 formControlName="note"
                 placeholder="Descripción o comentarios adicionales (opcional)"
                 rows="3"
+                maxlength="160"
+                [class.invalid]="noteControl?.invalid && (noteControl?.touched || noteControl?.dirty)"
+
               ></textarea>
             </div>
+
+            @if(noteControl?.hasError('maxlength') && (noteControl?.touched || noteControl?.dirty)) {
+              <span class="error-msg">La nota no puede exceder los 150 caracteres</span>
+            }
+            @if((noteControl?.touched || noteControl?.dirty) && noteControl?.hasError('whitespace')) {
+              <span class="error-msg">La nota no puede contener solo espacios.</span>
+            }
 
             <!-- Monto total -->
             <div class="form-group">
@@ -318,6 +335,7 @@
                     placeholder="0.00"
                     step="0.01"
                     max="999999999.99"
+                    maxlength="12"
                     class="total-amount-input"
                     [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
                     (input)="onTotalAmountChange()"

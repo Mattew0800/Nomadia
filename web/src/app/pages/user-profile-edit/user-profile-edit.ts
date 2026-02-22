@@ -58,7 +58,7 @@ export class UserProfileEdit {
         Validators.pattern(/^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san)(?:\s(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}|de|del|la|los|san))+$/i),
         this.maxWordsValidator(5)
       ]),
-      nick: new FormControl('', Validators.maxLength(10)),
+      nick: new FormControl('', [Validators.maxLength(10),this.notOnlyWhitespaceValidator()]),
       email: new FormControl({ value: '', disabled: false }, [
         Validators.required,
         Validators.email
@@ -70,7 +70,7 @@ export class UserProfileEdit {
       ]),
       birth: new FormControl('',[Validators.pattern(/^\d{4}-\d{2}-\d{2}$/), this.futureDateValidator(), this.ageValidator(8, 110)]),
       age: new FormControl(''),
-      about: new FormControl('', [Validators.minLength(3), Validators.maxLength(200)]),
+      about: new FormControl('', [Validators.minLength(3), Validators.maxLength(200), this.notOnlyWhitespaceValidator()]),
 
       currentPass: new FormControl(''),
       newPass: new FormControl('', [Validators.minLength(6)]),
@@ -140,6 +140,25 @@ export class UserProfileEdit {
 
       if (age > maxAge) {
         return { isTooOld: true };
+      }
+
+      return null;
+    };
+  }
+
+  notOnlyWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      // Si es nulo, undefined o cadena vacía → válido (campo opcional)
+      if (value == null || value === '') {
+        return null;
+      }
+
+      // Si es string y después de quitar espacios queda vacío → error
+      if (typeof value === 'string' && value.trim().length === 0) {
+        // Devolver la clave 'whitespace' para que coincida con la plantilla
+        return { whitespace: true };
       }
 
       return null;

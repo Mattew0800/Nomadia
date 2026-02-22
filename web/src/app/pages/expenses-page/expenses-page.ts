@@ -27,6 +27,7 @@ import { forkJoin } from 'rxjs';
 export class ExpensesPage implements OnInit {
 
   readonly MAX_TOTAL_AMOUNT = 999999999.99; // 999.999.999,99
+  readonly MIN_TOTAL_AMOUNT = 0.01; // Mínimo permitido para filtros y gastos
 
 
   expenseForm!: FormGroup;
@@ -411,8 +412,8 @@ export class ExpensesPage implements OnInit {
 
   private initForm(): void {
     this.expenseForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), this.notOnlyWhitespaceValidator()]],
-      note: ['', [Validators.maxLength(255)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(25), this.notOnlyWhitespaceValidator()]],
+      note: ['', [Validators.maxLength(150), this.notOnlyWhitespaceValidator()]],
       // Máximo permitido $5.000.000
       totalAmount: [0, [Validators.required, Validators.min(0.01), this.maxTotalValidator()]],
       activityId: [null],
@@ -485,6 +486,11 @@ export class ExpensesPage implements OnInit {
   get nameControl() {
     if (!this.expenseForm) return null;
     return this.expenseForm.get('name');
+  }
+
+  get noteControl() {
+    if (!this.expenseForm) return null;
+    return this.expenseForm.get('note');
   }
 
   get totalAmountControl() {
@@ -989,11 +995,28 @@ onFilterActivityChange(value: any): void {
 
 onFilterMinAmountChange(value: any): void {
   this.filterMinAmount = this.toNonNegativeOrNull(value);
+  if (this.filterMinAmount !== null && this.filterMinAmount < this.MIN_TOTAL_AMOUNT) {
+    this.filterMinAmount = this.MIN_TOTAL_AMOUNT;
+  }
+  if (this.filterMinAmount !== null && this.filterMinAmount > this.MAX_TOTAL_AMOUNT) {
+    this.filterMinAmount = this.MAX_TOTAL_AMOUNT;
+  }
   this.validateFilterAmountRange();
 }
 
 onFilterMaxAmountChange(value: any): void {
   this.filterMaxAmount = this.toNonNegativeOrNull(value);
+  if (this.filterMaxAmount !== null && this.filterMaxAmount < this.MIN_TOTAL_AMOUNT) {
+    this.filterMaxAmount = this.MIN_TOTAL_AMOUNT;
+  }
+  if (this.filterMaxAmount !== null && this.filterMaxAmount > this.MAX_TOTAL_AMOUNT) {
+    this.filterMaxAmount = this.MAX_TOTAL_AMOUNT;
+    // Forzar el valor en el input si el usuario lo excede
+    setTimeout(() => {
+      const input = document.querySelector('.filter-max-amount-input') as HTMLInputElement;
+      if (input) input.value = String(this.MAX_TOTAL_AMOUNT);
+    }, 0);
+  }
   this.validateFilterAmountRange();
 }
 
@@ -1028,6 +1051,13 @@ private validateFilterAmountRange(): void {
     return;
   }
   this.filterAmountRangeInvalid = this.filterMaxAmount < this.filterMinAmount;
+  // Validación extra: ambos deben estar en el rango permitido
+  if (
+    (this.filterMinAmount !== null && (this.filterMinAmount < this.MIN_TOTAL_AMOUNT || this.filterMinAmount > this.MAX_TOTAL_AMOUNT)) ||
+    (this.filterMaxAmount !== null && (this.filterMaxAmount < this.MIN_TOTAL_AMOUNT || this.filterMaxAmount > this.MAX_TOTAL_AMOUNT))
+  ) {
+    this.filterAmountRangeInvalid = true;
+  }
 }
 
   showCreateForm(): void {
@@ -1139,5 +1169,19 @@ private validateFilterAmountRange(): void {
         this.onCancel();
       }
     });
+  }
+
+  // Limita la cantidad de caracteres en los inputs de monto
+  limitInputLength(event: Event, maxLength: number): void {
+    const input = event.target as HTMLInputElement;
+    if (input.value.length > maxLength) {
+      input.value = input.value.slice(0, maxLength);
+      // Actualiza el modelo si es necesario
+      if (input.classList.contains('filter-min-amount-input')) {
+        this.filterMinAmount = this.toNonNegativeOrNull(input.value);
+      } else if (input.classList.contains('filter-max-amount-input')) {
+        this.filterMaxAmount = this.toNonNegativeOrNull(input.value);
+      }
+    }
   }
 }

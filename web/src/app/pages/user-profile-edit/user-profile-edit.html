@@ -105,6 +105,9 @@
           @if(nickControl?.touched && nickControl?.hasError("maxlength")){
             <p class="formError">El apodo no puede exceder los 10 caracteres.</p>
           }
+          @if((nickControl?.touched || nickControl?.dirty) && nickControl?.hasError('whitespace')) {
+            <span class="formError">El apodo no puede contener solo espacios.</span>
+          }
         </div>
 
         <div>
@@ -225,6 +228,9 @@
             }
             @if(aboutControl?.hasError("minlength")){
               <p class="formError">La descripción debe tener 3 caracteres como minimo.</p>
+            }
+            @if((aboutControl?.touched || aboutControl?.dirty) && aboutControl?.hasError('whitespace')) {
+              <span class="formError">La descripción no puede contener solo espacios.</span>
             }
           }
         </div>
