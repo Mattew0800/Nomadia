@@ -338,7 +338,7 @@ export class MainPage implements OnInit {
       cost: [0, [Validators.required, Validators.min(0)]],
       startTime: ['09:00', Validators.required], // HH:mm
       endTime: ['10:00', Validators.required],   // HH:mm
-    });
+    },{ validators: this.timeRangeValidator() });
   }
 
   openCreateActivity() {
@@ -648,7 +648,7 @@ export class MainPage implements OnInit {
       cost: [0, [Validators.required, Validators.min(0)]],
       startTime: ['09:00', Validators.required], // 'HH:mm'
       endTime: ['10:00', Validators.required],   // 'HH:mm'
-    });
+    }, { validators: this.timeRangeValidator() });
   }
 
   /** Abre el panel y precarga datos de la actividad clickeada */
@@ -766,6 +766,25 @@ export class MainPage implements OnInit {
         console.log(e)
       }
     })
+  }
+
+  timeRangeValidator(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const start = group.get('startTime')?.value;
+      const end = group.get('endTime')?.value;
+
+      // Si alguno está vacío, no validamos (los required ya se encargan)
+      if (!start || !end) {
+        return null;
+      }
+
+      // Si son iguales, devolvemos error
+      if (start === end) {
+        return { timeEqual: true };
+      }
+
+      return null;
+    };
   }
 
 
