@@ -26,7 +26,7 @@ import { forkJoin } from 'rxjs';
 })
 export class ExpensesPage implements OnInit {
 
-  readonly MAX_TOTAL_AMOUNT = 999999999.99; // 999.999.999,99
+  readonly MAX_TOTAL_AMOUNT = 999999999; // 999.999.999
   readonly MIN_TOTAL_AMOUNT = 0.01; // Mínimo permitido para filtros y gastos
 
 
@@ -573,7 +573,7 @@ export class ExpensesPage implements OnInit {
     const splitGroup = this.fb.group({
       userId: [user.id, Validators.required],
       userName: [user.name],
-      amountOwed: [0, [Validators.required, Validators.min(0)]]
+      amountOwed: [0, [Validators.required, Validators.min(0.01)]]
     });
 
     this.splits.push(splitGroup);
@@ -1067,20 +1067,31 @@ private validateFilterAmountRange(): void {
       return;
     }
 
-    if (this.showForm) {
-      this.onCancel();
+    // Si ya está abierto en modo nuevo gasto → solo cerrar (sin resetear, conserva el borrador)
+    if (this.showForm && this.selectedExpenseId === null) {
+      this.showForm = false;
       return;
     }
 
+    // Si estaba editando un gasto existente → limpiar y abrir modo nuevo
+    if (this.showForm && this.selectedExpenseId !== null) {
+      this.expenseForm.reset();
+      this.payers.clear();
+      this.splits.clear();
+      this.divisionType = 'equal';
+      this.editingSplits.clear();
+      this.editingPayers.clear();
+      this.selectedExpenseId = null;
+      this.selectedExpense = null;
+      this.editingTotalAmount = true;
+      // showForm ya es true, no hace falta cambiarlo
+      return;
+    }
+
+    // Estaba cerrado → abrir en modo nuevo sin resetear (preserva borrador)
     this.showForm = true;
     this.selectedExpenseId = null;
     this.selectedExpense = null;
-    this.expenseForm.reset();
-    this.payers.clear();
-    this.splits.clear();
-    this.divisionType = 'equal';
-    this.editingSplits.clear();
-    this.editingPayers.clear();
     this.editingTotalAmount = true;
   }
 
@@ -1106,6 +1117,12 @@ private validateFilterAmountRange(): void {
   viewExpenseDetails(expense: any): void {
     if (!this.hasValidTrip()) {
       console.warn('No se puede ver detalles: sin viaje seleccionado');
+      return;
+    }
+
+    // Si se hace clic en el mismo gasto que ya está abierto → solo cerrar sin resetear
+    if (this.showForm && this.selectedExpenseId === expense.id) {
+      this.showForm = false;
       return;
     }
 
@@ -1148,7 +1165,7 @@ private validateFilterAmountRange(): void {
               const splitGroup = this.fb.group({
                 userId: [participant.userId, Validators.required],
                 userName: [user?.name],
-                amountOwed: [participant.amountOwned, [Validators.required, Validators.min(0)]]
+                amountOwed: [participant.amountOwned, [Validators.required, Validators.min(0.01)]]
               });
               this.splits.push(splitGroup);
             }
@@ -1176,12 +1193,16 @@ private validateFilterAmountRange(): void {
     const input = event.target as HTMLInputElement;
     if (input.value.length > maxLength) {
       input.value = input.value.slice(0, maxLength);
-      // Actualiza el modelo si es necesario
-      if (input.classList.contains('filter-min-amount-input')) {
-        this.filterMinAmount = this.toNonNegativeOrNull(input.value);
-      } else if (input.classList.contains('filter-max-amount-input')) {
-        this.filterMaxAmount = this.toNonNegativeOrNull(input.value);
-      }
+    }
+    const numericValue = parseFloat(input.value);
+    if (!isNaN(numericValue) && numericValue > this.MAX_TOTAL_AMOUNT) {
+      input.value = String(this.MAX_TOTAL_AMOUNT);
+    }
+    // Actualiza el modelo si es necesario
+    if (input.classList.contains('filter-min-amount-input')) {
+      this.filterMinAmount = this.toNonNegativeOrNull(input.value);
+    } else if (input.classList.contains('filter-max-amount-input')) {
+      this.filterMaxAmount = this.toNonNegativeOrNull(input.value);
     }
   }
 }
