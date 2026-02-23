@@ -45,9 +45,14 @@
           </div>
 
           <div class="input-group" style="gap:10px;">
-            <input #startInput type="time" formControlName="startTime"  />
-            <input #endInput type="time" formControlName="endTime"  />
-
+            <div class="time-field">
+              <input #startInput type="time" formControlName="startTime"  />
+              <span class="ampm-badge">{{ getAmPm(editForm.get('startTime')?.value) }}</span>
+            </div>
+            <div class="time-field">
+              <input #endInput type="time" formControlName="endTime"  />
+              <span class="ampm-badge">{{ getAmPm(editForm.get('endTime')?.value) }}</span>
+            </div>
           </div>
           @if (editForm.hasError('timeEqual') && editForm.get('startTime')?.touched && editForm.get('endTime')?.touched) {
             <p class="errortwo">La hora de fin no puede ser igual a la hora de inicio.</p>
@@ -242,8 +247,14 @@
           </div>
 
           <div class="input-group" style="gap:10px;">
-            <input formControlName="startTime" type="time" />
-            <input formControlName="endTime" type="time" />
+            <div class="time-field">
+              <input formControlName="startTime" type="time" />
+              <span class="ampm-badge">{{ getAmPm(createForm.get('startTime')?.value) }}</span>
+            </div>
+            <div class="time-field">
+              <input formControlName="endTime" type="time" />
+              <span class="ampm-badge">{{ getAmPm(createForm.get('endTime')?.value) }}</span>
+            </div>
           </div>
 
           @if (createForm.hasError('timeEqual') && createForm.get('startTime')?.touched && createForm.get('endTime')?.touched) {

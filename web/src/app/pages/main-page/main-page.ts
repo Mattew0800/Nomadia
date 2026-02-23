@@ -790,4 +790,12 @@ export class MainPage implements OnInit {
 
 
   protected readonly String = String;
+
+  /** Devuelve 'AM' o 'PM' según una hora en formato 'HH:mm' */
+  getAmPm(time: string | null | undefined): string {
+    if (!time) return '';
+    const hour = parseInt(time.split(':')[0], 10);
+    if (isNaN(hour)) return '';
+    return hour < 12 ? 'AM' : 'PM';
+  }
 }
