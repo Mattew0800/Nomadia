@@ -27,7 +27,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         }
 
         router.navigate(['/error'], {
-          queryParams: { type: 'backend-unavailable' },
+          queryParams: { type: 'backend-unavailable', from: req.url },
           skipLocationChange: false
         });
         return EMPTY;

@@ -19,7 +19,7 @@ export class ErrorPage implements OnInit, OnDestroy {
   showLoader: boolean = false;
 
   private backendStatusSubscription?: Subscription;
-  private previousRoute: string = '/mainPage'; // Ruta a la que volver cuando el backend esté disponible
+  private previousRoute: string = '/login';
 
   constructor(
     private route: ActivatedRoute,
@@ -39,7 +39,16 @@ export class ErrorPage implements OnInit, OnDestroy {
         this.showRetryButton = false;
         this.showLoader = true;
 
-        // Suscribirse al estado del backend
+        // Determinar a dónde volver: si viene de una API URL, extraer la ruta de Angular correspondiente
+        const from = params['from'] ?? '';
+        if (from.includes('/nomadia/auth/register')) {
+          this.previousRoute = '/register';
+        } else if (from.includes('/nomadia/auth/login')) {
+          this.previousRoute = '/login';
+        } else if (from.includes('/nomadia/')) {
+          this.previousRoute = '/mainPage';
+        }
+
         this.subscribeToBackendStatus();
       } else {
         this.errorType = '404';
