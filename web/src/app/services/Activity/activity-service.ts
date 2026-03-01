@@ -6,11 +6,12 @@ import {ActivityResponseDTO} from '../../models/ActivityResponse';
 import {ActivityCreateDTO} from '../../models/ActivityCreate';
 import {ActivityUpdateDTO} from '../../models/ActivityUpdateDTO';
 import {AuthService} from '../Auth/auth-service';
+import {environment} from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ActivityService {
 
-  private API_URL = 'http://localhost:8080/nomadia/activities';
+    private API_URL = `${environment.apiUrl}/nomadia/activities`;
 
   activities : ActivityCreateDTO[];
 
