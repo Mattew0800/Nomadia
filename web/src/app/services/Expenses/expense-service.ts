@@ -8,13 +8,14 @@ import {ExpenseUpdateDTO} from '../../models/ExpenseUpdateDTO';
 import {UserBalanceDTO} from '../../models/UserBalanceDTO';
 import {DebtDTO} from '../../models/DebtDTO';
 import {UserDebtProgressDTO} from '../../models/UserDebtProgressDTO';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ExpenseService {
 
-  private API_URL = "http://localhost:8080/nomadia/expense";
+  private API_URL = `${environment.apiUrl}/nomadia/expense`;
 
   constructor(public http: HttpClient, public authService: AuthService) {}
 
