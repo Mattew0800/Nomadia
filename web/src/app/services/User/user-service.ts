@@ -6,13 +6,15 @@ import {RegisterResponse} from '../../models/RegisterResponse';
 import {putResponse} from '../../models/putResponse';
 import {UpdateUserResponse} from '../../models/UpdateUserResponse';
 import {AuthService} from '../Auth/auth-service';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  API_URL = "http://localhost:8080/nomadia";
+  API_URL = `${environment.apiUrl}/nomadia`;
+
 
   users: User[];
 
