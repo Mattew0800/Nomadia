@@ -32,20 +32,26 @@ public class ActivityService {
         return aStart.isBefore(bEnd) && bStart.isBefore(aEnd);
     }
 
+    private void validateTime(LocalTime start, LocalTime end,Long tripId,LocalDate date,Long excludeActivityId){
+        List<Activity> sameDay =activityRepository.findByTripIdAndDate(tripId, date);
+        if (!start.isBefore(end)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La hora de inicio debe ser anterior a la hora de finalización");
+        }
+        boolean conflict = sameDay.stream()
+                .filter(a -> excludeActivityId == null || !a.getId().equals(excludeActivityId))
+                .anyMatch(a -> overlaps(start, end, a.getStartTime(), a.getEndTime()));
+        if (conflict) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Ya existe otra actividad en ese horario");
+        }
+
+    }
     @Transactional
     public ActivityResponseDTO create(Long tripId, ActivityCreateDTO dto, Long userId) {
         Trip trip=tripService.getTripAndValidateMember(tripId, userId);
         if (dto.getDate().isBefore(trip.getStartDate())|| dto.getDate().isAfter(trip.getEndDate())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La fecha de la actividad debe estar dentro del rango del viaje");
         }
-        List<Activity> sameDay =activityRepository.findByTripIdAndDate(tripId, dto.getDate());
-        boolean conflict = sameDay.stream().anyMatch(a ->
-                overlaps(dto.getStartTime(), dto.getEndTime(),
-                        a.getStartTime(), a.getEndTime())
-        );
-        if (conflict) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,"Ya existe otra actividad en ese horario");
-        }
+        validateTime(dto.getStartTime(),dto.getEndTime(),trip.getId(),dto.getDate(),null);
         Activity activity = dto.toEntity();
         activity.setTrip(trip);
         return ActivityResponseDTO.fromEntity(
@@ -55,10 +61,14 @@ public class ActivityService {
 
     @Transactional
     public ActivityResponseDTO update(Long tripId,Long activityId,ActivityUpdateRequestDTO dto,Long userId ) {
-        tripService.getTripAndValidateMember(tripId, userId);
+        Trip trip=tripService.getTripAndValidateMember(tripId, userId);
         Activity activity = activityRepository
                 .findByIdAndTripId(activityId, tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Actividad no encontrada en este viaje"));
+        if (dto.getDate().isBefore(trip.getStartDate())|| dto.getDate().isAfter(trip.getEndDate())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La fecha de la actividad debe estar dentro del rango del viaje");
+        }
+        validateTime(dto.getStartTime(),dto.getEndTime(),trip.getId(),dto.getDate(),activity.getId());
         dto.applyToEntity(activity);
         return ActivityResponseDTO.fromEntity(activityRepository.save(activity));
     }

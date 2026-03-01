@@ -1202,21 +1202,7 @@
         }
       }
 
-      .error-msg {
-        color: #ef4444;
-        font-size: 12px;
-        font-weight: 500;
-        margin-top: 4px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        animation: fadeInDown 0.3s ease;
 
-        &::before {
-          content: '⚠';
-          font-size: 14px;
-        }
-      }
 
       @keyframes fadeInDown {
         from {
@@ -1712,5 +1698,21 @@
     50% {
       transform: translateY(-10px);
     }
+  }
+}
+
+.error-msg {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: fadeInDown 0.3s ease;
+
+  &::before {
+    content: '⚠';
+    font-size: 14px;
   }
 }

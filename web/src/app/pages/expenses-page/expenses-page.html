@@ -67,8 +67,8 @@
     </div>
 
     <div class="top-cards">
-      <h3>Deudas pendientes</h3>
-      <p class="subtitle">Debes saldar tu parte de algunos gastos</p>
+      <h3>Deudas Acumuladas</h3>
+      <p class="subtitle">Total acumulado de deudas asociadas a tu participación</p>
       <h1 class="amount">${{ deudasPendientes | number:'1.2-2' }}</h1>
     </div>
 
@@ -106,7 +106,11 @@
 
                 <div class="filter-group">
                   <label>Actividad</label>
-                  <select [(ngModel)]="filterActivityId" class="filter-select">
+                  <select
+                    [ngModel]="filterActivityId"
+                    (ngModelChange)="onFilterActivityChange($event)"
+                    class="filter-select"
+                  >
                     <option [value]="null">Todas las actividades</option>
                     @for(activity of activities; track activity.id) {
                       <option [value]="activity.id">{{ activity.name }}</option>
@@ -120,17 +124,24 @@
                     @if(editingFilterMinAmount) {
                       <input
                         type="number"
-                        [(ngModel)]="filterMinAmount"
+                        [ngModel]="filterMinAmount"
+                        (ngModelChange)="onFilterMinAmountChange($event)"
                         placeholder="$0"
                         min="0"
+                        max="999999999"
+                        maxlength="9"
                         step="0.01"
                         class="filter-min-amount-input"
+                        [class.invalid]="filterAmountRangeInvalid"
+                        (keydown)="blockNegativeKey($event)"
+                        (paste)="onPasteNonNegative($event, 'min')"
                         (blur)="finishFilterMinAmountEdit()"
                         (keyup.enter)="finishFilterMinAmountEdit()"
+                        (input)="limitInputLength($event, 12)"
                       />
                     } @else {
                       <span class="filter-amount-display clickable" (click)="startFilterMinAmountEdit()">
-                        {{ filterMinAmount !== null ? ('$' + (filterMinAmount | number:'1.2-2')) : '$0.00' }}
+                        {{ filterMinAmount !== null ? ('$' + (filterMinAmount | number:'1.0-2')) : '$0' }}
                       </span>
                     }
                   </div>
@@ -142,27 +153,38 @@
                     @if(editingFilterMaxAmount) {
                       <input
                         type="number"
-                        [(ngModel)]="filterMaxAmount"
+                        [ngModel]="filterMaxAmount"
+                        (ngModelChange)="onFilterMaxAmountChange($event)"
                         placeholder="$0"
                         min="0"
+                        max="999999999"
+                        maxlength="9"
                         step="0.01"
                         class="filter-max-amount-input"
+                        [class.invalid]="filterAmountRangeInvalid"
+                        (keydown)="blockNegativeKey($event)"
+                        (paste)="onPasteNonNegative($event, 'max')"
                         (blur)="finishFilterMaxAmountEdit()"
                         (keyup.enter)="finishFilterMaxAmountEdit()"
+                        (input)="limitInputLength($event, 12)"
                       />
                     } @else {
                       <span class="filter-amount-display clickable" (click)="startFilterMaxAmountEdit()">
-                        {{ filterMaxAmount !== null ? ('$' + (filterMaxAmount | number:'1.2-2')) : '$0.00' }}
+                        {{ filterMaxAmount !== null ? ('$' + (filterMaxAmount | number:'1.0-2')) : '$0' }}
                       </span>
                     }
                   </div>
                 </div>
 
+                @if(filterAmountRangeInvalid) {
+                <span class="error-msg">El monto máximo debe ser mayor o igual al monto mínimo</span>
+                }
+
                 <div class="filter-actions">
                   <button class="btn-clear" (click)="clearFilters()">
                     Limpiar
                   </button>
-                  <button class="btn-apply" (click)="applyFilters()">
+                  <button class="btn-apply" (click)="applyFilters()" [disabled]="filterAmountRangeInvalid">
                     Aplicar filtros
                   </button>
                 </div>
@@ -263,22 +285,44 @@
                 type="text"
                 formControlName="name"
                 placeholder="Ej: Cena en restaurante"
-                [class.invalid]="nameControl?.invalid && nameControl?.touched"
+                maxlength="30"
+                [class.invalid]="nameControl?.invalid && (nameControl?.touched || nameControl?.dirty)"
               />
-              @if(nameControl?.touched && nameControl?.invalid) {
-                <span class="error-msg">El nombre es obligatorio (min. 2 caracteres)</span>
+
+              @if((nameControl?.touched || nameControl?.dirty) && nameControl?.hasError('whitespace')) {
+                <span class="error-msg">El nombre no puede contener solo espacios.</span>
               }
+              @if((nameControl?.touched || nameControl?.dirty) && nameControl?.hasError('required')) {
+                <span class="error-msg">El nombre del gasto es obligatorio</span>
+              }
+              @if((nameControl?.touched || nameControl?.dirty) && nameControl?.hasError('minlength')) {
+                <span class="error-msg">Nombre demasiado corto (min. 2 caracteres)</span>
+              }
+              @if((nameControl?.touched || nameControl?.dirty) && nameControl?.hasError('maxlength')) {
+                <span class="error-msg">Nombre demasiado largo (máx. 25 caracteres)</span>
+              }
+
             </div>
 
             <!-- Nota -->
             <div class="form-group">
-              <label>Nota</label>
+              <label>Nota (opcional)</label>
               <textarea
                 formControlName="note"
                 placeholder="Descripción o comentarios adicionales (opcional)"
                 rows="3"
+                maxlength="160"
+                [class.invalid]="noteControl?.invalid && (noteControl?.touched || noteControl?.dirty)"
+
               ></textarea>
             </div>
+
+            @if(noteControl?.hasError('maxlength') && (noteControl?.touched || noteControl?.dirty)) {
+              <span class="error-msg">La nota no puede exceder los 150 caracteres</span>
+            }
+            @if((noteControl?.touched || noteControl?.dirty) && noteControl?.hasError('whitespace')) {
+              <span class="error-msg">La nota no puede contener solo espacios.</span>
+            }
 
             <!-- Monto total -->
             <div class="form-group">
@@ -290,6 +334,8 @@
                     formControlName="totalAmount"
                     placeholder="0.00"
                     step="0.01"
+                    max="999999999"
+                    maxlength="12"
                     class="total-amount-input"
                     [class.invalid]="totalAmountControl?.invalid && totalAmountControl?.touched"
                     (input)="onTotalAmountChange()"
@@ -297,11 +343,14 @@
                     (keyup.enter)="finishTotalAmountEdit()"
                   />
                 } @else {
-                  <span class="total-amount-display clickable" (click)="startTotalAmountEdit()">${{ totalAmountControl?.value | number:'1.2-2' }}</span>
+                  <span class="total-amount-display clickable" (click)="startTotalAmountEdit()">${{ totalAmountControl?.value | number:'1.0-2' }}</span>
                 }
               </div>
-              @if(totalAmountControl?.touched && totalAmountControl?.invalid) {
-                <span class="error-msg">Debe ser mayor a 0</span>
+              @if(totalAmountControl?.touched && totalAmountControl?.hasError('min')) {
+                <span class="error-msg">El monto debe ser mayor a 0</span>
+              }
+              @if(totalAmountControl?.touched && totalAmountControl?.hasError('max')) {
+                <span class="error-msg">El monto máximo permitido es $999,999,999</span>
               }
             </div>
 
@@ -355,23 +404,29 @@
                     />
                     <span class="user-name">{{ splitControl.get('userName')?.value }}</span>
 
-                    @if(divisionType === 'custom' && isSplitEditing($index)) {
-                      <input
-                        type="number"
-                        [formControl]="$any(splitControl.get('amountOwed'))"
-                        placeholder="0.00"
-                        step="0.01"
-                        class="amount-input"
-                        (blur)="finishSplitEdit($index)"
-                        (keyup.enter)="finishSplitEdit($index)"
-                      />
-                    } @else {
-                      <span
-                        class="amount-display"
-                        [class.clickable]="divisionType === 'custom'"
-                        (click)="divisionType === 'custom' ? startSplitEdit($index) : null"
-                      >${{ splitControl.get('amountOwed')?.value | number:'1.2-2' }}</span>
-                    }
+                    <div class="amount-wrapper">
+                      @if(divisionType === 'custom' && isSplitEditing($index)) {
+                        <input
+                          type="number"
+                          [formControl]="$any(splitControl.get('amountOwed'))"
+                          placeholder="0.00"
+                          step="0.01"
+                          class="amount-input"
+                          [class.invalid]="splitControl.get('amountOwed')?.invalid && splitControl.get('amountOwed')?.touched"
+                          (blur)="finishSplitEdit($index)"
+                          (keyup.enter)="finishSplitEdit($index)"
+                        />
+                      } @else {
+                        <span
+                          class="amount-display"
+                          [class.clickable]="divisionType === 'custom'"
+                          (click)="divisionType === 'custom' ? startSplitEdit($index) : null"
+                        >${{ splitControl.get('amountOwed')?.value | number:'1.0-2' }}</span>
+                      }
+                      @if(splitControl.get('amountOwed')?.touched && splitControl.get('amountOwed')?.invalid) {
+                        <span class="input-error-msg">Debe ser mayor a 0</span>
+                      }
+                    </div>
 
                     <button
                       type="button"
@@ -380,6 +435,7 @@
                     >
                       ×
                     </button>
+
                   </div>
                 }
               </div>
@@ -426,7 +482,7 @@
                           (keyup.enter)="finishPayerEdit($index)"
                         />
                       } @else {
-                        <span class="amount-display clickable" (click)="startPayerEdit($index)">${{ payerControl.get('amountPaid')?.value | number:'1.2-2' }}</span>
+                        <span class="amount-display clickable" (click)="startPayerEdit($index)">${{ payerControl.get('amountPaid')?.value | number:'1.0-2' }}</span>
                       }
                       @if(payerControl.get('amountPaid')?.touched && payerControl.get('amountPaid')?.invalid) {
                         <span class="input-error-msg">Debe ser mayor a 0</span>
@@ -449,7 +505,6 @@
               }
             </div>
 
-            <!-- Actividad asignada -->
             <div class="form-group">
               <label>Actividad asignada (opcional)</label>
               <select formControlName="activityId" class="activity-select">
