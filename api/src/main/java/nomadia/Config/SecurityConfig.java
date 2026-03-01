@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers("/nomadia/auth/register").permitAll()
                         .requestMatchers("/nomadia/auth/login").permitAll()
                         .requestMatchers("/nomadia/auth/register-admin").permitAll()//sacar despues
+                        .requestMatchers("/nomadia/health").permitAll()
                         .requestMatchers("/nomadia/user/me").hasRole("USER")
                         .requestMatchers("/nomadia/user/me/update").hasRole("USER")
                         .requestMatchers("/nomadia/user/create").hasRole("ADMIN")

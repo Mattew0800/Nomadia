@@ -20,6 +20,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.status === 0 || error.status === 502 || error.status === 503 || error.status === 504) {
         console.error('Interceptor: Backend no disponible. Redirigiendo a página de error...');
         backendStatus.setBackendAvailable(false);
+
+        // No redirigir si es el propio health check (evita loop)
+        if (req.url.includes('/nomadia/health')) {
+          return EMPTY;
+        }
+
         router.navigate(['/error'], {
           queryParams: { type: 'backend-unavailable' },
           skipLocationChange: false
