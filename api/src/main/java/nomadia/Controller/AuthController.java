@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/nomadia/auth")
-@CrossOrigin (origins={"http://localhost:4200","http://localhost:8080"})
+@CrossOrigin (origins={"http://localhost:4200","http://localhost:8080","https://nomadia-viajes.vercel.app"})
 public class AuthController {
 
     private final AuthService authService;
