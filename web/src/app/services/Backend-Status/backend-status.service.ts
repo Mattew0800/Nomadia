@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, interval, Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -48,7 +49,7 @@ export class BackendStatusService {
   }
 
   private checkBackendHealth(): void {
-    const healthUrl = 'http://localhost:8080/nomadia/health';
+    const healthUrl = `${environment.apiUrl}/nomadia/health`;
 
     this.http.get(healthUrl, {
       observe: 'response',

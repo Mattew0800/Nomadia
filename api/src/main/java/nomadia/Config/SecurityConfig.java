@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/nomadia/auth/register").permitAll()
                         .requestMatchers("/nomadia/auth/login").permitAll()
                         .requestMatchers("/nomadia/auth/register-admin").permitAll()//sacar despues
+                        .requestMatchers("/nomadia/health").permitAll()
                         .requestMatchers("/nomadia/user/me").hasRole("USER")
                         .requestMatchers("/nomadia/user/me/update").hasRole("USER")
                         .requestMatchers("/nomadia/user/get-all").hasRole("ADMIN")
@@ -97,7 +98,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:4200",
                 "http://localhost:8080",
-                "http://localhost:3306"
+                "http://localhost:3306",
+                "https://nomadia-viajes.vercel.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

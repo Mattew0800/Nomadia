@@ -6,11 +6,12 @@ import {ActivityResponseDTO} from '../../models/ActivityResponse';
 import {ActivityCreateDTO} from '../../models/ActivityCreate';
 import {ActivityUpdateDTO} from '../../models/ActivityUpdateDTO';
 import {AuthService} from '../Auth/auth-service';
+import {environment} from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ActivityService {
 
-  private API_URL = 'http://localhost:8080/nomadia/activities';
+    private API_URL = `${environment.apiUrl}/nomadia/activities`;
 
   activities : ActivityCreateDTO[];
 
@@ -39,7 +40,7 @@ export class ActivityService {
 
   listMine(): Observable<ActivityResponseDTO[]> {
     return this.http.post<ActivityResponseDTO[]>(
-      `http://localhost:8080/nomadia/activities/list`,
+      `${this.API_URL}/list`,
       {},
       { headers:  this.authService.authHeaders() }
     );
@@ -52,7 +53,7 @@ export class ActivityService {
     toTime?: string;
   }): Observable<ActivityResponseDTO[]> {
     return this.http.post<ActivityResponseDTO[]>(
-      `http://localhost:8080/nomadia/activities/list`,
+      `${this.API_URL}/list`,
       body,
       { headers:  this.authService.authHeaders() }
     );

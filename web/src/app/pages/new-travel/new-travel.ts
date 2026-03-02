@@ -15,6 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import {Test} from '../test/test';
 import { TripService } from '../../services/Trip/trip-service';
 import { TripCreate } from '../../models/TripCreate';
+import {environment} from '../../../environments/environment';
 
 
 function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
@@ -235,7 +236,7 @@ export class NewTravel {
     };
 
     // 3. Simular la llamada HTTP
-    const apiUrl = 'http://localhost:8080/nomadia/trip/create';
+    const apiUrl = `${environment.apiUrl}/nomadia/trip/create`;
     const token = this.authService.getToken();
 
     if (!token) {

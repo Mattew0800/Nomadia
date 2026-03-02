@@ -4,13 +4,14 @@ import {User} from '../../models/User';
 import {LoginResponse} from '../../models/LoginResponse';
 import {RegisterResponse} from '../../models/RegisterResponse';
 import {putResponse} from '../../models/putResponse';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  API_URL = "http://localhost:8080/nomadia";
+  API_URL = `${environment.apiUrl}/nomadia`;
   private tokenKey = 'token';
 
   users: User[];

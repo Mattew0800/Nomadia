@@ -5,6 +5,7 @@ import {AuthService} from '../Auth/auth-service';
 import {TripResponse} from '../../models/TripResponse';
 import {TripCreate} from '../../models/TripCreate';
 import {TravelerResponse} from '../../models/TravelerResponse';
+import {environment} from '../../../environments/environment';
 
 
 @Injectable({
@@ -13,7 +14,7 @@ import {TravelerResponse} from '../../models/TravelerResponse';
 export class TripService {
 
 
-  private API_URL = 'http://localhost:8080/nomadia/trip';
+  private API_URL = `${environment.apiUrl}/nomadia/trip`;
   trips: TripResponse[];
   users: TravelerResponse[];
 

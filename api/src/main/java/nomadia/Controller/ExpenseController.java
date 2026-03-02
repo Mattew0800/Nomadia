@@ -31,6 +31,7 @@ public class ExpenseController {
         return ResponseEntity.ok(expenseService.createExpense(dto, me.getId()));
     }
 
+
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ExpenseResponseDTO> updateExpense(@Valid @RequestBody ExpenseUpdateDTO dto, @AuthenticationPrincipal UserDetailsImpl me) {

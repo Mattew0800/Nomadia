@@ -2,7 +2,7 @@
 
 Plataforma web compuesta por un **backend desarrollado en Java/Spring Boot** y un **frontend en Angular 20 con SCSS**. Doble capa de validaciones con **Husky** y **commitlint**, que gestionan los git hooks y se integran con el pipeline de **CI/CD**.
 
-> ⚠️ **Muy importante**: luego de clonar el repositorio, ejecuta siempre `npm install` en la **raíz del proyecto** antes de empezar a desarrollar (frontend, backend, para todo). Esto instala las dependencias y configura los git hooks (Husky + commitlint).
+> ⚠️ **Muy importante**: luego de clonar el repositorio, ejecuta siempre `npm install` en la **raíz del proyecto** antes de empezar a desarrollar (frontend, backend, para todo). Esto instala las dependencias y configura los git hooks (husky + commitlint).
 
 ---
 
