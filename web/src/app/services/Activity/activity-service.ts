@@ -31,7 +31,7 @@ export class ActivityService {
 
   listByTrip(tripId: number) {
     return this.http.post<ActivityResponseDTO[]>(
-      `${this.API_URL}/list`,
+      `${this.API_URL}/get-by-trip`,
       { tripId },
       { headers: this.authService.authHeaders() }
     );

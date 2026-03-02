@@ -66,7 +66,7 @@
             </svg>
             Nombre completo
           </label>
-          <input type="text" formControlName="name" placeholder="Ej: Juan Pérez"
+          <input type="text" formControlName="name" placeholder="Ej: Juan Pérez" maxlength="50"
                  [ngClass]="{'input-invalid': form.get('name')?.invalid && form.get('name')?.touched}">
 
           <div>
@@ -79,6 +79,12 @@
               <p class="formError">Debes ingresar un nombre y apellido válidos.</p>
             }
           </div>
+          <div>
+            @if(f['name'].touched && f['name'].hasError('maxWords')){
+              <p class="formError">Tu nombre no puede contener mas de 5 palabras.</p>
+            }
+          </div>
+
 
         </div>
 
@@ -98,6 +104,9 @@
 
           @if(nickControl?.touched && nickControl?.hasError("maxlength")){
             <p class="formError">El apodo no puede exceder los 10 caracteres.</p>
+          }
+          @if((nickControl?.touched || nickControl?.dirty) && nickControl?.hasError('whitespace')) {
+            <span class="formError">El apodo no puede contener solo espacios.</span>
           }
         </div>
 
@@ -179,6 +188,8 @@
             <p class="formError">Debes tener al menos 8 años.</p>
           }@else if(f['birth'].touched && f['birth'].hasError('isTooOld')){
             <p class="formError">La fecha de nacimiento es incorrecta.</p>
+          }@else if(f['birth'].touched && f['birth'].hasError('futureDate')){
+            <p class="formError">La fecha de nacimiento es futura.</p>
           }
 
         </div>
@@ -218,6 +229,9 @@
             @if(aboutControl?.hasError("minlength")){
               <p class="formError">La descripción debe tener 3 caracteres como minimo.</p>
             }
+            @if((aboutControl?.touched || aboutControl?.dirty) && aboutControl?.hasError('whitespace')) {
+              <span class="formError">La descripción no puede contener solo espacios.</span>
+            }
           }
         </div>
 
@@ -236,7 +250,7 @@
               <label>Contraseña actual</label>
               <div style="position: relative;">
                 <input [type]="showCurrentPassword ? 'text' : 'password'" formControlName="currentPass" placeholder="••••••••">
-                <i [class]="showCurrentPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                <i [class]="showCurrentPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
                    (click)="toggleCurrentPasswordVisibility()"
                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
               </div>
@@ -247,7 +261,7 @@
               <div style="position: relative;">
                 <input [type]="showNewPassword ? 'text' : 'password'" formControlName="newPass" placeholder="••••••••"
                        [ngClass]="{'input-invalid': form.get('newPass')?.invalid && form.get('newPass')?.touched}">
-                <i [class]="showNewPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                <i [class]="showNewPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
                    (click)="toggleNewPasswordVisibility()"
                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
               </div>
@@ -261,7 +275,7 @@
               <div style="position: relative;">
                 <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPass" placeholder="••••••••"
                        [ngClass]="{'input-invalid': !passwordsMatch() && form.get('confirmPass')?.touched}">
-                <i [class]="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"
+                <i [class]="showConfirmPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
                    (click)="toggleConfirmPasswordVisibility()"
                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
               </div>

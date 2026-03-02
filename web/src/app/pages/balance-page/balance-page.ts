@@ -36,22 +36,25 @@ export class BalancePage implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('[BalancePage] ngOnInit - obteniendo usuario actual');
     this.userService.getCurrentUser().subscribe({
       next: (user) => {
         this.currentUserId = user.id ? Number(user.id) : 0;
+        console.log('[BalancePage] Usuario actual:', this.currentUserId);
 
         this.route.queryParams.subscribe(params => {
           this.tripId = params['tripId'];
+          console.log('[BalancePage] tripId desde queryParams:', this.tripId);
           if (this.tripId) {
             this.loadBalanceData();
           } else {
-            console.error('No tripId provided');
+            console.error('[BalancePage] No se recibió tripId en los queryParams');
             this.isLoading = false;
           }
         });
       },
       error: (err) => {
-        console.error('Error getting current user:', err);
+        console.error('[BalancePage] Error al obtener usuario actual:', err);
         this.isLoading = false;
       }
     });
@@ -59,47 +62,54 @@ export class BalancePage implements OnInit {
 
   loadBalanceData() {
     this.isLoading = true;
+    console.log('[BalancePage] Cargando viajeros del viaje:', this.tripId);
 
     this.tripService.getUsers(this.tripId).subscribe({
       next: (travelers) => {
+        console.log('[BalancePage] Viajeros recibidos:', travelers);
         travelers.forEach(t => {
           this.travelers.set(Number(t.id), t);
         });
         this.loadOtherData();
       },
       error: (error) => {
-        console.error('Error loading travelers:', error);
+        console.error('[BalancePage] Error al cargar viajeros:', error);
         this.isLoading = false;
       }
     });
   }
 
   private loadOtherData() {
+    // Solo hay 2 requests: balance y debts
     let loadedCount = 0;
-    const totalRequests = 3;
+    const totalRequests = 2;
 
     const checkIfAllLoaded = () => {
       loadedCount++;
+      console.log(`[BalancePage] Requests completadas: ${loadedCount}/${totalRequests}`);
       if (loadedCount >= totalRequests) {
+        console.log('[BalancePage] Todos los datos cargados. isLoading = false');
         this.isLoading = false;
       }
     };
 
+    console.log('[BalancePage] Cargando balance del viaje:', this.tripId);
     this.expenseService.getTripBalance(Number(this.tripId)).subscribe({
       next: (balances) => {
+        console.log('[BalancePage] Balance recibido:', balances);
         this.balances = balances;
-
-        this.calculateAverageCost();
         checkIfAllLoaded();
       },
       error: (error) => {
-        console.error('Error loading balances:', error);
+        console.error('[BalancePage] Error al cargar balance:', error);
         checkIfAllLoaded();
       }
     });
 
+    console.log('[BalancePage] Cargando deudas del viaje:', this.tripId);
     this.expenseService.getTripDebts(Number(this.tripId)).subscribe({
       next: (debtProgressData) => {
+        console.log('[BalancePage] Deudas recibidas:', debtProgressData);
         this.debts = debtProgressData.debts;
         this.debtProgress = {
           totalDebts: debtProgressData.totalDebts,
@@ -110,29 +120,14 @@ export class BalancePage implements OnInit {
         checkIfAllLoaded();
       },
       error: (error) => {
-        console.error('Error loading debts:', error);
+        console.error('[BalancePage] Error al cargar deudas:', error);
         checkIfAllLoaded();
       }
     });
 
-    this.expenseService.getTotalTripCost(Number(this.tripId)).subscribe({
-      next: (total) => {
-        this.totalCost = total;
-        this.calculateAverageCost();
-        checkIfAllLoaded();
-      },
-      error: (error) => {
-        console.error('Error loading total cost:', error);
-        checkIfAllLoaded();
-      }
-    });
+
   }
 
-  calculateAverageCost() {
-    if (this.balances.length > 0 && this.totalCost > 0) {
-      this.averageCost = this.totalCost / this.balances.length;
-    }
-  }
 
   getTraveler(userId: number): TravelerResponse | undefined {
     return this.travelers.get(userId);

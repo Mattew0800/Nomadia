@@ -36,32 +36,56 @@
       <section class="edit-panel" [class.open]="isEditPanelOpen">
         <form [formGroup]="editForm" (ngSubmit)="submitEditActivity()">
 
-          <div class="input-group" (click)="unlock('name')">
-            <input #nameInput type="text" formControlName="name" [readonly]="locks.name" placeholder="Nombre" />
+          <div class="input-group">
+            <input #nameInput type="text" formControlName="name" placeholder="Nombre" maxlength="24" />
           </div>
 
-          <div class="input-group" (click)="unlock('date')">
-            <input #dateInput type="date" formControlName="date" [readonly]="locks.date" />
+          <div class="input-group">
+            <input #dateInput type="date" formControlName="date" />
           </div>
 
           <div class="input-group" style="gap:10px;">
-            <input #startInput type="time" formControlName="startTime" [readonly]="locks.startTime" />
-            <input #endInput type="time" formControlName="endTime" [readonly]="locks.endTime" />
+            <div class="time-field">
+              <input #startInput type="time" formControlName="startTime"  />
+              <span class="ampm-badge">{{ getAmPm(editForm.get('startTime')?.value) }}</span>
+            </div>
+            <div class="time-field">
+              <input #endInput type="time" formControlName="endTime"  />
+              <span class="ampm-badge">{{ getAmPm(editForm.get('endTime')?.value) }}</span>
+            </div>
           </div>
+          @if (editForm.hasError('timeEqual') && editForm.get('startTime')?.touched && editForm.get('endTime')?.touched) {
+            <p class="errortwo">La hora de fin no puede ser igual a la hora de inicio.</p>
+          }
+
 
           <div class="input-group" (click)="unlock('cost')">
-            <input #costInput type="number" formControlName="cost" [readonly]="locks.cost" min="0" step="0.01" placeholder="Costo" />
+            <input #costInput type="number" formControlName="cost"  min="0" step="0.01" placeholder="Costo" />
           </div>
 
           <div class="input-group" (click)="unlock('description')">
-            <input #descInput type="text" formControlName="description" [readonly]="locks.description" placeholder="Descripción" />
+            <input #descInput type="text" formControlName="description"  placeholder="Descripción" maxlength="21" />
           </div>
 
           <button class="share-btn" type="submit">Guardar cambios</button>
 
           <button type="button" class="close-btn" (click)="closeEditPanel()">Cerrar</button>
 
+          @if(editNameControl.touched && editNameControl.invalid){
+            <p class="error">Nombre inválido.</p>
+          }
 
+          @if(editDescriptionControl.touched && editDescriptionControl.invalid){
+            <p class="error">Descripción inválida.</p>
+          }
+
+          @if(editCostControl.touched && editCostControl.hasError('required')){
+            <p class="error">El costo es obligatorio.</p>
+          }
+
+          @if(editCostControl.touched && editCostControl.hasError('min')){
+            <p class="error">El costo no puede ser negativo.</p>
+          }
           <p *ngIf="msgEditOk" style="margin-top:1rem; color:#d1f366;">{{ msgEditOk }}</p>
           <p *ngIf="msgEditError" style="margin-top:1rem; color:#eb3f3a;">{{ msgEditError }}</p>
         </form>
@@ -215,7 +239,7 @@
       <div class="modal-body">
         <form [formGroup]="createForm" (ngSubmit)="submitCreateActivity()">
           <div class="input-group">
-            <input formControlName="name" type="text" placeholder="Nombre" />
+            <input formControlName="name" type="text" placeholder="Nombre" maxlength="24"/>
           </div>
 
           <div class="input-group">
@@ -223,16 +247,33 @@
           </div>
 
           <div class="input-group" style="gap:10px;">
-            <input formControlName="startTime" type="time" />
-            <input formControlName="endTime" type="time" />
+            <div class="time-field">
+              <input formControlName="startTime" type="time" />
+              <span class="ampm-badge">{{ getAmPm(createForm.get('startTime')?.value) }}</span>
+            </div>
+            <div class="time-field">
+              <input formControlName="endTime" type="time" />
+              <span class="ampm-badge">{{ getAmPm(createForm.get('endTime')?.value) }}</span>
+            </div>
           </div>
 
-          <div class="input-group">
-            <input formControlName="cost" type="number" placeholder="Costo" />
-          </div>
+          @if (createForm.hasError('timeEqual') && createForm.get('startTime')?.touched && createForm.get('endTime')?.touched) {
+            <p class="errortwo">La hora de fin no puede ser igual a la hora de inicio.</p>
+          }
 
           <div class="input-group">
-            <input formControlName="description" type="text" placeholder="Descripción" />
+            <input
+              formControlName="cost"
+              type="number"
+              placeholder="Costo"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+
+          <div class="input-group">
+            <input formControlName="description" type="text" placeholder="Descripción" maxlength="21" />
           </div>
 
           @if(nameControl.touched && nameControl.invalid){
@@ -241,6 +282,13 @@
 
           @if(descriptionControl.touched && descriptionControl.invalid){
             <p class="error">Descripcion invalida</p>
+          }
+
+          @if(costControl.touched && costControl.hasError('min')){
+            <p class="error">El costo no puede ser negativo.</p>
+          }
+          @if(costControl.touched && costControl.hasError('required')){
+            <p class="error">El costo es obligatorio.</p>
           }
 
           <p *ngIf="msgCreateOk" class="error">{{ msgCreateOk }}</p>

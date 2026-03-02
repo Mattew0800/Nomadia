@@ -85,11 +85,5 @@ export class ExpenseService {
     );
   }
 
-  getTotalTripCost(tripId: number): Observable<number> {
-    return this.http.post<number>(
-      `${this.API_URL}/total-cost`,
-      { tripId },
-      { headers: this.authService.authHeaders() }
-    );
-  }
+
 }

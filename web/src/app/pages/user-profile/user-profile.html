@@ -53,49 +53,49 @@
 
                 @if(user?.nick){
                   <div>
-                      <label>Apodo</label>
-                      <input type="text" value="{{user?.nick}}" disabled>
+                      <label >Apodo</label>
+                      <input class="fix-bottom" type="text" value="{{user?.nick}}" disabled>
                   </div>
                 }@else{
                   <div>
                       <label>Apodo</label>
-                      <input type="text" value="Sin asignar" disabled>
+                      <input class="fix-bottom" type="text" value="Sin asignar" disabled>
                   </div>
                 }
 
                 @if(user?.email){
                 <div>
                     <label>Email</label>
-                    <input type="email" value="{{user?.email}}" disabled>
+                    <input class="fix-bottom" type="email" value="{{user?.email}}" disabled>
                 </div>
                 }@else{
                 <div>
                     <label>Email</label>
-                    <input type="email" value="Sin asignar" disabled>
+                    <input class="fix-bottom" type="email" value="Sin asignar" disabled>
                 </div>
                 }
 
                 @if(user?.phone){
                 <div>
                     <label>Teléfono</label>
-                    <input type="tel" value="{{user?.phone}}" disabled>
+                    <input class="fix-bottom" type="tel" value="{{user?.phone}}" disabled>
                 </div>
                 }@else{
                 <div>
                     <label>Teléfono</label>
-                    <input type="tel" value="Sin asignar" disabled>
+                    <input class="fix-bottom" type="tel" value="Sin asignar" disabled>
                 </div>
                 }
 
                 @if(user?.birth){
                 <div>
                     <label>Fecha de nacimiento</label>
-                    <input type="text" value="{{ user?.birth | date:'dd/MM/yyyy' }}" disabled>
+                    <input class="fix-bottom" type="text" value="{{ user?.birth | date:'dd/MM/yyyy' }}" disabled>
                 </div>
                 }@else{
                 <div>
                     <label>Fecha de nacimiento</label>
-                    <input type="text" value="Sin asignar" disabled>
+                    <input class="fix-bottom" type="text" value="Sin asignar" disabled>
                 </div>
                 }
 
@@ -103,12 +103,12 @@
                 @if(user?.age){
                   <div>
                       <label>Edad</label>
-                      <input type="number" value="{{user?.age}}" disabled>
+                      <input class="fix-bottom" type="number" value="{{user?.age}}" disabled>
                   </div>
                 }@else{
                   <div>
                       <label>Edad</label>
-                      <input type="text" value="Sin asignar" disabled>
+                      <input class="fix-bottom" type="text" value="Sin asignar" disabled>
                   </div>
                 }
 
