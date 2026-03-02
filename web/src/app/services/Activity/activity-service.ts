@@ -40,7 +40,7 @@ export class ActivityService {
 
   listMine(): Observable<ActivityResponseDTO[]> {
     return this.http.post<ActivityResponseDTO[]>(
-      `http://localhost:8080/nomadia/activities/list`,
+      `${this.API_URL}/list`,
       {},
       { headers:  this.authService.authHeaders() }
     );
@@ -53,7 +53,7 @@ export class ActivityService {
     toTime?: string;
   }): Observable<ActivityResponseDTO[]> {
     return this.http.post<ActivityResponseDTO[]>(
-      `http://localhost:8080/nomadia/activities/list`,
+      `${this.API_URL}/list`,
       body,
       { headers:  this.authService.authHeaders() }
     );

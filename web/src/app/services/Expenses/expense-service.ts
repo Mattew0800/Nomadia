@@ -79,7 +79,7 @@ export class ExpenseService {
 
   getTripDebts(tripId: number): Observable<UserDebtProgressDTO> {
     return this.http.post<UserDebtProgressDTO>(
-      'http://localhost:8080/nomadia/trip/debts',
+      `${environment.apiUrl}/nomadia/trip/debts`,
       { tripId },
       { headers: this.authService.authHeaders() }
     );
